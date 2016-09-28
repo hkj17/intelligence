@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>打卡记录</title>
+<link rel="stylesheet"
+	href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css">
+<link href="./css/signin.css" rel="stylesheet">
+<link href="./css/custom-theme/jquery-ui-1.10.0.custom.css"
+	rel="stylesheet">
+<link type="text/css"
+	href="http://cdn.bootcss.com/font-awesome/3.0.2/css/font-awesome.min.css"
+	rel="stylesheet" />
+<link type="text/css" href="./css/jquery.dataTables.edit.css"
+	rel="stylesheet">
+<link type="text/css" href="./css/common.css" rel="stylesheet">
+<link type="text/css" href="./css/jBox.css" rel="stylesheet">
+
+<script type="text/javascript" src="My97DatePicker/WdatePicker.js"></script>
+<script src="./js/jquery-1.10.2.js"></script>
+<script src="./js/jquery-ui-1.9.2.custom.min.js"></script>
+<script src="./js/bootstrap.min.js"></script>
+<script src="./js/jquery.dataTables.js"></script>
+<script src="./js/clock.js"></script>
+<script src="./js/include.js"></script>
+
+</head>
+<body>
+
+	<nav class="navbar navbar-default navbar-fixed-top">
+		<div class="container">
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggle collapsed"
+					data-toggle="collapse" data-target="#navbar" aria-expanded="false"
+					aria-controls="navbar">
+					<span class="sr-only">Toggle navigation</span> <span
+						class="icon-bar"></span> <span class="icon-bar"></span> <span
+						class="icon-bar"></span>
+				</button>
+				<a class="navbar-brand">智能前台</a>
+			</div>
+			<div id="navbar" class="navbar-collapse collapse">
+				<ul class="nav navbar-nav">
+					<li><a href="homePage.html">人员列表</a></li>
+					<li><a href="company.html">公司信息</a></li>
+					<li class="active"><a href="clock.html">打卡记录</a></li>
+					<li><a href="notification.html">预约通告</a></li>
+					<li><a href="clockPhoto.html">打卡照片</a></li>
+				</ul>
+				<ul class="nav navbar-nav navbar-right">
+					<li><a style="cursor: pointer;" onclick="editPass()">密码修改</a></li>
+					<li><a href="./">退出 <span class="sr-only">(current)</span></a></li>
+				</ul>
+			</div>
+			<!--/.nav-collapse -->
+		</div>
+	</nav>
+
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main"
+				style="position: absolute; margin-top: 20px; margin-left: 50px; width: 80%;">
+
+
+				<h2 class="sub-header">打卡记录</h2>
+				<div style="border: 1px solid #66B3FF; height: 200px;">
+					<label style="margin-left: 20px;">用户名：</label> <input
+						id="searchinput" type="text"
+						style="width: 200px; margin-left: 30px; margin-top: 30px;" /><br>
+					<label style="margin-left: 20px; margin-top: 10px;">时间范围：</label> <input
+						type="text" id="startTime"
+						onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})"
+						style="margin-top: 10px; margin-left: 16px;" clientidmode="Static" />
+					<label>--</label> <input type="text" id="endTime"
+						onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})"
+						clientidmode="Static" /><br> <label
+						style="margin-left: 20px; margin-top: 10px;">筛选规则:</label> <select
+						id="rule"
+						style="width: 100px; height: 30px; margin-left: 25px; margin-top: 10px;">
+						<option value="0">全选</option>
+						<option value="1">迟到/早退</option>
+					</select> <br> <input id="search" type="button" onclick="clockfilter()"
+						style="margin-left: 60px; margin-top: 10px;" value="搜索" /> <input
+						id="addClock" type="button" onclick="addClock()"
+						style="margin-left: 60px; margin-top: 10px;" value="添加" />
+
+
+				</div>
+				<div class="table-responsive">
+					<table id="companylist" class="table table-striped"
+						style="width: 1000px; margin-left: 10px;">
+						<thead>
+							<tr>
+								<th style="width: 5%;"></th>
+								<th>员工</th>
+								<th>公司名称</th>
+								<th>早打卡</th>
+								<th>晚打卡</th>
+								<th style="width: 10%;">状态</th>
+							</tr>
+						</thead>
+						<tbody>
+
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div id="hidebg"></div>
+	<div id="loading" class="loading">
+		<div>
+			<img alt="" src="./images/loading.gif"
+				style="height: 150px; width: 150px">
+		</div>
+		<div></div>
+	</div>
+
+	<div id="clockPan" title="增加打卡记录" style="display: none">
+		<div>
+			<label>公司名称：</label> <select id="companyName"
+				style="width: 100px; height: 30px; margin-left: 10px;">
+				<option value="0">请选择公司</option>
+			</select> <br> <label>员工：</label> <select id="employeeName"
+				style="width: 100px; height: 30px; margin-left: 10px;">
+				<option value="0">请选择员工</option>
+			</select> <br> <label>早上打卡：</label> <input type="text" id="morningClock"
+				onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})"
+				clientidmode="Static" /> <br> <label>晚上打卡：</label> <input
+				type="text" id="nightClock"
+				onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})"
+				clientidmode="Static" /> <br>
+			<button type="button" onclick="comfirm()">添加</button>
+
+		</div>
+	</div>
+
+	<div id="passwordEdit"
+		style="width: 500px; height: 400px; display: none;">
+		<iframe id="passwordf" name="passwordf" frameborder="false"
+			src="include.html"></iframe>
+	</div>
+
+</body>
+</html>

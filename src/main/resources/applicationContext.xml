@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans  
+       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+	   http://www.springframework.org/schema/context 
+	   http://www.springframework.org/schema/context/spring-context-4.0.xsd
+	   http://www.springframework.org/schema/aop
+	   http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+	   http://www.springframework.org/schema/tx
+	   http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+        ">
+
+	<bean id="loginInterceptor" class="com.is.util.LoginRequiredInterceptor"></bean>
+	<aop:config>
+		<aop:pointcut expression="execution(* com.is.rest.*.*(..) )"
+			id="loginPoint" />
+		<aop:advisor pointcut-ref="loginPoint" advice-ref="loginInterceptor" />
+	</aop:config>
+
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+		<property name="packagesToScan">
+			<list>
+				<value>com.is.model</value>
+			</list>
+		</property>
+	</bean>
+	<bean id="transactionManager"
+		class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	<!-- <bean id="initControlProcessor" class="com.nbicc.ita.control.InitControlProcessor"></bean> -->
+	<bean id="applicationContextUtil" class="com.is.util.ApplicationContextUtil"></bean>
+	<!-- <bean id="postProcessor" class="com.nbicc.ita.config.PostProcessor"></bean> -->
+
+
+	<!-- <bean id="loadLocation" class="com.nbicc.ita.util.LoadLocation"></bean> 
+		<bean id="jobConfig" class="com.nbicc.ita.job.JobConfig"></bean> -->
+
+	<bean class="com.is.util.PropertyConfig">
+		<property name="locations" value="classpath:cloud.properties" />
+	</bean>
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+	<context:annotation-config />
+	<context:component-scan base-package="com.is"
+		annotation-config="true" />
+
+</beans>  

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<script src="//cdn.bootcss.com/jquery/1.11.3/jquery.min.js"></script>
+
+<script type="text/javascript">
+	$(function() {
+		$.ajax({
+			"type" : 'get',
+			"url" : "/intelligentStage-system-manage/rest/admin/demo",
+			success : function(data) {
+				var info=data.data;
+				$("#test1").append(info.you);
+				$("#test2").append(info.me);
+			}
+		})
+
+	})
+</script>
+<title>测试</title>
+</head>
+<body>
+
+	<div id="test1" style="float: left; height: 300px; width: 500px"></div>
+
+	<div id="test2" style="float: left; height: 300px; width: 500px"></div>
+
+</body>
+</html>

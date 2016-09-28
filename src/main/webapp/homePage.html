@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>首页</title>
+<link rel="stylesheet"
+	href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css">
+<link href="./css/signin.css" rel="stylesheet">
+<link href="./css/custom-theme/jquery-ui-1.10.0.custom.css"
+	rel="stylesheet">
+<link type="text/css"
+	href="http://cdn.bootcss.com/font-awesome/3.0.2/css/font-awesome.min.css"
+	rel="stylesheet" />
+<link type="text/css" href="./css/jquery.dataTables.edit.css"
+	rel="stylesheet">
+<link type="text/css" href="./css/common.css" rel="stylesheet">
+
+<script type="text/javascript" src="My97DatePicker/WdatePicker.js"></script>
+<script src="./js/jquery-1.11.1.js"></script>
+<script src="./js/jquery-ui-1.9.2.custom.min.js"></script>
+<script src="./js/bootstrap.min.js"></script>
+<script src="./js/jquery.dataTables.js"></script>
+<script src="./js/homePage.js"></script>
+<script src="./js/include.js"></script>
+<script src="./js/jquery.form.js"></script>
+</head>
+<body>
+
+	<nav class="navbar navbar-default navbar-fixed-top">
+		<div class="container">
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggle collapsed"
+					data-toggle="collapse" data-target="#navbar" aria-expanded="false"
+					aria-controls="navbar">
+					<span class="sr-only">Toggle navigation</span> <span
+						class="icon-bar"></span> <span class="icon-bar"></span> <span
+						class="icon-bar"></span>
+				</button>
+				<a class="navbar-brand">智能前台</a>
+			</div>
+			<div id="navbar" class="navbar-collapse collapse">
+				<ul class="nav navbar-nav">
+					<li class="active"><a href="homePage.html">人员列表</a></li>
+					<li><a href="company.html">公司信息</a></li>
+					<li><a href="clock.html">打卡记录</a></li>
+					<li><a href="notification.html">预约通告</a></li>
+					<li><a href="clockPhoto.html">打卡照片</a></li>
+				</ul>
+				<ul class="nav navbar-nav navbar-right">
+					<li><a style="cursor: pointer;" onclick="editPass()">密码修改</a></li>
+					<li><a href="./">退出 <span
+							class="sr-only">(current)</span></a></li>
+				</ul>
+			</div>
+			<!--/.nav-collapse -->
+		</div>
+	</nav>
+
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main"
+				style="position: absolute; margin-top: 20px; margin-left: 50px; width: 90%;">
+
+
+				<h2 class="sub-header">员工列表</h2>
+				<div style="border: 1px solid #66B3FF; height: 130px;">
+				<input id="searchinput" type="text" style="width: 200px;margin-left: 30px;margin-top: 30px;"/>
+				<input id="search" type="button" onclick="userfilter()" style="margin-left: 40px;" value="搜索"/><br>
+				<input type="button" style="margin-left: 40px;margin-top: 20px;" value="添加员工" onclick="add()"/>
+				
+				</div>
+				<div class="table-responsive">
+					<table id="userlist" class="table table-striped">
+						<thead>
+							<tr>
+								<th style="width: 5%;"></th>
+								<th>用户名</th>
+								<th>姓名</th>
+								<th>性别</th>
+								<th>生日</th>
+								<th>手机号</th>
+								<th>入职时间</th>
+								<th>微信号</th>
+								<th>所属公司</th>
+								<th>权限</th>
+								<th>备注</th>
+								<th>操作</th>
+							</tr>
+						</thead>
+						<tbody>
+
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div id="addemployee" title="新增普通员工" style="display: none">
+		<div>
+		    <form id="picForm" action="/intelligentStage-system-manage/rest/admin/addimage" method="post" enctype="multipart/form-data">  
+		    <label style="margin-top: 30px;">用户名：</label> 
+			<input type="text" id="adminName" name="adminName" />	<br>
+			<img src="" id="showPhoto" style="float: right;width: 100px;height: 100px;margin-right: 40px;" />
+			<label>密码：</label> 
+			<input type="password" id="password" name="password" />	<br>
+			<label>确认密码：</label> 
+			<input type="password" id="confirm" />	<br>
+			<label>姓名：</label> 
+			<input type="text" id="name" name="name" />	<br>
+			<label>性别：</label> 
+			<select id="sex" name="sex" style="width: 100px;height: 30px;">
+                              <option value="1">男</option>
+                              <option value="2">女</option>
+             </select>	<br>
+			
+			<input id="photo" name="photo"   type="file" style="float: right;margin-right: 60px;" value="添加照片"/>
+			<label>生日：</label> 
+			<input type="text" id="birth" name="birth" onClick="WdatePicker()"  clientidmode="Static" /> <br>
+			<label>联系方式：</label> 
+			<input type="text" id="contact" name="contact" /><br>
+			<label>入职时间：</label> 
+			<input type="text" id="entryTime" name="entryTime" onClick="WdatePicker()"  clientidmode="Static" />	<br>
+			<label>微信：</label> 
+			<input type="text" id="wechat" name="wechat" />	<br>
+			<label>公司名称：</label> 
+			<select id="company" name="company" style="width: 100px;height: 30px;">
+                              <option value="0">不限</option>
+             </select>	<br>
+			<label>备注：</label> 
+			<input type="text" id="content" name="content" />	<br>
+			
+			 <input type="submit" value="上传" /> 
+			</form>
+		</div>
+	</div>
+	
+	
+	<div id="editEmployee" title="编辑员工" style="display: none">
+		<div>
+		    <input type="text" id="emid" style="display: none;" />
+		    <label style="margin-top: 30px;">姓名：</label> 
+			<input type="text" id="editname" name="editname" />	<br>
+			<label>性别：</label> 
+			<select id="editsex" name="editsex" style="width: 100px;height: 30px;">
+                              <option value="1">男</option>
+                              <option value="2">女</option>
+             </select>	<br>
+			
+			<label>生日：</label> 
+			<input type="text" id="editbirth" name="editbirth" onClick="WdatePicker()"  clientidmode="Static" /> <br>
+			<label>联系方式：</label> 
+			<input type="text" id="editcontact" name="editcontact" /><br>
+			<label>入职时间：</label> 
+			<input type="text" id="editentryTime" name="editentryTime" onClick="WdatePicker()"  clientidmode="Static" />	<br>
+			<label>微信：</label> 
+			<input type="text" id="editwechat" name="editwechat" />	<br>
+			<label>公司名称：</label> 
+			<select id="editcompany" name="editcompany" style="width: 100px;height: 30px;">
+                              <option value="0">不限</option>
+             </select>	<br>
+			<label>备注：</label> 
+			<input type="text" id="editcontent" name="editcontent" />	<br>
+			
+			 <input type="button" value="确定" onclick="editEmployee()" /> 
+			
+		</div>
+	</div>
+	
+	
+	<div id="superbox3" class="logoutpop">
+       		<div class="shut4" id="superclose"></div>
+       		<div id="superdelword2" style="height:50px; width:300px; margin:0 auto; margin-top:20px;font-size:90% ;text-align:center;color:black" value="">您是否要删除该记录？</div>
+        	<div class="ssyes" id="superdel3" style=" margin-left:92px;float:left">确认</div>
+        	<div class="ssout" id="superdel4" style="float:left">返回</div>
+   	</div>
+   	<div id="hidebg"></div>
+	<div id = "loading" class="loading">
+			<div><img alt="" src="./images/loading.gif" style="height:150px;width:150px"></div>
+			<div></div>
+	</div>
+	
+	<div id="passwordEdit" style="width: 500px;height: 400px;display: none;">
+	    <iframe id="passwordf" name="passwordf" frameborder="false" src="include.html"></iframe>
+	</div>
+
+
+</body>
+</html>

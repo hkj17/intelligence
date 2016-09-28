@@ -1,0 +1,78 @@
+package com.is.system.dao;
+
+import java.util.List;
+
+import com.is.model.Admin;
+import com.is.model.Appointment;
+import com.is.model.ClockPhoto;
+import com.is.model.ClockRecord;
+import com.is.model.Company;
+import com.is.model.Department;
+import com.is.model.Employee;
+import com.is.model.Message;
+import com.is.model.Notification;
+import com.is.model.Visitor;
+import com.is.model.VisitorInfo;
+
+public interface IntelligenceDao {
+	
+	public Admin getAdminByName(String username);
+	
+	public List<Employee> getEmployeeList();
+	
+	public Company getCompanyById(int id);
+	
+	public List<Company> getCompanyList();
+	
+	public List<ClockRecord> getClockList();
+	
+	public List<ClockRecord> getClockByWhere(String department,String user,String stratClock,String endClock,String rule);
+	
+	public List<Notification> getNotifyList();
+	
+	public List<Appointment> getAppointList();
+	
+	public List<Employee> getEmployeeByAdmin(String adminId);
+	
+	public Employee getEmployeeById(String id);
+	
+	public Notification getNotifyById(int id);
+	
+	public Appointment getAppointById(int id);
+	
+	public List<Employee> getEmployeeByCompany(int id);
+	
+	public ClockRecord getClockByMc(int id,String morningClock);
+	
+	public ClockRecord getClockByNc(int id,String nightClock);
+	
+	
+	public Admin getAdminById(int id);
+	
+	public String getEmployeeIdByCompany(int id);
+	
+	public List<ClockPhoto> getClockPhoto();
+	
+	public List<Employee> getEmployeeByName(String name);
+	
+	public String getEmployeeByMobile(String mobile);
+	
+	public Company getCompanyByEmployee(String id);
+	
+	public List<ClockRecord> getClockByEmployee(String id);
+	
+	public List<Employee> getEmployeeByWhere(String word,String company,String department);
+	
+	public VisitorInfo getVisitorInfoById(String id);
+
+	public List<Department> getDepartmentByCompany(String company);
+	
+	public List<Visitor> indexVisitor(String startTime,String endTime);
+	
+	public Department getDepartmentById(String id);
+	
+	public List<Message> getMessageByEmployee(String employeeId);
+	
+	public Company getCompanyByDeviceId(String deviceId);
+	
+}

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>打卡照片</title>
+<link rel="stylesheet"
+	href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css">
+<link href="./css/signin.css" rel="stylesheet">
+<link href="./css/custom-theme/jquery-ui-1.10.0.custom.css"
+	rel="stylesheet">
+<link type="text/css"
+	href="http://cdn.bootcss.com/font-awesome/3.0.2/css/font-awesome.min.css"
+	rel="stylesheet" />
+<link type="text/css" href="./css/jquery.dataTables.edit.css"
+	rel="stylesheet">
+<link type="text/css" href="./css/common.css" rel="stylesheet">
+
+<script language="javascript" type="text/javascript"
+	src="My97DatePicker/WdatePicker.js"></script>
+<script src="./js/jquery-1.11.1.js"></script>
+<script src="./js/jquery-ui-1.9.2.custom.min.js"></script>
+<script src="./js/bootstrap.min.js"></script>
+<script src="./js/jquery.dataTables.js"></script>
+<script src="./js/include.js"></script>
+<script src="./js/clockPhoto.js"></script>
+</head>
+<body>
+
+<nav class="navbar navbar-default navbar-fixed-top">
+		<div class="container">
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggle collapsed"
+					data-toggle="collapse" data-target="#navbar" aria-expanded="false"
+					aria-controls="navbar">
+					<span class="sr-only">Toggle navigation</span> <span
+						class="icon-bar"></span> <span class="icon-bar"></span> <span
+						class="icon-bar"></span>
+				</button>
+				<a class="navbar-brand">智能前台</a>
+			</div>
+			<div id="navbar" class="navbar-collapse collapse">
+				<ul class="nav navbar-nav">
+					<li><a href="homePage.html">人员列表</a></li>
+					<li><a href="company.html">公司信息</a></li>
+					<li><a href="clock.html">打卡记录</a></li>
+					<li><a href="notification.html">预约通告</a></li>
+					<li class="active"><a href="clockPhoto.html">打卡照片</a></li>
+				</ul>
+				<ul class="nav navbar-nav navbar-right">
+					<li><a style="cursor: pointer;" onclick="editPass()">密码修改</a></li>
+					<li><a href="./">退出 <span class="sr-only">(current)</span></a></li>
+				</ul>
+			</div>
+			<!--/.nav-collapse -->
+		</div>
+	</nav>
+	
+	
+	<div style="width: 100%;height: 1000px;margin-top: 30px;">
+	<ul id="photoList"></ul>
+	</div>
+
+</body>
+</html>

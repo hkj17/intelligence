@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>预约通知</title>
+<link rel="stylesheet" href="./css/bootstrap.min.css">
+<link rel="stylesheet" href="./css/custom-theme/jquery-ui-1.10.0.custom.css">
+<link type="text/css" href="./css/jquery.dataTables.edit.css"
+	rel="stylesheet">
+<link type="text/css" href="./css/common.css" rel="stylesheet">
+
+<script src="./js/jquery-1.10.2.js"></script>
+<script src="./js/bootstrap.min.js"></script>
+<script type="text/javascript" src="My97DatePicker/WdatePicker.js"></script>
+<script src="./js/jquery-ui-1.10.0.custom.min.js"></script>
+<script src="./js/jquery.dataTables.js"></script>
+<script src="./js/notification.js"></script>
+<script src="./js/include.js"></script>
+<script type="text/javascript">
+
+$(function() {
+	$("#tabs").tabs();
+	
+})
+	
+</script>
+</head>
+<body>
+
+	<nav class="navbar navbar-default navbar-fixed-top">
+		<div class="container">
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggle collapsed"
+					data-toggle="collapse" data-target="#navbar" aria-expanded="false"
+					aria-controls="navbar">
+					<span class="sr-only">Toggle navigation</span> <span
+						class="icon-bar"></span> <span class="icon-bar"></span> <span
+						class="icon-bar"></span>
+				</button>
+				<a class="navbar-brand">智能前台</a>
+			</div>
+			<div id="navbar" class="navbar-collapse collapse">
+				<ul class="nav navbar-nav">
+					<li><a href="homePage.html">人员列表</a></li>
+					<li><a href="company.html">公司信息</a></li>
+					<li><a href="clock.html">打卡记录</a></li>
+					<li class="active"><a href="notification.html">预约通告</a></li>
+					<li><a href="clockPhoto.html">打卡照片</a></li>
+				</ul>
+				<ul class="nav navbar-nav navbar-right">
+					<li><a style="cursor: pointer;" onclick="editPass()">密码修改</a></li>
+					<li><a href="./">退出 <span class="sr-only">(current)</span></a></li>
+				</ul>
+			</div>
+			<!--/.nav-collapse -->
+		</div>
+	</nav>
+
+	<div id="tabs" style="margin-top: 80px; margin-left: 100px;">
+		<ul>
+			<li><a href="#tabs-1">通知事项</a></li>
+			<li><a href="#tabs-2" onclick="appoint()">预约事项</a></li>
+		</ul>
+		<div id="tabs-1" style="width: 900px;">
+		<input id="addNews" type="button" value="写通知" onclick="addNews()"/>
+		<div class="table-responsive">
+			<table  id="newslist" class="newstable" style="margin-left: 0px;border: 0;border-style:none;text-align: left;">
+						<thead>
+							<tr>
+								<th style="width: 20%"></th>
+								<th style="width: 10%"></th>
+								
+								<th style="width: 5%"></th>
+							</tr>
+						</thead>
+						<tbody>
+
+						</tbody>
+					</table>
+			</div>
+		
+		</div>
+		<div id="tabs-2" style="width: 900px;">
+		<input id="addAppoint" type="button" value="增加预约" onclick="addAppoint()"/>
+		<div class="table-responsive">
+			<table id="applist" class="apptable" style="margin-left: 0px;border: 0;border-style:none;">
+						<thead>
+							<tr>
+								<th style="width: 4%">序号</th>
+								<th style="width: 10%">员工名</th>
+								<th style="width: 10%">事项</th>
+								<th style="width: 5%">发布时间</th>
+								<th style="width: 8%">操作</th>
+							</tr>
+						</thead>
+						<tbody>
+
+						</tbody>
+					</table>
+			</div>
+		</div>
+		
+
+	</div>
+	
+	
+	<div id="news" title="编辑通知" style="display: none">
+		<div>
+		   <label>发布人：</label> 
+			<input type="text" id="author" />	<br>
+			<label>标题：</label> 
+			<input type="text" id="title" style="width: 300px;" />	<br>
+			<label>编辑内容：</label> 
+			<textarea id="newsContent" rows="20" cols="80"></textarea>
+			
+			
+			<button  type="button" onclick="confirm()">添加</button>
+			
+		</div>
+	</div>
+	
+	
+	<div id="newsShow" title="通知信息" style="display: none">
+		<div style="overflow:auto;">
+		   <label id="newsTitle" style="font-size: 25px;"></label><br>
+		   <textarea id="newstext" rows="20" cols="90" readonly></textarea><br>
+		   <label>编辑人：</label>
+		   <label id="person"></label><br>
+		   <label>日期：</label>
+		   <label id="editTime"></label>
+			
+		</div>
+	</div>
+	
+	<div id="appointInfo" title="预约详情" style="display: none">
+	    <br>
+	    <textarea id="apptext" rows="12" cols="50"></textarea><br>
+	     <label>日期: </label>
+	     <label id="appTime"></label>
+	    
+	</div>
+	
+	<div id="appointAdd" title="增加预约" style="display: none">
+	     <label>员工: </label>
+	     <select id="employee" style="width: 100px;height: 30px;margin-top: 10px;margin-left: 10px;">
+                              <option value="0">请选择员工</option>
+         </select>	<br>
+         <label>事情类型：</label>
+         <select id="appType" style="width: 100px;height: 30px;margin-top: 10px;margin-left: 10px;">
+                              <option value="0">快递</option>
+                              <option value="1">预约</option>
+         </select>	<br><br>
+          <label>内容：</label>
+          <textarea id="addText" rows="12" cols="50"></textarea><br>
+          <button  type="button" onclick="addAppointment()">添加</button>
+	    
+	</div>
+	
+	<div id="superbox3" class="logoutpop">
+       		<div class="shut4" id="superclose"></div>
+       		<div id="superdelword2" style="height:50px; width:300px; margin:0 auto; margin-top:20px;font-size:90% ;text-align:center;color:black" value="">您是否要删除该记录？</div>
+        	<div class="ssyes" id="superdel3" style=" margin-left:92px;float:left">确认</div>
+        	<div class="ssout" id="superdel4" style="float:left">返回</div>
+   	</div>
+   	<div id="hidebg"></div>
+	<div id = "loading" class="loading">
+			<div><img alt="" src="./images/loading.gif" style="height:150px;width:150px"></div>
+			<div></div>
+	</div>
+	
+	<div id="superbox" class="logoutpop">
+       		<div class="shut4" id="superclose"></div>
+       		<div  style="height:50px; width:300px; margin:0 auto; margin-top:20px;font-size:90% ;text-align:center;color:black" value="">您是否要删除该记录？</div>
+        	<div class="ssyes" id="superdel" style=" margin-left:92px;float:left">确认</div>
+        	<div class="ssout" id="superdela" style="float:left">返回</div>
+   	</div>
+   	
+   	<div id="passwordEdit" style="width: 500px;height: 400px;display: none;">
+	    <iframe id="passwordf" name="passwordf" frameborder="false" src="include.html"></iframe>
+	</div>
+
+</body>
+</html>
