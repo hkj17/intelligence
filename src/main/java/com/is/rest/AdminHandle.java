@@ -291,10 +291,10 @@ public class AdminHandle {
 	@Path("/addEmployee")
 	public Response addEmployeeInfo(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams)  {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
-		String state = adminService.addEmployee(requestMap.get("name"), requestMap.get("sex"), requestMap.get("birth"), requestMap.get("contact"),
+		String employeeId = adminService.addEmployee(requestMap.get("name"), requestMap.get("sex"), requestMap.get("birth"), requestMap.get("contact"),
 				requestMap.get("entryTime"), requestMap.get("wechat"), requestMap.get("deviceId"),  requestMap.get("content"),  requestMap.get("path"), 
 				 requestMap.get("position"), requestMap.get("jobId"),  requestMap.get("address"),  requestMap.get("email"),  requestMap.get("idCard"),  requestMap.get("department"));
 
-		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, state);
+		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, employeeId);
 	}
 }

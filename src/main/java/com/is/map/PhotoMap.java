@@ -1,4 +1,4 @@
-package com.is.websocket;
+package com.is.map;
 
 import java.util.HashMap;
 import java.util.Map;

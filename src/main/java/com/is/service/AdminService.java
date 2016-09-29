@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,17 +14,16 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.is.constant.ResponseCode;
+import com.is.map.PhotoMap;
 import com.is.model.Admin;
-import com.is.model.ClockRecord;
 import com.is.model.Company;
 import com.is.model.Department;
 import com.is.model.Employee;
 import com.is.model.Message;
 import com.is.system.dao.CloudDao;
 import com.is.system.dao.IntelligenceDao;
-import com.is.websocket.PhotoMap;
+import com.is.websocket.CheckResponse;
 import com.is.websocket.ServiceDistribution;
-import com.taobao.api.response.TopatsResultGetResponse;
 
 import net.sourceforge.pinyin4j.PinyinHelper;
 import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
@@ -138,10 +136,14 @@ public class AdminService {
 		employee.setCompany(company);
 		employee.setContent(content);
 
-		employee.setPhotoPath(photo + employeeId + ".jpg");
+		employee.setPhotoPath(photo+ ".jpg");
 		employee.setPhotoStatus("1");
 
 		cloudDao.add(employee);
+		String strangerId=photo.substring(photo.lastIndexOf("/")+1);
+		ServiceDistribution.handleJson103_1(employeeId, strangerId, name, birth, deviceId);
+		CheckResponse response=new CheckResponse(deviceId, "103_2");
+		response.start();
 		return employeeId;
 	}
 
@@ -299,6 +301,8 @@ public class AdminService {
 
 	public Boolean excuteCollection(String deviceId) {
 		boolean state = ServiceDistribution.handleJson101_1(deviceId);
+		CheckResponse response=new CheckResponse(deviceId, "101_2");
+		response.start();
 		return state;
 	}
 
@@ -306,6 +310,8 @@ public class AdminService {
 		String path = PhotoMap.getMap(deviceId);
 		PhotoMap.removeMap(deviceId);
 		ServiceDistribution.handleJson102_1(deviceId);
+		CheckResponse response=new CheckResponse(deviceId, "102_2");
+		response.start();
 		return path;
 	}
 

@@ -3,15 +3,17 @@ package com.is.websocket;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import com.is.map.FutureMap;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.ChannelHandlerContext;
 import net.sf.json.JSONObject;
 public class SocketService {
 
 	private static ByteArrayOutputStream databuff = new ByteArrayOutputStream();
 
-	public static void handleSocketMsg(byte[] bytes,SocketChannel socketChannel) throws IOException {
+	public static void handleSocketMsg(byte[] bytes,ChannelHandlerContext socketChannel) throws IOException {
 		int len=bytes.length;
 		String head = new String(bytes, 0, 2);
 		if (head.equals("##")) {
@@ -43,7 +45,7 @@ public class SocketService {
 		
 	}
 	
-	public static void excuteWrite(byte[] responseMsg,SocketChannel socketChannel){
+	public static void excuteWrite(byte[] responseMsg,ChannelHandlerContext socketChannel){
 		ByteBuf encoded = Unpooled.buffer();
 		encoded.writeBytes(responseMsg);
 		//System.out.println(encoded.getByte(0));
@@ -51,7 +53,7 @@ public class SocketService {
 		socketChannel.flush();
 	}
 	
-	public static void handlePayload(String payload,SocketChannel socketChannel) {
+	public static void handlePayload(String payload,ChannelHandlerContext socketChannel) {
 		JSONObject jsonObject = JSONObject.fromObject(payload);
 		JSONObject responseCode = new JSONObject();
 		String type = jsonObject.getString("type");
@@ -73,11 +75,23 @@ public class SocketService {
 			excuteWrite(answer,socketChannel);
 		}
 		if (type.equals("3") && code.equals("21")) {
-			responseCode=ServiceDistribution.handleJson3_21(jsonObject);
+			responseCode=ServiceDistribution.handleJson3_21(jsonObject,socketChannel);
 			anType="3";
 			anCode="22";
 			byte[] answer=responseByte(responseCode,anType,anCode);
 			excuteWrite(answer,socketChannel);
+		}
+		if (type.equals("101") && code.equals("2")) {
+			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.name());
+			 future.setResponse("101_2");
+		}
+		if (type.equals("102") && code.equals("2")) {
+			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.name());
+			 future.setResponse("102_2");
+		}
+		if (type.equals("103") && code.equals("2")) {
+			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.name());
+			 future.setResponse("103_2");
 		}
 
 	}
@@ -91,8 +105,18 @@ public class SocketService {
 		byte[] result = new byte[40 + len];
 		System.arraycopy(xing, 0, result, 0, 2);
 		System.arraycopy(lenb, 0, result, 2, 4);
-		byte[] other = new byte[34];
-		System.arraycopy(other, 0, result, 6, 34);
+		
+		//暂时空着
+		byte[] other = new byte[32];
+		System.arraycopy(other, 0, result, 6, 32);
+		
+		//type和code
+		byte[] typeByte=TransformByte.hexStr2ByteArray(String.format("%2s", Integer.toHexString(Integer.parseInt(type))).replace(' ', '0'));
+		System.arraycopy(typeByte, 0, result, 38, 1);
+		byte[] codeByte=TransformByte.hexStr2ByteArray(String.format("%2s", Integer.toHexString(Integer.parseInt(code))).replace(' ', '0'));
+		System.arraycopy(codeByte, 0, result, 39, 1);
+		
+		//json报文
 		System.arraycopy(json, 0, result, 40, len);
 		return result;
 	}

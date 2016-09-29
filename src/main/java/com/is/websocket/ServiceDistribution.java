@@ -1,26 +1,31 @@
 package com.is.websocket;
 
+import static com.is.constant.ParameterKeys.FACE_PHOTO_PATH;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.List;
-import static com.is.constant.ParameterKeys.FACE_PHOTO_PATH;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
-import sun.misc.BASE64Encoder;
-import sun.misc.BASE64Decoder;
+
+import com.is.map.ChannelNameToDeviceMap;
+import com.is.map.DeviceService;
+import com.is.map.PhotoMap;
 import com.is.model.Employee;
 import com.is.service.AdminService;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.ChannelHandlerContext;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+import sun.misc.BASE64Decoder;
 
+@SuppressWarnings("restriction")
 @Component("serviceDistribution")
 public class ServiceDistribution implements ApplicationContextAware {
 	private static ApplicationContext context;
@@ -48,10 +53,13 @@ public class ServiceDistribution implements ApplicationContextAware {
 		return responseCode;
 	}
 
-	public static JSONObject handleJson1_1(JSONObject jsonObject, SocketChannel socketChannel) {
+	public static JSONObject handleJson1_1(JSONObject jsonObject, ChannelHandlerContext socketChannel) {
 		String devcieSn = jsonObject.getString("deviceSn");
 		if (DeviceService.getSocketMap(devcieSn) == null) {
 			DeviceService.addSocketMap(devcieSn, socketChannel);
+		}
+		if(ChannelNameToDeviceMap.getDeviceMap(socketChannel.name())==null){
+			ChannelNameToDeviceMap.addDeviceMap(socketChannel.name(), devcieSn);
 		}
 		JSONObject responseCode = new JSONObject();
 		responseCode.put("type", 1);
@@ -61,7 +69,7 @@ public class ServiceDistribution implements ApplicationContextAware {
 	}
 
 	public static boolean handleJson101_1(String deviceId) {
-		SocketChannel channel = DeviceService.getSocketMap(deviceId);
+		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.put("type", "101");
 		jsonObject.put("code", "1");
@@ -76,15 +84,15 @@ public class ServiceDistribution implements ApplicationContextAware {
 			return false;
 	}
 
-	public static JSONObject handleJson3_21(JSONObject jsonObject) {
+	public static JSONObject handleJson3_21(JSONObject jsonObject,ChannelHandlerContext ctx) {
 		String photo = jsonObject.getString("photo");
 		String id = jsonObject.getString("strangerId");
-		String deviceId = jsonObject.getString("deviceId");
+		String deviceId = ChannelNameToDeviceMap.getDeviceMap(ctx.name());
 		String path = FACE_PHOTO_PATH + deviceId;
 		if (!(new File(path).isDirectory())) {
 			new File(path).mkdirs();
 		}
-		path=path+"/id";
+		path=path+"/"+id;
 		boolean state=GenerateImage(photo, path);
 		if(state && PhotoMap.getMap(deviceId)==null){
 			PhotoMap.addMap(deviceId, path);
@@ -97,7 +105,7 @@ public class ServiceDistribution implements ApplicationContextAware {
 	}
 	
 	public static void handleJson102_1(String deviceId) {
-		SocketChannel channel = DeviceService.getSocketMap(deviceId);
+		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.put("type", "102");
 		jsonObject.put("code", "1");
@@ -110,7 +118,28 @@ public class ServiceDistribution implements ApplicationContextAware {
 		} 
 	}
 
-	@SuppressWarnings("restriction")
+	public static Boolean handleJson103_1(String employeeId,String strangerId,String employeeName,String birth,String deviceId) {
+		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("type", "103");
+		jsonObject.put("code", "1");
+		jsonObject.put("employeeId", employeeId);
+		jsonObject.put("strangerId", strangerId);
+		jsonObject.put("employeeName", employeeName);
+		jsonObject.put("birth", birth);
+		byte[] result = SocketService.responseByte(jsonObject, "102", "1");
+		if (null != channel) {
+			ByteBuf encoded = Unpooled.buffer();
+			encoded.writeBytes(result);
+			channel.write(encoded);
+			channel.flush();
+			return true;
+		} 
+		else {
+			return false;
+		}
+	}
+	
 	public static boolean GenerateImage(String imgStr,String path) { // 对字节数组字符串进行Base64解码并生成图片
 		if (imgStr == null) // 图像数据为空
 			return false;

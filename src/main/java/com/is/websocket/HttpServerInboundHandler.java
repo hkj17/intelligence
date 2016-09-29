@@ -3,10 +3,8 @@ package com.is.websocket;
 import org.apache.log4j.Logger;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.channel.socket.SocketChannel;
 
 
 public class HttpServerInboundHandler extends ChannelInboundHandlerAdapter {
@@ -23,7 +21,7 @@ public class HttpServerInboundHandler extends ChannelInboundHandlerAdapter {
 		System.out.println("Client said:" + resultStr);
 		logger.info("Client said:" + resultStr);
 		result.release();
-		SocketService.handleSocketMsg(result1,(SocketChannel)ctx.channel());
+		SocketService.handleSocketMsg(result1,ctx);
 
 	}
 
