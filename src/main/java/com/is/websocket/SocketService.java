@@ -93,6 +93,10 @@ public class SocketService {
 			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.name());
 			 future.setResponse("103_2");
 		}
+		if (type.equals("103") && code.equals("12")) {
+			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.name());
+			 future.setResponse("103_12");
+		}
 
 	}
 	

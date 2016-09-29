@@ -25,6 +25,9 @@ public class CheckResponse extends Thread{
 	public void run(){
 		SyncFuture<String> future=new SyncFuture<>();
 		 ChannelHandlerContext ctx=DeviceService.getSocketMap(deviceId);
+		 if(ctx==null){
+			 return;
+		 }
 		 String name=ctx.name();
 		 FutureMap.addFuture(name, future);
 		 try {
@@ -38,9 +41,8 @@ public class CheckResponse extends Thread{
 					ChannelNameToDeviceMap.removeDeviceMap(name);
 				}
 			}
-			else{
-				FutureMap.removeFutureMap(name);
-			}
+			
+			
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -50,6 +52,9 @@ public class CheckResponse extends Thread{
 		} catch (TimeoutException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+		 finally {
+			 FutureMap.removeFutureMap(name);
 		}
 	}
 	

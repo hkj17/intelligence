@@ -151,8 +151,9 @@ public class AdminHandle {
 	public Response editEmployee(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		boolean state = adminService.editEmployee(requestMap.get(EMPLOYEE_ID), requestMap.get(NAME),
-				requestMap.get(SEX), requestMap.get(BIRTH), requestMap.get(CONTACT), requestMap.get(ENTRY_TIME),
-				requestMap.get(WECHAT), requestMap.get(COMPANY), requestMap.get(CONTENT));
+				requestMap.get(BIRTH), requestMap.get(CONTACT),  requestMap.get("deviceId"),
+				requestMap.get("positon"), requestMap.get("jobId"), requestMap.get("address"),
+				requestMap.get("email"), requestMap.get("idCard"), requestMap.get("workPos"));
 		if (state) {
 			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
 		} else {
@@ -187,25 +188,13 @@ public class AdminHandle {
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, map);
 	}
 
-	@POST
+	/*@POST
 	@Path("/updateEmployee")
 	public Response updateEmployee(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		boolean state = adminService.updateEmployee();
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, state);
-	}
+	}*/
 
-	@POST
-	@Path("/addEmployee")
-	public Response addEmployee(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
-		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
-		String state = adminService.addEmployeeTest(requestMap.get("name"), requestMap.get("sex"),
-				requestMap.get("birth"), requestMap.get("contact"), requestMap.get("entryTime"),
-				requestMap.get("wechat"), requestMap.get("company"), requestMap.get("content"),
-				requestMap.get("folder_name"), requestMap.get("position"), requestMap.get("jobId"),
-				requestMap.get("address"), requestMap.get("email"), requestMap.get("idCard"),
-				requestMap.get("department"));
-		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, state);
-	}
 
 	@GET
 	@Path("/addEmployeeGetPhotoList")
@@ -275,7 +264,7 @@ public class AdminHandle {
 		if (state) {
 			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
 		} else {
-			return ResponseFactory.response(Response.Status.OK, ResponseCode.REQUEST_FAIL, "no user");
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.REQUEST_FAIL, null);
 		}
 	}
 
@@ -291,10 +280,42 @@ public class AdminHandle {
 	@Path("/addEmployee")
 	public Response addEmployeeInfo(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams)  {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
-		String employeeId = adminService.addEmployee(requestMap.get("name"), requestMap.get("sex"), requestMap.get("birth"), requestMap.get("contact"),
-				requestMap.get("entryTime"), requestMap.get("wechat"), requestMap.get("deviceId"),  requestMap.get("content"),  requestMap.get("path"), 
-				 requestMap.get("position"), requestMap.get("jobId"),  requestMap.get("address"),  requestMap.get("email"),  requestMap.get("idCard"),  requestMap.get("department"));
+		String employeeId = adminService.addEmployee(requestMap.get("name"), requestMap.get("birth"), requestMap.get("contact"),
+				 requestMap.get("deviceId"),   requestMap.get("path"), 
+				 requestMap.get("position"), requestMap.get("jobId"),  requestMap.get("address"),  requestMap.get("email"),  requestMap.get("idCard"),requestMap.get("workPos"),requestMap.get("department"));
 
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, employeeId);
+	}
+	
+	@POST
+	@Path("/searchAdmin")
+	public Response searchAdmin(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams)  {
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		List<Admin> list=adminService.searchAdmin(requestMap.get("name"), requestMap.get("auth"));
+		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, list);
+	}
+	
+	@POST
+	@Path("/editAdmin")
+	public Response editAdmin(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams){
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		boolean state=adminService.editAdmin(requestMap.get("id"), requestMap.get("name"),requestMap.get("password"), requestMap.get("auth"));
+		if (state) {
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
+		} else {
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.REQUEST_FAIL, null);
+		}
+	}
+	
+	@POST
+	@Path("/deleteAdmin")
+	public Response deleteAdmin(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams){
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		boolean state=adminService.deleteAdmin(requestMap.get("id"));
+		if (state) {
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
+		} else {
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.REQUEST_FAIL, null);
+		}
 	}
 }

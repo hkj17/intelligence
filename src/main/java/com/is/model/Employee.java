@@ -70,9 +70,20 @@ public class Employee {
 	@Column(name="pingyin")
 	private String pingyin;
 	
+	@Column(name = "work_pos")
+	private String workPos;
+	
 	@ManyToOne
 	@JoinColumn(name="department_id")
 	private Department department;
+	
+	public String getWorkPos() {
+		return workPos;
+	}
+	
+	public void setWorkPos(String workPos) {
+		this.workPos = workPos;
+	}
 	
 	public void setDepartment(Department department) {
 		this.department = department;

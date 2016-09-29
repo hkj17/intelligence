@@ -98,9 +98,9 @@ public class AdminService {
 		return intelligenceDao.getCompanyList();
 	}
 
-	public String addEmployee(String name, String sex, String birth, String contact, String entryTime, String wechat,
-			String deviceId, String content, String photo, String position, String jobId, String address, String email,
-			String idCard, String department) {
+	public String addEmployee(String name, String birth, String contact,
+			String deviceId,  String photo, String position, String jobId, String address, String email,
+			String idCard, String workPos,String department) {
 		Employee employee = new Employee();
 		// 判断是否为汉字
 		Pattern p = Pattern.compile("[\u4e00-\u9fa5]");
@@ -113,28 +113,23 @@ public class AdminService {
 		String employeeId = UUID.randomUUID().toString().trim().replaceAll("-", "");
 		employee.setEmployeeId(employeeId);
 		employee.setEmployeeName(name);
-		employee.setSex(sex);
 		employee.setPosition(position);
 		employee.setJobId(jobId);
 		employee.setAddress(address);
 		employee.setEmail(email);
-		if (null != department) {
+		employee.setWorkPos(workPos);
+		/*if (null != department) {
 			Department depart = intelligenceDao.getDepartmentById(department);
 			employee.setDepartment(depart);
 		}
-
+*/
 		employee.setIdCard(idCard);
 		if (!"".equals(birth) && null != birth) {
 			employee.setBirth(birth);
 		}
-		if (!"".equals(entryTime) && null != entryTime) {
-			employee.setEntryTime(entryTime);
-		}
 		employee.setTelphone(contact);
-		employee.setWechat(wechat);
 		Company company=intelligenceDao.getCompanyByDeviceId(deviceId);
 		employee.setCompany(company);
-		employee.setContent(content);
 
 		employee.setPhotoPath(photo+ ".jpg");
 		employee.setPhotoStatus("1");
@@ -147,77 +142,31 @@ public class AdminService {
 		return employeeId;
 	}
 
-	public String addEmployeeTest(String name, String sex, String birth, String contact, String entryTime,
-			String wechat, String company, String content, String fileName, String position, String jobId,
-			String address, String email, String idCard, String department) {
-		Employee employee = new Employee();
-		// 判断是否为汉字
-		Pattern p = Pattern.compile("[\u4e00-\u9fa5]");
-		Matcher m = p.matcher(name);
-		if (m.find()) {
-			String pingyin = converterToSpell(name);
-			employee.setPingyin(pingyin);
-		}
-
-		String employeeId = UUID.randomUUID().toString().trim().replaceAll("-", "");
-		employee.setEmployeeId(employeeId);
-		employee.setEmployeeName(name);
-		employee.setSex(sex);
-		employee.setPosition(position);
-		employee.setJobId(jobId);
-		employee.setAddress(address);
-		employee.setEmail(email);
-		if (null != department) {
-			Department depart = intelligenceDao.getDepartmentById(department);
-			employee.setDepartment(depart);
-		}
-
-		employee.setIdCard(idCard);
-		if (!"".equals(birth) && null != birth) {
-			employee.setBirth(birth);
-		}
-		if (!"".equals(entryTime) && null != entryTime) {
-			employee.setEntryTime(entryTime);
-		}
-		employee.setTelphone(contact);
-		employee.setWechat(wechat);
-		if (null != company) {
-			Company myCompany = intelligenceDao.getCompanyById(Integer.parseInt(company));
-			employee.setCompany(myCompany);
-		}
-		employee.setContent(content);
-		employee.setPhotoPath("/cloudweb/server/tomcat_intel/webapps/employee_img/" + fileName + ".jpg");
-		employee.setPhotoStatus("1");
-		cloudDao.add(employee);
-		return employeeId;
-	}
 
 	public Boolean deleteUser(String id) {
 		Employee employee = intelligenceDao.getEmployeeById(id);
 		Admin admin = employee.getAdmin();
 		cloudDao.delete(employee);
-		cloudDao.delete(admin);
-
+		if(admin!=null){
+			cloudDao.delete(admin);
+		}
 		return true;
 
 	}
 
-	public Boolean editEmployee(String employeeId, String name, String sex, String birth, String contact,
-			String entryTime, String wechat, String company, String content) {
+	public Boolean editEmployee(String employeeId, String name, String birth, String contact, 
+			String deviceId, String position, String jobId, String address, String email,
+			String idCard, String workPos) {
 		Employee employee = intelligenceDao.getEmployeeById(employeeId);
 		employee.setEmployeeName(name);
-		employee.setSex(sex);
-		if (!"".equals(birth) && null != birth) {
-			employee.setBirth(birth);
-		}
-		if (!"".equals(entryTime) && null != entryTime) {
-			employee.setEntryTime(entryTime);
-		}
-		Company myCompany = intelligenceDao.getCompanyById(Integer.parseInt(company));
-		employee.setCompany(myCompany);
+		employee.setBirth(birth);
 		employee.setTelphone(contact);
-		employee.setWechat(wechat);
-		employee.setContent(content);
+		employee.setPosition(position);
+		employee.setJobId(jobId);
+		employee.setAddress(address);
+		employee.setEmail(email);
+		employee.setIdCard(idCard);
+		employee.setWorkPos(workPos);
 		cloudDao.update(employee);
 		return true;
 	}
@@ -237,7 +186,7 @@ public class AdminService {
 		return intelligenceDao.getEmployeeByName(name);
 	}
 
-	public Boolean updateEmployee() {
+	/*public Boolean updateEmployee() {
 		List<Employee> list = intelligenceDao.getEmployeeList();
 		for (Employee employee : list) {
 			if (employee.getEmployeeId().length() <= 5) {
@@ -280,7 +229,7 @@ public class AdminService {
 		}
 		return true;
 
-	}
+	}*/
 
 	public Boolean updateEmployee(String id, String path) {
 		Employee employee = intelligenceDao.getEmployeeById(id);
@@ -445,6 +394,27 @@ public class AdminService {
 			employee.setPhotoPath(photo);
 			cloudDao.update(employee);
 		}
+	}
+	
+	public List<Admin> searchAdmin(String name,String auth){
+		return intelligenceDao.searchAdmin(name, auth);
+	}
+	
+	public Boolean editAdmin(String id,String name,String password,String auth){
+		Admin admin=intelligenceDao.getAdminById(id);
+		admin.setUsername(name);
+		admin.setPassword(password);
+		admin.setAuthority(Integer.parseInt(auth));
+		cloudDao.update(admin);
+		return true;
+	}
+	
+	public Boolean deleteAdmin(String id){
+		Admin admin=intelligenceDao.getAdminById(id);
+		if(null!=admin){
+			cloudDao.delete(admin);
+		}
+		return true;
 	}
 
 }

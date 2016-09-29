@@ -17,6 +17,8 @@ import com.is.model.Visitor;
 import com.is.model.VisitorInfo;
 import com.is.system.dao.CloudDao;
 import com.is.system.dao.IntelligenceDao;
+import com.is.websocket.CheckResponse;
+import com.is.websocket.ServiceDistribution;
 
 @Transactional
 @Component("visitorService")
@@ -32,8 +34,8 @@ public class VisitorService {
 	
 	
 	public String addVisitorInfo(String name,String company,String position,
-			String telphone,String email,String companyUrl,int tag,
-			String deviceId,String importance,String birth){
+			String telphone,String email,String companyUrl,
+			String deviceId,String importance,String birth,String path){
 		VisitorInfo info=new VisitorInfo();
 		String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
 		info.setId(id);
@@ -46,19 +48,13 @@ public class VisitorService {
 		info.setCompanyUrl(companyUrl);
 		info.setImportance(Integer.parseInt(importance));
 		info.setBirth(birth);
-		if(tag==1){
-			info.setPhotoPath(IMAGES_PATH+id+".jpg");
-		}
-		else{
-			info.setPhotoPath(IMAGES_PATH+"Ecca-6.png");
-		}
+		info.setPhotoPath(path+".jpg");
 		cloudDao.add(info);
 		
-		/*Visitor visitor=new Visitor();
-		visitor.setVisitorInfo(info);
-		visitor.setStartTime(new Date());
-		visitor.setEmployeeId(employeeId);
-		cloudDao.add(visitor);*/
+		String strangerId=path.substring(path.lastIndexOf("/")+1);
+		ServiceDistribution.handleJson103_11(id, strangerId, name, company,position,birth, deviceId);
+		CheckResponse response=new CheckResponse(deviceId, "103_12");
+		response.start();
 		return id;
 	}
 	

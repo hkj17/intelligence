@@ -47,7 +47,7 @@ public interface IntelligenceDao {
 	public ClockRecord getClockByNc(int id,String nightClock);
 	
 	
-	public Admin getAdminById(int id);
+	public Admin getAdminById(String id);
 	
 	public String getEmployeeIdByCompany(int id);
 	
@@ -74,5 +74,7 @@ public interface IntelligenceDao {
 	public List<Message> getMessageByEmployee(String employeeId);
 	
 	public Company getCompanyByDeviceId(String deviceId);
+	
+	public List<Admin> searchAdmin(String name,String auth); 
 	
 }

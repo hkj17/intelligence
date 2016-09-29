@@ -81,7 +81,7 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 	
 	@Override
 	public List<ClockRecord> getClockByWhere(String department,String user,String startClock,String endClock,String rule){
-		String sql="select clock.* from clockrecord clock,employee b where clock.employee_id=b.employee_id";
+		String sql="select clock.*,b.employee_name as name,b.job_id as jobId,b.department_id as department from clockrecord clock,employee b where clock.employee_id=b.employee_id";
 		Map<Integer, String> map=new HashMap<>();
 		int i=0;
 		if(!user.equals("") && !user.equals(null)){
@@ -193,8 +193,8 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 	}
 	
 	@Override
-	public Admin getAdminById(int id){
-		Query query=getSession().createSQLQuery("select a.* from admin a,company b where b.admin_id=a.admin_id and b.company_id="+"'"+id+"'");
+	public Admin getAdminById(String id){
+		Query query=getSession().createSQLQuery("select a.* from admin a where a.admin_id='"+id+"'");
 		Admin admin=(Admin) ((SQLQuery) query).addEntity(Admin.class).uniqueResult();
 		return admin;
 	}
@@ -261,6 +261,30 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 	public Company getCompanyByDeviceId(String deviceId) {
 		return (Company) cloudDao.getByHql(Hql.GET_COMPANY_BY_DEVICE_ID, deviceId);
 		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public List<Admin> searchAdmin(String name, String auth) {
+		String sql="select * from admin where username is NOT null";
+		Map<Integer, String> map=new HashMap<>();
+		int i=0;
+		if(!name.equals("") && !name.equals(null)){
+			sql=sql+" and username like ?";
+			map.put(i, '%' + name + '%');
+			i=i+1;
+		}
+		if(!auth.equals("") && !auth.equals(null)){
+			sql+=" and authority=?";
+			map.put(i, auth);
+		}
+		
+
+		Query query = getSession().createSQLQuery(sql);
+		for(int p=0;p<map.size();p++){
+			query.setParameter(p, map.get(p));
+		}
+		List<Admin> list=((SQLQuery) query).addEntity(Admin.class).list();
+		return list;
 	}
 	
 

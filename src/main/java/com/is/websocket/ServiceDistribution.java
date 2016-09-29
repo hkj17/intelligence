@@ -127,7 +127,31 @@ public class ServiceDistribution implements ApplicationContextAware {
 		jsonObject.put("strangerId", strangerId);
 		jsonObject.put("employeeName", employeeName);
 		jsonObject.put("birth", birth);
-		byte[] result = SocketService.responseByte(jsonObject, "102", "1");
+		byte[] result = SocketService.responseByte(jsonObject, "103", "1");
+		if (null != channel) {
+			ByteBuf encoded = Unpooled.buffer();
+			encoded.writeBytes(result);
+			channel.write(encoded);
+			channel.flush();
+			return true;
+		} 
+		else {
+			return false;
+		}
+	}
+	
+	public static Boolean handleJson103_11(String visitorId,String strangerId,String visitorName,String company,String position,String birth,String deviceId) {
+		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("type", "103");
+		jsonObject.put("code", "11");
+		jsonObject.put("visitorId", visitorId);
+		jsonObject.put("strangerId", strangerId);
+		jsonObject.put("visitorName", visitorName);
+		jsonObject.put("company", company);
+		jsonObject.put("position", position);
+		jsonObject.put("birth", birth);
+		byte[] result = SocketService.responseByte(jsonObject, "103", "11");
 		if (null != channel) {
 			ByteBuf encoded = Unpooled.buffer();
 			encoded.writeBytes(result);
