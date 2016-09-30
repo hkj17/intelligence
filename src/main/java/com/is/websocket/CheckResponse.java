@@ -42,7 +42,7 @@ public class CheckResponse extends Thread{
 				}
 			}
 			
-			
+			System.out.println("node:"+node);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

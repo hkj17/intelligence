@@ -45,6 +45,9 @@ public class ClockService {
 			if(clockRecord.getState()==null || "".equals(clockRecord.getState())){
 				SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss");
 				Company company=intelligenceDao.getCompanyByEmployee(clockRecord.getEmployeeId());
+				if(null==company){
+					continue;
+				}
 				String start=company.getTimeWork();
 				String end=company.getTimeRest();
 				Date startTime=sdf.parse(start);

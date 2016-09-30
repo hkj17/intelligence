@@ -74,7 +74,7 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 	
 	@Override
 	public List<ClockRecord> getClockList(){
-		Query query=getSession().createSQLQuery("SELECT a.* from clockrecord a,employee b where b.employee_id=a.employee_id");
+		Query query=getSession().createSQLQuery("SELECT a.*,b.employee_name as name,b.job_id as jobId,b.department_id as department from clockrecord a LEFT JOIN employee b on b.employee_id=a.employee_id where a.employee_id is not null");
 		List<ClockRecord> list=((SQLQuery) query).addEntity(ClockRecord.class).list();
 		return list;
 	}
@@ -85,25 +85,27 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 		Map<Integer, String> map=new HashMap<>();
 		int i=0;
 		if(!user.equals("") && !user.equals(null)){
-			sql=sql+" and b.employee_name like ?";
-			map.put(i, '%' + user + '%');
-			i=i+1;
+			sql=sql+" and (b.pingyin like ? or b.pingyin like ? or b.employee_name like ?)";
+			map.put(i, user + '%');
+			map.put(i+1, '%' +","+ user + '%');
+			map.put(i+2, '%' + user + '%');
+			i=i+3;
 		}
-		if(!startClock.equals("") && !startClock.equals(null)){
+		if(startClock!=null){
 			sql+=" and clock.start_clock>=?";
 			map.put(i, startClock);
 			i=i+1;
 		}
-		if(!department.equals("") && !department.equals(null)){
+		if(department!=null){
 			sql+=" and b.department_id=?";
 			map.put(i, department);
 			i=i+1;
 		}
-		if(!endClock.equals("") && !endClock.equals(null)){
+		if(endClock!=null){
 			sql+=" and clock.end_clock<=?";
 			map.put(i, endClock);
 		}
-		if(Integer.parseInt(rule)==1){
+		if("1".equals(rule)){
 			sql+=" and clock.state!=0";
 		}
 
@@ -147,10 +149,9 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 	}
 	
 	@Override
-	public List<Employee> getEmployeeByAdmin(String adminId){
-		Query query=getSession().createSQLQuery("SELECT a.* from employee a,company b,admin c where a.company_id=b.company_id and b.admin_id=c.admin_id and c.admin_id="+"'"+adminId+"'");
-		List<Employee> list=((SQLQuery) query).addEntity(Employee.class).list();
-		return list;
+	public Employee getEmployeeByAdmin(String adminId){
+		Employee employee=(Employee) cloudDao.getByHql(Hql.GET_EMPLOYEE_BY_ADMIN_ID, adminId);
+		return employee;
 	}
 	
 	@Override
@@ -227,7 +228,9 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 	
 	@Override
 	public List<ClockRecord> getClockByEmployee(String id){
-		return cloudDao.findByHql(Hql.GET_CLOCK_BY_EMPLOYEE, id);
+		Query query=getSession().createSQLQuery("SELECT a.*,b.employee_name as name,b.job_id as jobId,b.department_id as department from clockrecord a,employee b where b.employee_id=a.employee_id and a.employee_id='"+id+"'");
+		List<ClockRecord> list=((SQLQuery) query).addEntity(ClockRecord.class).list();
+		return list;
 	}
 	
 	@Override
@@ -241,8 +244,36 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 	}
 	
 	@Override
-	public List<Visitor> indexVisitor(String startTime,String endTime){
-		Query query=getSession().createSQLQuery("select a.*,b.employee_name as employeeName from visitor a LEFT JOIN employee b on a.employee_id=b.employee_id where a.start_time>='"+startTime+"' and a.start_time<='"+endTime+"'");
+	public List<Visitor> indexVisitor(String depaertmentId,String name,String startTime,String endTime){
+		String sql="select a.*,b.employee_name as employeeName from visitor a LEFT JOIN employee b on a.employee_id=b.employee_id where a.employee_id is not null";
+		Map<Integer, String> map=new HashMap<>();
+		int i=0;
+		if(depaertmentId!=null){
+			sql=sql+" and b.department_id=?";
+			map.put(i, depaertmentId);
+			i=i+1;
+		}
+		if(name!=null){
+			sql+=" and (b.pingyin like ? or b.pingyin like ? or b.employee_name like ?)";
+			map.put(i, name+"%");
+			map.put(i+1, "%" +","+name + "%");
+			map.put(i+2, "%"+name + "%");
+			i=i+3;
+		}
+		if(startTime!=null){
+			sql+=" and a.start_time>=?";
+			map.put(i, startTime);
+			i=i+1;
+		}
+		if(endTime!=null){
+			sql+=" and a.end_time<=?";
+			map.put(i, endTime);
+		}
+		
+		Query query = getSession().createSQLQuery(sql);
+		for(int p=0;p<map.size();p++){
+			query.setParameter(p, map.get(p));
+		}
 		List<Visitor> list=((SQLQuery) query).addEntity(Visitor.class).list();
 		return list;
 	}
@@ -268,12 +299,12 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 		String sql="select * from admin where username is NOT null";
 		Map<Integer, String> map=new HashMap<>();
 		int i=0;
-		if(!name.equals("") && !name.equals(null)){
+		if(name!=null){
 			sql=sql+" and username like ?";
 			map.put(i, '%' + name + '%');
 			i=i+1;
 		}
-		if(!auth.equals("") && !auth.equals(null)){
+		if(auth!=null){
 			sql+=" and authority=?";
 			map.put(i, auth);
 		}
@@ -285,6 +316,13 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 		}
 		List<Admin> list=((SQLQuery) query).addEntity(Admin.class).list();
 		return list;
+	}
+
+	@Override
+	public Visitor getVisitorById(String id) {
+		// TODO Auto-generated method stub
+		Visitor visitor=(Visitor) cloudDao.getByHql(Hql.GET_VISITOR_BY_ID, id);
+		return visitor;
 	}
 	
 

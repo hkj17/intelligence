@@ -48,7 +48,7 @@ public class NotificationService {
 		return intelligenceDao.getAppointList();
 	}
 	
-	public List<Employee> getEmployeeByAdmin(String adminId){
+	public Employee getEmployeeByAdmin(String adminId){
 		return intelligenceDao.getEmployeeByAdmin(adminId);
 	}
 	

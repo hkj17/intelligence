@@ -32,7 +32,7 @@ public interface IntelligenceDao {
 	
 	public List<Appointment> getAppointList();
 	
-	public List<Employee> getEmployeeByAdmin(String adminId);
+	public Employee getEmployeeByAdmin(String adminId);
 	
 	public Employee getEmployeeById(String id);
 	
@@ -67,7 +67,7 @@ public interface IntelligenceDao {
 
 	public List<Department> getDepartmentByCompany(String company);
 	
-	public List<Visitor> indexVisitor(String startTime,String endTime);
+	public List<Visitor> indexVisitor(String depaertmentId,String name,String startTime,String endTime);
 	
 	public Department getDepartmentById(String id);
 	
@@ -76,5 +76,7 @@ public interface IntelligenceDao {
 	public Company getCompanyByDeviceId(String deviceId);
 	
 	public List<Admin> searchAdmin(String name,String auth); 
+	
+	public Visitor getVisitorById(String id);
 	
 }

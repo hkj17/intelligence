@@ -3,6 +3,7 @@ package com.is.service;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.UUID;
@@ -51,7 +52,7 @@ public class VisitorService {
 		info.setPhotoPath(path+".jpg");
 		cloudDao.add(info);
 		
-		String strangerId=path.substring(path.lastIndexOf("/")+1);
+		String strangerId=path==null?null:path.substring(path.lastIndexOf("/")+1);
 		ServiceDistribution.handleJson103_11(id, strangerId, name, company,position,birth, deviceId);
 		CheckResponse response=new CheckResponse(deviceId, "103_12");
 		response.start();
@@ -87,12 +88,20 @@ public class VisitorService {
 	}
 	
 	
-	public List<Visitor> indexVisitor(String startTime,String endTime){
-		return intelligenceDao.indexVisitor(startTime, endTime);
+	public List<Visitor> indexVisitor(String depaertmentId,String name,String startTime,String endTime){
+		return intelligenceDao.indexVisitor(depaertmentId,name,startTime, endTime);
 	}
 	
 	public VisitorInfo getVisitorById(String id){
 		return intelligenceDao.getVisitorInfoById(id);
+	}
+	
+	public Boolean addVisitorLeaveTime(String time,String id) throws ParseException{
+		Visitor visitor=intelligenceDao.getVisitorById(id);
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		visitor.setEndTime(formatter.parse(time));
+		cloudDao.update(visitor);
+		return true;
 	}
 
 }

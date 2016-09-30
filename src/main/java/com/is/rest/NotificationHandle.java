@@ -65,13 +65,13 @@ public class NotificationHandle {
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS,appointments);
 	}
 	
-	@POST
+	/*@POST
 	@Path("/getEmployeeByAdmin")
 	public Response getEmployeeByAdmin(@Context HttpServletRequest request){
 		Admin admin=(Admin) request.getSession().getAttribute(SESSION_USER);
 		List<Employee> employees=notificationService.getEmployeeByAdmin(admin.getAdminId());
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS,employees);
-	}
+	}*/
 	
 	@POST
 	@Path("/addAppointment")

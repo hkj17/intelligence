@@ -118,11 +118,11 @@ public class AdminService {
 		employee.setAddress(address);
 		employee.setEmail(email);
 		employee.setWorkPos(workPos);
-		/*if (null != department) {
+		if (null != department) {
 			Department depart = intelligenceDao.getDepartmentById(department);
 			employee.setDepartment(depart);
 		}
-*/
+
 		employee.setIdCard(idCard);
 		if (!"".equals(birth) && null != birth) {
 			employee.setBirth(birth);
@@ -256,6 +256,7 @@ public class AdminService {
 	}
 
 	public String completeCollection(String deviceId) {
+		//String path="/cloudweb/server/tomcat_intel/webapps/employee_img/1.jpg";
 		String path = PhotoMap.getMap(deviceId);
 		PhotoMap.removeMap(deviceId);
 		ServiceDistribution.handleJson102_1(deviceId);
@@ -411,9 +412,16 @@ public class AdminService {
 	
 	public Boolean deleteAdmin(String id){
 		Admin admin=intelligenceDao.getAdminById(id);
+		Employee employee=intelligenceDao.getEmployeeByAdmin(id);
+		if(null!=employee){
+			employee.setAdmin(null);
+			cloudDao.update(employee);
+		}
 		if(null!=admin){
 			cloudDao.delete(admin);
 		}
+		
+		
 		return true;
 	}
 

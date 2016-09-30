@@ -19,6 +19,8 @@ public class Hql {
 	
 	public static final String GET_EMPLOYEE_BY_ID="from Employee emp where emp.employeeId=?";
 	
+	public static final String GET_EMPLOYEE_BY_ADMIN_ID="from Employee a where a.admin.adminId=?";
+	
 	public static final String GET_NOTIFY_BY_ID="from Notification nof where nof.noteId=?";
 	
 	public static final String GET_APPOINT_BY_ID="from Appointment appo where appo.apId=?";
@@ -48,5 +50,7 @@ public class Hql {
 	public static final String GET_MESSAGE_BY_EMPLOYEE_ID="from Message where employeeId=?";
 	
 	public static final String GET_COMPANY_BY_DEVICE_ID="from Company a where a.deviceId = ?";
+	
+	public static final String GET_VISITOR_BY_ID="from Visitor where id=?";
 
 }

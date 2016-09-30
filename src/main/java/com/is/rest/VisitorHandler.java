@@ -35,7 +35,6 @@ public class VisitorHandler {
 	
 	@POST
 	@Path("/addVisitorInfo") 
-	@Consumes("multipart/form-data")
 	public Response addVisitorInfo(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		String id=visitorService.addVisitorInfo(requestMap.get("name"), requestMap.get("company"), 
@@ -49,7 +48,7 @@ public class VisitorHandler {
 	@Path("/indexVisitor")
 	public Response indexVisitor(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws ParseException{
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
-		List<Visitor> list=visitorService.indexVisitor(requestMap.get(START_TIME), requestMap.get(END_TIME));
+		List<Visitor> list=visitorService.indexVisitor(requestMap.get("departmentId"), requestMap.get("name"),requestMap.get("startTime"), requestMap.get("endTime"));
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, list);
 	}
 	
@@ -59,6 +58,19 @@ public class VisitorHandler {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		VisitorInfo info=visitorService.getVisitorById(requestMap.get("visitorId"));
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, info);
+		
+	}
+	
+	@POST
+	@Path("/addVisitorLeaveTime")
+	public Response addVisitorLeaveTime(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws ParseException{
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		boolean state=visitorService.addVisitorLeaveTime(requestMap.get("time"), requestMap.get("id"));
+		if(state){
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
+		}else{
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.REQUEST_FAIL, null);
+		}
 		
 	}
 }

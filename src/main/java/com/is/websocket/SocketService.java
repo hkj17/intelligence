@@ -23,7 +23,7 @@ public class SocketService {
 			b[1]=bytes[3];
 			b[2]=bytes[4];
 			b[3]=bytes[5];
-			int length = Integer.parseInt(TransformByte.bytesToHexString(b),16);
+			int length = TransformByte.bytesToHexString(b);
 			// System.out.println(length);
 			if (len == length + 6) {
 				String body = new String(bytes, 40, length-34);
@@ -103,7 +103,7 @@ public class SocketService {
 	public static byte[] responseByte(JSONObject jsonObject,String type,String code){
 		byte[] json = jsonObject.toString().getBytes();
 		int len = json.length;
-		byte[] lenb = TransformByte.hexStr2ByteArray(String.format("%8s", Integer.toHexString(len + 32)).replace(' ', '0'));
+		byte[] lenb = TransformByte.hexStr2ByteArray(len+34);
 		System.out.println(new String(lenb));
 		byte[] xing = "##".getBytes();
 		byte[] result = new byte[40 + len];
@@ -115,9 +115,9 @@ public class SocketService {
 		System.arraycopy(other, 0, result, 6, 32);
 		
 		//type和code
-		byte[] typeByte=TransformByte.hexStr2ByteArray(String.format("%2s", Integer.toHexString(Integer.parseInt(type))).replace(' ', '0'));
+		byte[] typeByte=TransformByte.hexStr2ByteArray(Integer.parseInt(type));
 		System.arraycopy(typeByte, 0, result, 38, 1);
-		byte[] codeByte=TransformByte.hexStr2ByteArray(String.format("%2s", Integer.toHexString(Integer.parseInt(code))).replace(' ', '0'));
+		byte[] codeByte=TransformByte.hexStr2ByteArray(Integer.parseInt(code));
 		System.arraycopy(codeByte, 0, result, 39, 1);
 		
 		//json报文

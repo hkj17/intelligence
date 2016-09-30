@@ -6,16 +6,21 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.AdaptiveRecvByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.FixedLengthFrameDecoder;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.codec.bytes.ByteArrayDecoder;
 import io.netty.handler.codec.bytes.ByteArrayEncoder;
+import io.netty.handler.codec.serialization.ClassResolvers;
+import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import io.netty.util.CharsetUtil;
@@ -25,8 +30,8 @@ public class SocketHandle implements ApplicationListener<ContextRefreshedEvent>{
 	private static Logger logger = Logger.getLogger(SocketHandle.class);
 	
 
-	private static final String IP = "120.26.60.164";
-	//private static final String IP = "192.168.223.31";
+	//private static final String IP = "120.26.60.164";
+	private static final String IP = "192.168.223.31";
 
 	protected static final int BIZGROUPSIZE = Runtime.getRuntime().availableProcessors() * 2; // 默认
 
@@ -38,6 +43,7 @@ public class SocketHandle implements ApplicationListener<ContextRefreshedEvent>{
 	@SuppressWarnings("rawtypes")
 	protected static void start() throws Exception {
 		ServerBootstrap b = new ServerBootstrap();
+		//b.option(ChannelOption.RCVBUF_ALLOCATOR, new AdaptiveRecvByteBufAllocator(64, 1024*1024, 1024*1024));
 		b.group(bossGroup, workerGroup);
 		b.channel(NioServerSocketChannel.class);
 		b.childHandler(new ChannelInitializer() {
@@ -47,6 +53,7 @@ public class SocketHandle implements ApplicationListener<ContextRefreshedEvent>{
 				//pipeline.addLast("decoder", new LengthFieldBasedFrameDecoder(1024*1024, 0, 2, 0, 2));
 				/*pipeline.addLast("decoder", new ());
 				pipeline.addLast("encoder", new ByteArrayEncoder());*/
+				pipeline.addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4));
 				pipeline.addLast(new HttpServerInboundHandler());
 			}
 
