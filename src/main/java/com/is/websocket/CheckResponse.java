@@ -32,7 +32,7 @@ public class CheckResponse extends Thread{
 		 FutureMap.addFuture(name, future);
 		 try {
 			String node=future.get(6, TimeUnit.SECONDS);
-			if(node.equals(text)){
+			if(!node.equals(text)){
 				ctx.close();
 				if (DeviceService.getSocketMap(deviceId) != null) {
 					DeviceService.removeSocketMap(deviceId);

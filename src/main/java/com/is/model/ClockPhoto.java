@@ -5,8 +5,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity(name = "ClockPhoto")
@@ -21,12 +19,22 @@ public class ClockPhoto {
 	@Column(name = "clock_time")
 	private String clockTime;
 	
-	@ManyToOne
-	@JoinColumn(name = "employee_id") 
-	private Employee employee;
+	@Column(name = "employee_id") 
+	private String employeeId;
 	
 	@Column(name = "photo")
 	private String photo;
+	
+	@Column(name = "device_id")
+	private String deviceId;
+	
+	public void setDeviceId(String deviceId) {
+		this.deviceId = deviceId;
+	}
+	
+	public String getDeviceId() {
+		return deviceId;
+	}
 
 	public int getCpId() {
 		return cpId;
@@ -48,12 +56,12 @@ public class ClockPhoto {
 		this.clockTime = clockTime;
 	}
 
-	public Employee getEmployee() {
-		return employee;
+	public void setEmployeeId(String employeeId) {
+		this.employeeId = employeeId;
 	}
-
-	public void setEmployee(Employee employee) {
-		this.employee = employee;
+	
+	public String getEmployeeId() {
+		return employeeId;
 	}
 
 	public String getPhoto() {

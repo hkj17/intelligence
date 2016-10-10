@@ -42,7 +42,7 @@ public interface IntelligenceDao {
 	
 	public List<Employee> getEmployeeByCompany(int id);
 	
-	public ClockRecord getClockByMc(int id,String morningClock);
+	public ClockRecord getClockByMc(String id,String morningClock);
 	
 	public ClockRecord getClockByNc(int id,String nightClock);
 	

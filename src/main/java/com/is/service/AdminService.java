@@ -424,5 +424,9 @@ public class AdminService {
 		
 		return true;
 	}
+	
+	public Employee getEmployeeByAdminId(String adminId){
+		return intelligenceDao.getEmployeeByAdmin(adminId);
+	}
 
 }

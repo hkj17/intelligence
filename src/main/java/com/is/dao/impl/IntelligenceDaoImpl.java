@@ -175,7 +175,7 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 	}
 	
 	@Override
-	public ClockRecord getClockByMc(int id,String morningClock){
+	public ClockRecord getClockByMc(String id,String morningClock){
 		Query query=getSession().createSQLQuery("select * from clockrecord a where a.employee_id="+"'"+id+"'" +" and a.start_clock like "+"'%"+morningClock+"%'");
 		ClockRecord clockRecord=(ClockRecord) ((SQLQuery) query).addEntity(ClockRecord.class).uniqueResult();
 		return clockRecord;

@@ -59,6 +59,21 @@ public class VisitorService {
 		return id;
 	}
 	
+	public boolean updateVisitorInfo(String id,String name,String company,String position,
+			String telphone,String email,String importance,String birth){
+		VisitorInfo visitorInfo=intelligenceDao.getVisitorInfoById(id);
+		visitorInfo.setName(name);
+		visitorInfo.setCompany(company);
+		visitorInfo.setPosition(position);
+		visitorInfo.setTelphone(telphone);
+		visitorInfo.setEmail(email);
+		visitorInfo.setImportance(Integer.parseInt(importance));
+		visitorInfo.setBirth(birth);
+		cloudDao.update(visitorInfo);
+		return true;
+		
+	}
+	
 	public Boolean addImage(InputStream uploadedInputStream,String id) throws IOException{
 		//1、创建一个DiskFileItemFactory工厂
 		DiskFileItemFactory factory = new DiskFileItemFactory();

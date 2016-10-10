@@ -1,6 +1,7 @@
 package com.is.websocket;
 
 import static com.is.constant.ParameterKeys.FACE_PHOTO_PATH;
+import static com.is.constant.ParameterKeys.CLOCK_PHOTO_PATH;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -17,6 +18,7 @@ import com.is.map.DeviceService;
 import com.is.map.PhotoMap;
 import com.is.model.Employee;
 import com.is.service.AdminService;
+import com.is.service.ClockService;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -85,14 +87,14 @@ public class ServiceDistribution implements ApplicationContextAware {
 	}
 
 	public static JSONObject handleJson3_21(JSONObject jsonObject,ChannelHandlerContext ctx) {
-		String photo = jsonObject.getString("photo");
+		String photo = jsonObject.getString("photo").substring(23);
 		String id = jsonObject.getString("strangerId");
 		String deviceId = ChannelNameToDeviceMap.getDeviceMap(ctx.name());
 		String path = FACE_PHOTO_PATH + deviceId;
 		if (!(new File(path).isDirectory())) {
 			new File(path).mkdirs();
 		}
-		path=path+"/"+id;
+		path=path+"/"+id+".jpg";
 		boolean state=GenerateImage(photo, path);
 		if(state && PhotoMap.getMap(deviceId)==null){
 			PhotoMap.addMap(deviceId, path);
@@ -162,6 +164,45 @@ public class ServiceDistribution implements ApplicationContextAware {
 		else {
 			return false;
 		}
+	}
+	
+	public static boolean handleJson111_1(String deviceId,String employeeId,String time) {
+		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("type", "111");
+		jsonObject.put("code", "1");
+		jsonObject.put("employeeId", employeeId);
+		jsonObject.put("time", time);
+		byte[] result = SocketService.responseByte(jsonObject, "111", "1");
+		if (null != channel) {
+			ByteBuf encoded = Unpooled.buffer();
+			encoded.writeBytes(result);
+			channel.write(encoded);
+			channel.flush();
+			return true;
+		} 
+		else {
+			return false;
+		}
+	}
+	
+	public static void handleJson111_2(JSONObject jsonObject,ChannelHandlerContext ctx){
+		String employeeId=jsonObject.getString("employeeId");
+		String photoId=jsonObject.getString("photoId");
+		String photo=jsonObject.getString("photo");
+		String time=jsonObject.getString("time");
+		String deviceId = ChannelNameToDeviceMap.getDeviceMap(ctx.name());
+		
+		String path = CLOCK_PHOTO_PATH + deviceId+"/"+employeeId;
+		if (!(new File(path).isDirectory())) {
+			new File(path).mkdirs();
+		}
+		path=path+"/"+photoId+".jpg";
+		GenerateImage(photo, path);
+		
+		ClockService clockService = (ClockService) ServiceDistribution.getContext().getBean("clockService");
+		clockService.addClockPhoto(employeeId, time, path,deviceId);
+		
 	}
 	
 	public static boolean GenerateImage(String imgStr,String path) { // 对字节数组字符串进行Base64解码并生成图片

@@ -1,6 +1,5 @@
 package com.is.websocket;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import com.is.map.FutureMap;
@@ -11,35 +10,16 @@ import io.netty.channel.ChannelHandlerContext;
 import net.sf.json.JSONObject;
 public class SocketService {
 
-	private static ByteArrayOutputStream databuff = new ByteArrayOutputStream();
+	//private static ByteArrayOutputStream databuff = new ByteArrayOutputStream();
 
 	public static void handleSocketMsg(byte[] bytes,ChannelHandlerContext socketChannel) throws IOException {
 		int len=bytes.length;
 		String head = new String(bytes, 0, 2);
 		if (head.equals("##")) {
-			//String aa=new String(bytes, 5, 1,"UTF-8");
-			byte[] b = new byte[4];
-			b[0]=bytes[2];
-			b[1]=bytes[3];
-			b[2]=bytes[4];
-			b[3]=bytes[5];
-			int length = TransformByte.bytesToHexString(b);
-			// System.out.println(length);
-			if (len == length + 6) {
-				String body = new String(bytes, 40, length-34);
-				handlePayload(body,socketChannel);
-			} else if (len > length + 6) {
-				String body = new String(bytes, 40, length-34);
-				String left = new String(bytes, 6 + length, len - 6 - length);
-				byte[] leftbyte = left.getBytes();
-				databuff.write(leftbyte);
-				handlePayload(body,socketChannel);
-			} else {
-				databuff.write(bytes);
-				excuteWrite( "errorformat".getBytes(),socketChannel);
-			}
+			String body = new String(bytes, 36, len-36);
+			handlePayload(body,socketChannel);
 		} else {
-			databuff.write(bytes);
+			/*databuff.write(bytes);*/
 			excuteWrite( "errorformat".getBytes(),socketChannel);
 		}
 		
@@ -67,35 +47,43 @@ public class SocketService {
 			byte[] answer=responseByte(responseCode,anType,anCode);
 			excuteWrite(answer,socketChannel);
 		}
-		if (type.equals("1") && code.equals("1")) {
+		else if (type.equals("1") && code.equals("1")) {
 			responseCode=ServiceDistribution.handleJson1_1(jsonObject,socketChannel);
 			anType="1";
 			anCode="2";
 			byte[] answer=responseByte(responseCode,anType,anCode);
 			excuteWrite(answer,socketChannel);
 		}
-		if (type.equals("3") && code.equals("21")) {
+		else if (type.equals("3") && code.equals("21")) {
 			responseCode=ServiceDistribution.handleJson3_21(jsonObject,socketChannel);
 			anType="3";
 			anCode="22";
 			byte[] answer=responseByte(responseCode,anType,anCode);
 			excuteWrite(answer,socketChannel);
 		}
-		if (type.equals("101") && code.equals("2")) {
+		else if (type.equals("101") && code.equals("2")) {
 			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.name());
 			 future.setResponse("101_2");
 		}
-		if (type.equals("102") && code.equals("2")) {
+		else if (type.equals("102") && code.equals("2")) {
 			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.name());
 			 future.setResponse("102_2");
 		}
-		if (type.equals("103") && code.equals("2")) {
+		else if (type.equals("103") && code.equals("2")) {
 			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.name());
 			 future.setResponse("103_2");
 		}
-		if (type.equals("103") && code.equals("12")) {
+		else if (type.equals("103") && code.equals("12")) {
 			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.name());
 			 future.setResponse("103_12");
+		}
+		else if (type.equals("111") && code.equals("2")) {
+			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.name());
+			 future.setResponse("111_2");
+			 ServiceDistribution.handleJson111_2(jsonObject, socketChannel);
+		}
+		else {
+			excuteWrite("error type or code!".getBytes(),socketChannel);
 		}
 
 	}
@@ -103,25 +91,24 @@ public class SocketService {
 	public static byte[] responseByte(JSONObject jsonObject,String type,String code){
 		byte[] json = jsonObject.toString().getBytes();
 		int len = json.length;
-		byte[] lenb = TransformByte.hexStr2ByteArray(len+34);
-		System.out.println(new String(lenb));
+		/*byte[] lenb = TransformByte.hexStr2ByteArray(len+34);
+		System.out.println(new String(lenb));*/
 		byte[] xing = "##".getBytes();
-		byte[] result = new byte[40 + len];
+		byte[] result = new byte[36 + len];
 		System.arraycopy(xing, 0, result, 0, 2);
-		System.arraycopy(lenb, 0, result, 2, 4);
 		
 		//暂时空着
 		byte[] other = new byte[32];
-		System.arraycopy(other, 0, result, 6, 32);
+		System.arraycopy(other, 0, result, 2, 32);
 		
 		//type和code
 		byte[] typeByte=TransformByte.hexStr2ByteArray(Integer.parseInt(type));
-		System.arraycopy(typeByte, 0, result, 38, 1);
+		System.arraycopy(typeByte, 0, result, 34, 1);
 		byte[] codeByte=TransformByte.hexStr2ByteArray(Integer.parseInt(code));
-		System.arraycopy(codeByte, 0, result, 39, 1);
+		System.arraycopy(codeByte, 0, result, 35, 1);
 		
 		//json报文
-		System.arraycopy(json, 0, result, 40, len);
+		System.arraycopy(json, 0, result, 36, len);
 		return result;
 	}
 	

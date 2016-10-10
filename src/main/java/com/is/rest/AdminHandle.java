@@ -2,20 +2,15 @@ package com.is.rest;
 
 import static com.is.constant.ParameterKeys.AUTHORITY;
 import static com.is.constant.ParameterKeys.BIRTH;
-import static com.is.constant.ParameterKeys.COMPANY;
 import static com.is.constant.ParameterKeys.CONTACT;
-import static com.is.constant.ParameterKeys.CONTENT;
+import static com.is.constant.ParameterKeys.DEVICE_ID;
 import static com.is.constant.ParameterKeys.EMPLOYEE_ID;
 import static com.is.constant.ParameterKeys.EMPLOYEE_NAME;
-import static com.is.constant.ParameterKeys.ENTRY_TIME;
 import static com.is.constant.ParameterKeys.NAME;
 import static com.is.constant.ParameterKeys.OLD_PASSWORD;
 import static com.is.constant.ParameterKeys.SESSION_USER;
-import static com.is.constant.ParameterKeys.SEX;
 import static com.is.constant.ParameterKeys.USER_NAME;
 import static com.is.constant.ParameterKeys.USER_PSW;
-import static com.is.constant.ParameterKeys.WECHAT;
-import static com.is.constant.ParameterKeys.DEVICE_ID;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -84,7 +79,8 @@ public class AdminHandle {
 		if (admin.getResponseCode().compareTo(ResponseCode.SUCCESS) == 0) {
 			request.getSession().setAttribute(SESSION_USER, admin);
 			admin.setPassword("");
-			return ResponseFactory.response(Response.Status.OK, admin.getResponseCode(), admin);
+			Employee employee=adminService.getEmployeeByAdminId(admin.getAdminId());
+			return ResponseFactory.response(Response.Status.OK, admin.getResponseCode(), employee);
 		}
 		return ResponseFactory.response(Response.Status.OK, admin.getResponseCode(), null);
 	}
