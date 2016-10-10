@@ -6,6 +6,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 
 
@@ -31,8 +32,13 @@ public class ClockRecord {
 	@Column(name = "state")
 	private String state;
 	
+	@Transient
 	private String name;
+	
+	@Transient
 	private String jobId;
+	
+	@Transient
 	private String department;
 	
 	

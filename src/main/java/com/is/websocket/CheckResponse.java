@@ -33,6 +33,7 @@ public class CheckResponse extends Thread{
 		 try {
 			String node=future.get(6, TimeUnit.SECONDS);
 			if(!node.equals(text)){
+				System.out.println("connection break!");
 				ctx.close();
 				if (DeviceService.getSocketMap(deviceId) != null) {
 					DeviceService.removeSocketMap(deviceId);

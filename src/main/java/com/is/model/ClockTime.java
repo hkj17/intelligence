@@ -7,9 +7,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-@Entity(name = "ClockPhoto")
-@Table(name = "clockphoto")
-public class ClockPhoto {
+@Entity(name = "ClockTime")
+@Table(name = "clock_time")
+public class ClockTime {
 	
 	@Id
 	@Column(name = "cp_id")
@@ -22,8 +22,6 @@ public class ClockPhoto {
 	@Column(name = "employee_id") 
 	private String employeeId;
 	
-	@Column(name = "photo")
-	private String photo;
 	
 	@Column(name = "device_id")
 	private String deviceId;
@@ -64,13 +62,6 @@ public class ClockPhoto {
 		return employeeId;
 	}
 
-	public String getPhoto() {
-		return photo;
-	}
-
-	public void setPhoto(String photo) {
-		this.photo = photo;
-	}
 	
 	
 

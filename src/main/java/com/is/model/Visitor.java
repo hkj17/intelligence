@@ -39,7 +39,20 @@ public class Visitor implements CloudEntity {
 	@Column(name = "employee_id")
 	private String employeeId;
 	
+	@Column(name = "device_id")
+	private String deviceId;
+	
+	@Transient
 	private String employeeName;
+	
+	public void setDeviceId(String deviceId) {
+		this.deviceId = deviceId;
+	}
+	
+	public String getDeviceId() {
+		return deviceId;
+	}
+	
 	
 	public void setEmployeeName(String employeeName) {
 		this.employeeName = employeeName;

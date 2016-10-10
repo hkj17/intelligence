@@ -11,8 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.is.model.ClockAbnormal;
 import com.is.model.ClockAppeal;
-import com.is.model.ClockPhoto;
+import com.is.model.ClockTime;
 import com.is.model.ClockRecord;
 import com.is.model.Company;
 import com.is.model.Employee;
@@ -151,7 +152,14 @@ public class ClockService {
 		return true;
 	}
 
-	public Boolean addClockMobile(String deviceId,String id, String time) {
+	public Boolean addClockAbnormal(String deviceId,String id, String time) {
+		boolean state=ServiceDistribution.handleJson111_1(deviceId, id, time);
+		CheckResponse response=new CheckResponse(deviceId, "111_2");
+		response.start();
+		return state;
+	}
+	
+	public Boolean addClocknormal(String deviceId,String id, String time) {
 		ClockRecord clockRecord = getClockByMc(id, time.substring(0, 10));
 		if (null == clockRecord) {
 			addClock(id, time, null);
@@ -160,23 +168,28 @@ public class ClockService {
 			String morningClock = clockRecord.getStartClock();
 			updateClock(String.valueOf(crId), id, morningClock, time);
 		}
-		boolean state=ServiceDistribution.handleJson111_1(deviceId, id, time);
-		CheckResponse response=new CheckResponse(deviceId, "111_2");
-		response.start();
-		return state;
+		ClockTime clockTime=new ClockTime();
+		clockTime.setClockTime(time);
+		clockTime.setDeviceId(deviceId);
+		clockTime.setEmployeeId(id);
+		cloudDao.add(clockTime);
+		return true;
+		
 	}
 
-	public List<ClockPhoto> getClockPhoto() {
+	public List<ClockTime> getClockPhoto() {
 		return intelligenceDao.getClockPhoto();
 	}
 	
-	public void addClockPhoto(String employeeId,String time,String path,String deviceId){
-		ClockPhoto clockPhoto=new ClockPhoto();
-		clockPhoto.setEmployeeId(employeeId);
-		clockPhoto.setClockTime(time);
-		clockPhoto.setPhoto(path);
-		clockPhoto.setDeviceId(deviceId);
-		cloudDao.add(clockPhoto);
+	public void insertAbonormalClockPhoto(String employeeId,String time,String path,String deviceId){
+		ClockAbnormal clockAbnormal=new ClockAbnormal();
+		String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
+		clockAbnormal.setId(id);
+		clockAbnormal.setEmployeeId(employeeId);
+		clockAbnormal.setClockTime(time);
+		clockAbnormal.setPhotoPath(path);
+		clockAbnormal.setDeviceId(deviceId);
+		cloudDao.add(clockAbnormal);
 	}
 
 	public List<ClockRecord> getClockByEmployee(String id) {

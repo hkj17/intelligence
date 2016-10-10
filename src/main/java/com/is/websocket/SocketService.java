@@ -54,10 +54,31 @@ public class SocketService {
 			byte[] answer=responseByte(responseCode,anType,anCode);
 			excuteWrite(answer,socketChannel);
 		}
+		else if (type.equals("3") && code.equals("1")) {
+			responseCode=ServiceDistribution.handleJson3_1(jsonObject,socketChannel);
+			anType="3";
+			anCode="2";
+			byte[] answer=responseByte(responseCode,anType,anCode);
+			excuteWrite(answer,socketChannel);
+		}
+		else if (type.equals("3") && code.equals("11")) {
+			responseCode=ServiceDistribution.handleJson3_11(jsonObject,socketChannel);
+			anType="3";
+			anCode="12";
+			byte[] answer=responseByte(responseCode,anType,anCode);
+			excuteWrite(answer,socketChannel);
+		}
 		else if (type.equals("3") && code.equals("21")) {
 			responseCode=ServiceDistribution.handleJson3_21(jsonObject,socketChannel);
 			anType="3";
 			anCode="22";
+			byte[] answer=responseByte(responseCode,anType,anCode);
+			excuteWrite(answer,socketChannel);
+		}
+		else if (type.equals("5") && code.equals("1")) {
+			responseCode=ServiceDistribution.handleJson5_1(jsonObject,socketChannel);
+			anType="5";
+			anCode="2";
 			byte[] answer=responseByte(responseCode,anType,anCode);
 			excuteWrite(answer,socketChannel);
 		}
@@ -81,6 +102,22 @@ public class SocketService {
 			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.name());
 			 future.setResponse("111_2");
 			 ServiceDistribution.handleJson111_2(jsonObject, socketChannel);
+		}
+		else if (type.equals("104") && code.equals("2")) {
+			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.name());
+			 future.setResponse("104_2");
+		}
+		else if (type.equals("104") && code.equals("12")) {
+			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.name());
+			 future.setResponse("104_12");
+		}
+		else if (type.equals("105") && code.equals("2")) {
+			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.name());
+			 future.setResponse("105_2");
+		}
+		else if (type.equals("105") && code.equals("12")) {
+			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.name());
+			 future.setResponse("105_12");
 		}
 		else {
 			excuteWrite("error type or code!".getBytes(),socketChannel);

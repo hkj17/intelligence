@@ -59,7 +59,7 @@ public class VisitorService {
 		return id;
 	}
 	
-	public boolean updateVisitorInfo(String id,String name,String company,String position,
+	public boolean updateVisitorInfo(String deviceId,String id,String name,String company,String position,
 			String telphone,String email,String importance,String birth){
 		VisitorInfo visitorInfo=intelligenceDao.getVisitorInfoById(id);
 		visitorInfo.setName(name);
@@ -70,36 +70,12 @@ public class VisitorService {
 		visitorInfo.setImportance(Integer.parseInt(importance));
 		visitorInfo.setBirth(birth);
 		cloudDao.update(visitorInfo);
+		
+		ServiceDistribution.handleJson104_11(deviceId, id, name, company, position, telphone, email, importance, birth);
+		CheckResponse response=new CheckResponse(deviceId, "104_12");
+		response.start();
 		return true;
 		
-	}
-	
-	public Boolean addImage(InputStream uploadedInputStream,String id) throws IOException{
-		//1、创建一个DiskFileItemFactory工厂
-		DiskFileItemFactory factory = new DiskFileItemFactory();
-		//2、创建一个文件上传解析器
-		ServletFileUpload upload = new ServletFileUpload(factory);
-		//解决上传文件名的中文乱码
-		upload.setHeaderEncoding("UTF-8"); 
-		FileOutputStream out = new FileOutputStream(IMAGES_PATH + id+".jpg");
-		try {
-			
-			byte buffer[] = new byte[1024];
-			//判断输入流中的数据是否已经读完的标识
-			int len = 0;
-			//循环将输入流读入到缓冲区当中，(len=in.read(buffer))>0就表示in里面还有数据
-			while((len=uploadedInputStream.read(buffer))>0){
-			//使用FileOutputStream输出流将缓冲区的数据写入到指定的目录(savePath + "\\" + filename)当中
-			out.write(buffer, 0, len);
-			}
-		}  catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} finally{
-			uploadedInputStream.close();
-			out.close();
-		}
-		return true;
 	}
 	
 	
@@ -117,6 +93,34 @@ public class VisitorService {
 		visitor.setEndTime(formatter.parse(time));
 		cloudDao.update(visitor);
 		return true;
+	}
+	
+	public Boolean deleteVisitorInfo(String deviceId,String visitorId){
+		VisitorInfo visitorInfo=intelligenceDao.getVisitorInfoById(visitorId);
+		if(visitorInfo!=null){
+			cloudDao.delete(visitorInfo);
+		}
+		
+		boolean state=ServiceDistribution.handleJson105_11(deviceId,visitorId);
+		CheckResponse response=new CheckResponse(deviceId, "105_12");
+		response.start();
+		return state;
+	}
+	
+	public void insertVisitor(String deviceId,String infoId,String time,String employeeId){
+		Visitor visitor=new Visitor();
+		VisitorInfo visitorInfo=intelligenceDao.getVisitorInfoById(infoId);
+		visitor.setVisitorInfo(visitorInfo);
+		visitor.setEmployeeId(employeeId);
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		try {
+			visitor.setStartTime(formatter.parse(time));
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		visitor.setDeviceId(deviceId);
+		cloudDao.add(visitor);
 	}
 
 }

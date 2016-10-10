@@ -14,7 +14,7 @@ import org.springframework.stereotype.Repository;
 import com.is.constant.Hql;
 import com.is.model.Admin;
 import com.is.model.Appointment;
-import com.is.model.ClockPhoto;
+import com.is.model.ClockTime;
 import com.is.model.ClockRecord;
 import com.is.model.Company;
 import com.is.model.Department;
@@ -208,7 +208,7 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 	}
 	
 	@Override
-	public List<ClockPhoto> getClockPhoto(){
+	public List<ClockTime> getClockPhoto(){
 		return cloudDao.findByHql(Hql.GET_CLOCK_PHOTO);
 	}
 	

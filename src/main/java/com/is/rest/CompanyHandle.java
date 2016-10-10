@@ -1,6 +1,7 @@
 package com.is.rest;
 
 import static com.is.constant.ParameterKeys.COMPANY_NAME;
+import static com.is.constant.ParameterKeys.DEVICE_ID;
 import static com.is.constant.ParameterKeys.ADDRESS;
 import static com.is.constant.ParameterKeys.START_TIME;
 import static com.is.constant.ParameterKeys.END_TIME;
@@ -65,7 +66,7 @@ public class CompanyHandle {
 	@Path("/deleteCompany")
 	public Response deleteCompany(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams){
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
-		boolean state=companyService.deleteCompany(requestMap.get(COMPANY_ID));
+		boolean state=companyService.deleteCompany(requestMap.get(DEVICE_ID),requestMap.get(COMPANY_ID));
 		if(state){
 			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
 		}else{

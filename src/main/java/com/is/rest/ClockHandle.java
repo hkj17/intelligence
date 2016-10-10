@@ -33,7 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.is.constant.ResponseCode;
-import com.is.model.ClockPhoto;
+import com.is.model.ClockTime;
 import com.is.model.ClockRecord;
 import com.is.model.Employee;
 import com.is.service.ClockService;
@@ -88,18 +88,6 @@ public class ClockHandle {
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, employees);
 	}
 
-	@POST
-	@Path("/addClock")
-	public Response addClock(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
-		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
-		boolean state = clockService.addClock(requestMap.get(EMPLOYEE_ID), requestMap.get(MORNING_CLOCK),
-				requestMap.get(NIGHT_CLOCK));
-		if (state) {
-			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
-		} else {
-			return ResponseFactory.response(Response.Status.OK, ResponseCode.REQUEST_FAIL, null);
-		}
-	}
 	
 	@POST
 	@Path("/clockTimeAppeal")
@@ -120,7 +108,7 @@ public class ClockHandle {
 			throws IOException {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 
-		boolean state = clockService.addClockMobile(requestMap.get(DEVICE_ID),requestMap.get(EMPLOYEE_ID), requestMap.get(CLOCK_TIME));
+		boolean state = clockService.addClockAbnormal(requestMap.get(DEVICE_ID),requestMap.get(EMPLOYEE_ID), requestMap.get(CLOCK_TIME));
 		if (state) {
 			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
 		} else {
@@ -172,7 +160,7 @@ public class ClockHandle {
 	@POST
 	@Path("/getClockPhoto")
 	public Response getClockPhoto(@Context HttpServletRequest request) {
-		List<ClockPhoto> clockPhotos = clockService.getClockPhoto();
+		List<ClockTime> clockPhotos = clockService.getClockPhoto();
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, clockPhotos);
 	}
 	

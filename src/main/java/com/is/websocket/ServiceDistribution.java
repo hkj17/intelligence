@@ -19,6 +19,8 @@ import com.is.map.PhotoMap;
 import com.is.model.Employee;
 import com.is.service.AdminService;
 import com.is.service.ClockService;
+import com.is.service.EmployeeService;
+import com.is.service.VisitorService;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -31,6 +33,12 @@ import sun.misc.BASE64Decoder;
 @Component("serviceDistribution")
 public class ServiceDistribution implements ApplicationContextAware {
 	private static ApplicationContext context;
+	
+	private static VisitorService visitorService= (VisitorService)getContext().getBean("visitorService");
+
+	private static AdminService adminService= (AdminService)getContext().getBean("adminService");
+	
+	private static EmployeeService employeeService= (EmployeeService)getContext().getBean("employeeService");
 
 	@SuppressWarnings("static-access")
 	@Override
@@ -46,7 +54,7 @@ public class ServiceDistribution implements ApplicationContextAware {
 
 	public static JSONObject handleJson8_1(JSONObject jsonObject) {
 		JSONObject responseCode = new JSONObject();
-		AdminService adminService = (AdminService) ServiceDistribution.getContext().getBean("adminService");
+		//AdminService adminService = (AdminService) ServiceDistribution.getContext().getBean("adminService");
 		List<Employee> list = adminService.getEmployeeList();
 		JSONArray array = JSONArray.fromObject(list);
 		responseCode.put("data", array);
@@ -68,6 +76,53 @@ public class ServiceDistribution implements ApplicationContextAware {
 		responseCode.put("code", 2);
 		responseCode.put("deviceSn", devcieSn);
 		return responseCode;
+	}
+	
+	public static JSONObject handleJson3_1(JSONObject jsonObject, ChannelHandlerContext socketChannel) {
+		String employeeId=jsonObject.getString("employeeId");
+		String time=jsonObject.getString("time");
+		ClockService clockService = (ClockService) ServiceDistribution.getContext().getBean("clockService");
+		String deviceId=ChannelNameToDeviceMap.getDeviceMap(socketChannel.name());
+		clockService.addClocknormal(deviceId, employeeId, time);
+		
+		JSONObject responseCode = new JSONObject();
+		responseCode.put("type", 3);
+		responseCode.put("code", 2);
+		responseCode.put("employeeId", employeeId);
+		return responseCode;
+		
+	}
+	
+	public static JSONObject handleJson3_11(JSONObject jsonObject, ChannelHandlerContext socketChannel) {
+		String visitorId=jsonObject.getString("visitorId");
+		String time=jsonObject.getString("time");
+		//VisitorService visitorService = (VisitorService) ServiceDistribution.getContext().getBean("visitorService");
+		String deviceId=ChannelNameToDeviceMap.getDeviceMap(socketChannel.name());
+		visitorService.insertVisitor(deviceId, visitorId, time,null);
+		
+		JSONObject responseCode = new JSONObject();
+		responseCode.put("type", 3);
+		responseCode.put("code", 12);
+		responseCode.put("visitorId", visitorId);
+		return responseCode;
+		
+	}
+	
+	public static JSONObject handleJson5_1(JSONObject jsonObject, ChannelHandlerContext socketChannel) {
+		String visitorId=jsonObject.getString("visitorId");
+		String time=jsonObject.getString("time");
+		String employeeId=jsonObject.getString("employeeId");
+		//VisitorService visitorService = (VisitorService)getContext().getBean("visitorService");
+		String deviceId=ChannelNameToDeviceMap.getDeviceMap(socketChannel.name());
+		visitorService.insertVisitor(deviceId, visitorId, time,employeeId);
+		employeeService.sendMsg(employeeId);
+		
+		JSONObject responseCode = new JSONObject();
+		responseCode.put("type", 5);
+		responseCode.put("code", 2);
+		responseCode.put("visitorId", visitorId);
+		return responseCode;
+		
 	}
 
 	public static boolean handleJson101_1(String deviceId) {
@@ -201,8 +256,94 @@ public class ServiceDistribution implements ApplicationContextAware {
 		GenerateImage(photo, path);
 		
 		ClockService clockService = (ClockService) ServiceDistribution.getContext().getBean("clockService");
-		clockService.addClockPhoto(employeeId, time, path,deviceId);
+		clockService.insertAbonormalClockPhoto(employeeId, time, path,deviceId);
 		
+	}
+	
+	public static Boolean handleJson104_11(String deviceId,String id,String name,String company,String position,
+			String telphone,String email,String importance,String birth){
+		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("type", "104");
+		jsonObject.put("code", "11");
+		jsonObject.put("visitorId", id);
+		jsonObject.put("visitorName", name);
+		jsonObject.put("birth", birth);
+		jsonObject.put("company", company);
+		jsonObject.put("importance", importance);
+		jsonObject.put("position", position);
+		jsonObject.put("telephone", telphone);
+		jsonObject.put("email", email);
+		byte[] result = SocketService.responseByte(jsonObject, "104", "11");
+		if (null != channel) {
+			ByteBuf encoded = Unpooled.buffer();
+			encoded.writeBytes(result);
+			channel.write(encoded);
+			channel.flush();
+			return true;
+		} 
+		else {
+			return false;
+		}
+	}
+	
+	public static Boolean handleJson104_1(String deviceId,String employeeId, String name, String birth){
+		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("type", "104");
+		jsonObject.put("code", "1");
+		jsonObject.put("employeeId", employeeId);
+		jsonObject.put("employeeName", name);
+		jsonObject.put("birth", birth);
+		byte[] result = SocketService.responseByte(jsonObject, "104", "1");
+		if (null != channel) {
+			ByteBuf encoded = Unpooled.buffer();
+			encoded.writeBytes(result);
+			channel.write(encoded);
+			channel.flush();
+			return true;
+		} 
+		else {
+			return false;
+		}
+	}
+	
+	public static Boolean handleJson105_1(String deviceId,String employeeId){
+		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("type", "105");
+		jsonObject.put("code", "1");
+		jsonObject.put("employeeId", employeeId);
+		byte[] result = SocketService.responseByte(jsonObject, "105", "1");
+		if (null != channel) {
+			ByteBuf encoded = Unpooled.buffer();
+			encoded.writeBytes(result);
+			channel.write(encoded);
+			channel.flush();
+			return true;
+		} 
+		else {
+			return false;
+		}
+	}
+	
+	public static Boolean handleJson105_11(String deviceId,String visitorId){
+		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("type", "105");
+		jsonObject.put("code", "11");
+		jsonObject.put("visitorId", visitorId);
+		byte[] result = SocketService.responseByte(jsonObject, "105", "11");
+		if (null != channel) {
+			ByteBuf encoded = Unpooled.buffer();
+			encoded.writeBytes(result);
+			channel.write(encoded);
+			channel.flush();
+			return true;
+		} 
+		else {
+			return false;
+		}
 	}
 	
 	public static boolean GenerateImage(String imgStr,String path) { // 对字节数组字符串进行Base64解码并生成图片

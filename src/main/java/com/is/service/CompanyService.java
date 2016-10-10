@@ -70,11 +70,11 @@ public class CompanyService {
 		return true;
 	}
 	
-	public Boolean deleteCompany(String id){
+	public Boolean deleteCompany(String device,String id){
 		Company company=intelligenceDao.getCompanyById(Integer.parseInt(id));
 		String employeeId=intelligenceDao.getEmployeeIdByCompany(Integer.parseInt(id));
 		cloudDao.delete(company);
-		adminService.deleteUser(employeeId);
+		adminService.deleteUser(device,employeeId);
 		return true;
 	}
 	

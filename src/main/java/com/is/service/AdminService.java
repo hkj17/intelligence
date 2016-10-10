@@ -143,14 +143,19 @@ public class AdminService {
 	}
 
 
-	public Boolean deleteUser(String id) {
+	@SuppressWarnings("unchecked")
+	public Boolean deleteUser(String deviceId,String id) {
 		Employee employee = intelligenceDao.getEmployeeById(id);
 		Admin admin = employee.getAdmin();
 		cloudDao.delete(employee);
 		if(admin!=null){
 			cloudDao.delete(admin);
 		}
-		return true;
+		
+		boolean state=ServiceDistribution.handleJson105_1(deviceId, employee.getEmployeeId());
+		CheckResponse response=new CheckResponse(deviceId, "105_2");
+		response.start();
+		return state;
 
 	}
 
@@ -168,7 +173,11 @@ public class AdminService {
 		employee.setIdCard(idCard);
 		employee.setWorkPos(workPos);
 		cloudDao.update(employee);
-		return true;
+		
+		boolean state = ServiceDistribution.handleJson104_1(deviceId, employeeId, name, birth);
+		CheckResponse response=new CheckResponse(deviceId, "104_2");
+		response.start();
+		return state;
 	}
 
 	public Boolean editPassword(String username, String password) {

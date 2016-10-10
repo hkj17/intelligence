@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.is.model.Admin;
 import com.is.model.Appointment;
-import com.is.model.ClockPhoto;
+import com.is.model.ClockTime;
 import com.is.model.ClockRecord;
 import com.is.model.Company;
 import com.is.model.Department;
@@ -51,7 +51,7 @@ public interface IntelligenceDao {
 	
 	public String getEmployeeIdByCompany(int id);
 	
-	public List<ClockPhoto> getClockPhoto();
+	public List<ClockTime> getClockPhoto();
 	
 	public List<Employee> getEmployeeByName(String name);
 	

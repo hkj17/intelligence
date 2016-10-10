@@ -134,7 +134,7 @@ public class AdminHandle {
 	@Path("/deleteUser")
 	public Response deleteUser(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
-		boolean state = adminService.deleteUser(requestMap.get(EMPLOYEE_ID));
+		boolean state = adminService.deleteUser(requestMap.get(DEVICE_ID),requestMap.get(EMPLOYEE_ID));
 		if (state) {
 			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
 		} else {

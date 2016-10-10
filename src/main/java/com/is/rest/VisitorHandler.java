@@ -74,7 +74,7 @@ public class VisitorHandler {
 	@Path("/updateVisitorInfo")
 	public Response updateVisitorInfo(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws ParseException{
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
-		boolean state=visitorService.updateVisitorInfo(requestMap.get("id"),requestMap.get("name"), requestMap.get("company"), 
+		boolean state=visitorService.updateVisitorInfo(requestMap.get("deviceId"),requestMap.get("id"),requestMap.get("name"), requestMap.get("company"), 
 				requestMap.get("position"), requestMap.get("telphone"), requestMap.get("email"), 
 				requestMap.get("importance"),requestMap.get("birth"));
 		if(state){
@@ -83,4 +83,17 @@ public class VisitorHandler {
 			return ResponseFactory.response(Response.Status.OK, ResponseCode.REQUEST_FAIL, null);
 		}
 	}
+	
+	@POST
+	@Path("/deleteVisitorInfo")
+	public Response deleteVisitorInfo(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws ParseException{
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		boolean state=visitorService.deleteVisitorInfo(requestMap.get("deviceId"), requestMap.get("visitorId"));
+		if(state){
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
+		}else{
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.REQUEST_FAIL, null);
+		}
+	}
+	
 }
