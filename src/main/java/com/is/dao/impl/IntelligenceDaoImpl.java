@@ -324,6 +324,13 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 		Visitor visitor=(Visitor) cloudDao.getByHql(Hql.GET_VISITOR_BY_ID, id);
 		return visitor;
 	}
+
+	@Override
+	public List<Employee> getAuditPersonList(String deviceId) {
+		Query query=getSession().createSQLQuery("select a.* from employee a LEFT JOIN admin b on b.admin_id=a.admin_id where b.device_id='"+deviceId+"' and b.audit_auth=1");
+		List<Employee> list=((SQLQuery) query).addEntity(Employee.class).list();
+		return list;
+	}
 	
 
 }

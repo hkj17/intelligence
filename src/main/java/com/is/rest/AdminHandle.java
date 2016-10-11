@@ -12,17 +12,12 @@ import static com.is.constant.ParameterKeys.SESSION_USER;
 import static com.is.constant.ParameterKeys.USER_NAME;
 import static com.is.constant.ParameterKeys.USER_PSW;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -30,10 +25,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -53,7 +44,6 @@ public class AdminHandle {
 	@Autowired
 	private AdminService adminService;
 
-	private static final String IMAGES_PATH = "/cloudweb/server/tomcat_intel/webapps/employee_img/";
 
 	@POST
 	@Path("/AccountAssignment")
@@ -80,6 +70,9 @@ public class AdminHandle {
 			request.getSession().setAttribute(SESSION_USER, admin);
 			admin.setPassword("");
 			Employee employee=adminService.getEmployeeByAdminId(admin.getAdminId());
+			Admin admin2=employee.getAdmin();
+			admin2.setPassword(null);
+			employee.setAdmin(admin2);
 			return ResponseFactory.response(Response.Status.OK, admin.getResponseCode(), employee);
 		}
 		return ResponseFactory.response(Response.Status.OK, admin.getResponseCode(), null);
@@ -206,42 +199,6 @@ public class AdminHandle {
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, list);
 	}
 
-	@POST
-	@Path("/getImg")
-	@Consumes("multipart/form-data")
-	public Response getImg(@FormDataParam("id") String id, @FormDataParam("photo") InputStream uploadedInputStream,
-			@FormDataParam("photo") FormDataContentDisposition fileDetail) throws IOException {
-		DiskFileItemFactory factory = new DiskFileItemFactory();
-		// 2、创建一个文件上传解析器
-		ServletFileUpload upload = new ServletFileUpload(factory);
-		// 解决上传文件名的中文乱码
-		upload.setHeaderEncoding("UTF-8");
-		FileOutputStream out = new FileOutputStream(IMAGES_PATH + id + ".jpg");
-		try {
-			byte buffer[] = new byte[1024];
-			// 判断输入流中的数据是否已经读完的标识
-			int len = 0;
-			// 循环将输入流读入到缓冲区当中，(len=in.read(buffer))>0就表示in里面还有数据
-			while ((len = uploadedInputStream.read(buffer)) > 0) {
-				// 使用FileOutputStream输出流将缓冲区的数据写入到指定的目录(savePath + "\\" +
-				// filename)当中
-				out.write(buffer, 0, len);
-			}
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} finally {
-			uploadedInputStream.close();
-			out.close();
-		}
-		boolean state = adminService.updateEmployee(id, IMAGES_PATH + id + ".jpg");
-		if (state) {
-			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
-		} else {
-			return ResponseFactory.response(Response.Status.OK, ResponseCode.REQUEST_FAIL, "no user");
-		}
-
-	}
 
 	@POST
 	@Path("/getEmployeeByWhere")
@@ -314,4 +271,13 @@ public class AdminHandle {
 			return ResponseFactory.response(Response.Status.OK, ResponseCode.REQUEST_FAIL, null);
 		}
 	}
+	
+	@POST
+	@Path("/getAuditPerson")
+	public Response getAuditPerson(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams){
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		List<Employee> list=adminService.getAuditPersonList(requestMap.get(DEVICE_ID));
+		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, list);
+	}
+	
 }

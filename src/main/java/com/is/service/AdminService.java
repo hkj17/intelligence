@@ -132,7 +132,6 @@ public class AdminService {
 		employee.setCompany(company);
 
 		employee.setPhotoPath(photo+ ".jpg");
-		employee.setPhotoStatus("1");
 
 		cloudDao.add(employee);
 		String strangerId=photo.substring(photo.lastIndexOf("/")+1);
@@ -240,18 +239,6 @@ public class AdminService {
 
 	}*/
 
-	public Boolean updateEmployee(String id, String path) {
-		Employee employee = intelligenceDao.getEmployeeById(id);
-		if (null != employee) {
-			employee.setPhotoPath(path);
-			employee.setPhotoStatus("1");
-			cloudDao.update(employee);
-			return true;
-		} else {
-			return false;
-		}
-
-	}
 
 	public List<Employee> getEmployeeByWhere(String word, String company, String department) {
 		return intelligenceDao.getEmployeeByWhere(word, company, department);
@@ -436,6 +423,18 @@ public class AdminService {
 	
 	public Employee getEmployeeByAdminId(String adminId){
 		return intelligenceDao.getEmployeeByAdmin(adminId);
+	}
+	
+	public List<Employee> getAuditPersonList(String deviceId){
+		return intelligenceDao.getAuditPersonList(deviceId);
+	}
+	
+	public void updateTemplatePath(String employeeId,String path){
+		Employee employee=intelligenceDao.getEmployeeById(employeeId);
+		if(employee!=null){
+			employee.setTemplatePath(path);
+			cloudDao.update(employee);
+		}
 	}
 
 }

@@ -1,15 +1,10 @@
 package com.is.service;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +20,6 @@ import com.is.websocket.ServiceDistribution;
 @Component("visitorService")
 public class VisitorService {
 
-	private String IMAGES_PATH="/cloudweb/server/tomcat_intel/webapps/visitor_img/";
 	
 	@Autowired
 	private IntelligenceDao intelligenceDao;
@@ -107,8 +101,26 @@ public class VisitorService {
 		return state;
 	}
 	
+	public Boolean deleteVisitorRecord(String id){
+		Visitor visitor=intelligenceDao.getVisitorById(id);
+		if(visitor!=null){
+			cloudDao.delete(visitor);
+		}
+		return true;
+	}
+	
+	public void updateVisitorTemplate(String id,String path){
+		VisitorInfo visitorInfo=intelligenceDao.getVisitorInfoById(id);
+		if(visitorInfo!=null){
+			visitorInfo.setTemplatePath(path);
+			cloudDao.add(visitorInfo);
+		}
+	}
+	
 	public void insertVisitor(String deviceId,String infoId,String time,String employeeId){
 		Visitor visitor=new Visitor();
+		String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
+		visitor.setId(id);
 		VisitorInfo visitorInfo=intelligenceDao.getVisitorInfoById(infoId);
 		visitor.setVisitorInfo(visitorInfo);
 		visitor.setEmployeeId(employeeId);

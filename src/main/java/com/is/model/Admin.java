@@ -34,8 +34,19 @@ public class Admin implements Serializable {
 	@Column(name = "authority")
 	private int authority;
 	
+	@Column(name = "audit_auth")
+	private int auditAuth;
+	
 	@Transient
 	private ResponseCode responseCode;
+	
+	public int getAuditAuth() {
+		return auditAuth;
+	}
+	
+	public void setAuditAuth(int auditAuth) {
+		this.auditAuth = auditAuth;
+	}
 	
 	public void setDeviceId(String deviceId) {
 		this.deviceId = deviceId;

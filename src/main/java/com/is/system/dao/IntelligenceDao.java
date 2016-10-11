@@ -79,4 +79,6 @@ public interface IntelligenceDao {
 	
 	public Visitor getVisitorById(String id);
 	
+	public List<Employee> getAuditPersonList(String deviceId);
+	
 }

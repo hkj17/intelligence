@@ -64,18 +64,26 @@ public class Employee {
 	@Column(name="id_card")
 	private String idCard;
 	
-	@Column(name="photo_status")
-	private String photoStatus;
-	
 	@Column(name="pingyin")
 	private String pingyin;
 	
 	@Column(name = "work_pos")
 	private String workPos;
 	
+	@Column(name = "template_path")
+	private String templatePath;
+	
 	@ManyToOne
 	@JoinColumn(name="department_id")
 	private Department department;
+	
+	public void setTemplatePath(String templatePath) {
+		this.templatePath = templatePath;
+	}
+	
+	public String getTemplatePath() {
+		return templatePath;
+	}
 	
 	public String getWorkPos() {
 		return workPos;
@@ -131,12 +139,7 @@ public class Employee {
 	public void setIdCard(String idCard) {
 		this.idCard = idCard;
 	}
-	public String getPhotoStatus() {
-		return photoStatus;
-	}
-	public void setPhotoStatus(String photoStatus) {
-		this.photoStatus = photoStatus;
-	}
+	
 	public String getPhotoPath() {
 		return photoPath;
 	}

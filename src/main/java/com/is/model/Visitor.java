@@ -4,13 +4,14 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 
 @Entity(name = "Visitor")
 @Table(name = "visitor")
@@ -23,11 +24,11 @@ public class Visitor implements CloudEntity {
 
 	@Id
 	@Column(name = "id")
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int id;
+	private String id;
 	
 	@JoinColumn(name = "visitor_id")
 	@ManyToOne
+	@NotFound(action=NotFoundAction.IGNORE)  
 	private VisitorInfo visitorInfo;
 	
 	@Column(name = "start_time")
@@ -62,11 +63,11 @@ public class Visitor implements CloudEntity {
 		return employeeName;
 	}
 
-	public int getId() {
+	public String getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 

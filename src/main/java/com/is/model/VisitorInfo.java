@@ -42,6 +42,17 @@ public class VisitorInfo {
 	
 	@Column(name = "birth")
 	private String birth;
+	
+	@Column(name = "template_path")
+	private String templatePath;
+	
+	public String getTemplatePath() {
+		return templatePath;
+	}
+	
+	public void setTemplatePath(String templatePath) {
+		this.templatePath = templatePath;
+	}
 
 	public String getDeviceId() {
 		return deviceId;
