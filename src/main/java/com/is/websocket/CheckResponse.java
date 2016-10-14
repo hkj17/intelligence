@@ -1,5 +1,8 @@
 package com.is.websocket;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -50,6 +53,42 @@ public class CheckResponse extends Thread {
 			e.printStackTrace();
 		} finally {
 			FutureMap.removeFutureMap(name);
+		}
+	}
+	
+	public void roll(String methodName,Object[] params){
+		try {
+			Class<?> c = Class.forName("com.is.websocket.ServiceDistribution");
+			Object obj = c.newInstance();
+			Class[] cla = new Class[params.length];
+			Arrays.fill(cla, String.class);
+			Method method = c.getMethod(methodName, cla);
+			method.invoke(obj , params);
+			
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (NoSuchMethodException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 

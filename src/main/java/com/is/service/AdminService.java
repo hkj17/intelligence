@@ -120,6 +120,8 @@ public class AdminService {
 		employee.setAddress(address);
 		employee.setEmail(email);
 		employee.setWorkPos(workPos);
+		
+		department="77fc5ea8-955c-46d9-a5f3-d492c308e5ab";
 		if (null != department) {
 			Department depart = intelligenceDao.getDepartmentById(department);
 			employee.setDepartment(depart);
