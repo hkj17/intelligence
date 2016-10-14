@@ -21,6 +21,7 @@ public class ParameterKeys {
 	public static final String WECHAT="wechat";
 	public static final String COMPANY="company";
 	public static final String COMPANY_NAME="companyName";
+	public static final String GRADE="grade";
 	public static final String CONTENT="content";
 	public static final String START_TIME="startTime";
 	public static final String END_TIME="endTime";
@@ -41,12 +42,12 @@ public class ParameterKeys {
 	public static final String PHOTO_PATH="photoPath";
 	public static final String EMPLOYEE_NAME="employeeName";
 	public static final String DEPARTMENT="department";
-	public static final String DEVICE_ID="deviceId";
+	//public static final String DEVICE_ID="deviceId";
 	public static final String FACE_PHOTO_PATH="/cloudweb/server/tomcat_intel/webapps/face_photo/";
 	//public static final String FACE_PHOTO_PATH="E:\\complete\\";
 	
 	public static final String CLOCK_PHOTO_PATH="/cloudweb/server/tomcat_intel/webapps/clock_img/";
 	public static final String EMPLOYEE_TEMPLATE="/cloudweb/server/tomcat_intel/webapps/template_photo/employee_template/";
 	public static final String VISITOR_TEMPLATE="/cloudweb/server/tomcat_intel/webapps/template_photo/visitor_template/";
-
+	public static final String STRANGER_PHOTO="/cloudweb/server/tomcat_intel/webapps/template_photo/stranger_photo/";
 }

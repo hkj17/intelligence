@@ -4,46 +4,41 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import com.is.map.ChannelNameToDeviceMap;
 import com.is.map.DeviceService;
 import com.is.map.FutureMap;
 
 import io.netty.channel.ChannelHandlerContext;
 
-public class CheckResponse extends Thread{
+public class CheckResponse extends Thread {
 
-	
 	private String deviceId;
 	private String text;
-	
-	public CheckResponse(String deviceId,String text){
-		this.deviceId=deviceId;
-		this.text=text;
+	private SyncFuture<String> future;
+
+	public CheckResponse(String deviceId, String text, SyncFuture<String> future) {
+		this.deviceId = deviceId;
+		this.text = text;
+		this.future = future;
 	}
-	
+
 	@Override
-	public void run(){
-		SyncFuture<String> future=new SyncFuture<>();
-		 ChannelHandlerContext ctx=DeviceService.getSocketMap(deviceId);
-		 if(ctx==null){
-			 return;
-		 }
-		 String name=ctx.name();
-		 FutureMap.addFuture(name, future);
-		 try {
-			String node=future.get(6, TimeUnit.SECONDS);
-			if(!node.equals(text) || node==null){
+	public void run() {
+		ChannelHandlerContext ctx = DeviceService.getSocketMap(deviceId);
+		if(ctx==null){
+			return;
+		}
+		String name = ctx.name();
+		try {
+			if (future == null) {
+				return;
+			}
+			String node = future.get(6, TimeUnit.SECONDS);
+			if (!text.equals(node) || node == null) {
 				System.out.println("connection break!");
 				ctx.close();
-				if (DeviceService.getSocketMap(deviceId) != null) {
-					DeviceService.removeSocketMap(deviceId);
-				}
-				if(ChannelNameToDeviceMap.getDeviceMap(name)!=null){
-					ChannelNameToDeviceMap.removeDeviceMap(name);
-				}
 			}
-			
-			System.out.println("node:"+node);
+
+			System.out.println("node:" + node);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -53,10 +48,9 @@ public class CheckResponse extends Thread{
 		} catch (TimeoutException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-		 finally {
-			 FutureMap.removeFutureMap(name);
+		} finally {
+			FutureMap.removeFutureMap(name);
 		}
 	}
-	
+
 }

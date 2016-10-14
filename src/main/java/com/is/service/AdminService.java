@@ -22,8 +22,10 @@ import com.is.model.Employee;
 import com.is.model.Message;
 import com.is.system.dao.CloudDao;
 import com.is.system.dao.IntelligenceDao;
+import com.is.websocket.AddFuture;
 import com.is.websocket.CheckResponse;
 import com.is.websocket.ServiceDistribution;
+import com.is.websocket.SyncFuture;
 
 import net.sourceforge.pinyin4j.PinyinHelper;
 import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
@@ -131,13 +133,17 @@ public class AdminService {
 		Company company=intelligenceDao.getCompanyByDeviceId(deviceId);
 		employee.setCompany(company);
 
-		employee.setPhotoPath(photo+ ".jpg");
+		String strangerId=null;
+		if(photo!=null){
+			employee.setPhotoPath(photo);
+			strangerId=photo.substring(photo.lastIndexOf("/")+1,photo.lastIndexOf("."));
+		}
 
 		cloudDao.add(employee);
-		String strangerId=photo.substring(photo.lastIndexOf("/")+1);
-		ServiceDistribution.handleJson103_1(employeeId, strangerId, name, birth, deviceId);
-		CheckResponse response=new CheckResponse(deviceId, "103_2");
+		SyncFuture<String> future=AddFuture.setFuture(deviceId);
+		CheckResponse response=new CheckResponse(deviceId, "103_2",future);
 		response.start();
+		ServiceDistribution.handleJson103_1(employeeId, strangerId, name, birth, deviceId);
 		return employeeId;
 	}
 
@@ -150,10 +156,10 @@ public class AdminService {
 		if(admin!=null){
 			cloudDao.delete(admin);
 		}
-		
-		boolean state=ServiceDistribution.handleJson105_1(deviceId, employee.getEmployeeId());
-		CheckResponse response=new CheckResponse(deviceId, "105_2");
+		SyncFuture<String> future=AddFuture.setFuture(deviceId);
+		CheckResponse response=new CheckResponse(deviceId, "105_2",future);
 		response.start();
+		boolean state=ServiceDistribution.handleJson105_1(deviceId, employee.getEmployeeId());
 		return state;
 
 	}
@@ -172,10 +178,10 @@ public class AdminService {
 		employee.setIdCard(idCard);
 		employee.setWorkPos(workPos);
 		cloudDao.update(employee);
-		
-		boolean state = ServiceDistribution.handleJson104_1(deviceId, employeeId, name, birth);
-		CheckResponse response=new CheckResponse(deviceId, "104_2");
+		SyncFuture<String> future=AddFuture.setFuture(deviceId);
+		CheckResponse response=new CheckResponse(deviceId, "104_2",future);
 		response.start();
+		boolean state = ServiceDistribution.handleJson104_1(deviceId, employeeId, name, birth);
 		return state;
 	}
 
@@ -245,19 +251,21 @@ public class AdminService {
 	}
 
 	public Boolean excuteCollection(String deviceId) {
-		boolean state = ServiceDistribution.handleJson101_1(deviceId);
-		CheckResponse response=new CheckResponse(deviceId, "101_2");
+		SyncFuture<String> future=AddFuture.setFuture(deviceId);
+		CheckResponse response=new CheckResponse(deviceId, "101_2",future);
 		response.start();
+		boolean state = ServiceDistribution.handleJson101_1(deviceId);
 		return state;
 	}
 
 	public String completeCollection(String deviceId) {
+		SyncFuture<String> future=AddFuture.setFuture(deviceId);
+		CheckResponse response=new CheckResponse(deviceId, "102_2",future);
+		response.start();
 		//String path="/cloudweb/server/tomcat_intel/webapps/employee_img/1.jpg";
 		String path = PhotoMap.getMap(deviceId);
 		PhotoMap.removeMap(deviceId);
 		ServiceDistribution.handleJson102_1(deviceId);
-		CheckResponse response=new CheckResponse(deviceId, "102_2");
-		response.start();
 		return path;
 	}
 
@@ -383,13 +391,15 @@ public class AdminService {
 
 	public void test() {
 		List<Employee> list = intelligenceDao.getEmployeeList();
+		int i=0;
 		for (Employee employee : list) {
-			String photo = employee.getPhotoPath().substring(employee.getPhotoPath().lastIndexOf("/") + 1);
-			photo = "/cloudweb/server/tomcat_intel/webapps/employee_img/" + photo;
-			// photo.replaceAll("tomcat_zcl", "tomcat_intel");
-			// photo.replace("tomcat_zcl", "tomcat_intel");
-			employee.setPhotoPath(photo);
+			List<Department> departments=intelligenceDao.getDepartmentByCompany("3");
+			if(i>12){
+				i=0;
+			}
+			employee.setDepartment(departments.get(i));
 			cloudDao.update(employee);
+			i++;
 		}
 	}
 	

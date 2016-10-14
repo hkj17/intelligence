@@ -33,7 +33,7 @@ public class ClockRecord {
 	private String state;
 	
 	@Transient
-	private String name;
+	private String employeeName;
 	
 	@Transient
 	private String jobId;
@@ -41,17 +41,14 @@ public class ClockRecord {
 	@Transient
 	private String department;
 	
-	
-	
-
-	
-	
-	public String getName() {
-		return name;
+	public void setEmployeeName(String employeeName) {
+		this.employeeName = employeeName;
 	}
-	public void setName(String name) {
-		this.name = name;
+	
+	public String getEmployeeName() {
+		return employeeName;
 	}
+	
 	public String getJobId() {
 		return jobId;
 	}

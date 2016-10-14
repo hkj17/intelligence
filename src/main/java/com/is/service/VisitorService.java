@@ -13,8 +13,10 @@ import com.is.model.Visitor;
 import com.is.model.VisitorInfo;
 import com.is.system.dao.CloudDao;
 import com.is.system.dao.IntelligenceDao;
+import com.is.websocket.AddFuture;
 import com.is.websocket.CheckResponse;
 import com.is.websocket.ServiceDistribution;
+import com.is.websocket.SyncFuture;
 
 @Transactional
 @Component("visitorService")
@@ -43,13 +45,13 @@ public class VisitorService {
 		info.setCompanyUrl(companyUrl);
 		info.setImportance(Integer.parseInt(importance));
 		info.setBirth(birth);
-		info.setPhotoPath(path+".jpg");
+		info.setPhotoPath(path);
 		cloudDao.add(info);
-		
-		String strangerId=path==null?null:path.substring(path.lastIndexOf("/")+1);
-		ServiceDistribution.handleJson103_11(id, strangerId, name, company,position,birth, deviceId);
-		CheckResponse response=new CheckResponse(deviceId, "103_12");
+		String strangerId=path==null?null:path.substring(path.lastIndexOf("/")+1,path.lastIndexOf("."));
+		SyncFuture<String> future=AddFuture.setFuture(deviceId);
+		CheckResponse response=new CheckResponse(deviceId, "103_12",future);
 		response.start();
+		ServiceDistribution.handleJson103_11(id, strangerId, name, company,position,birth, deviceId);
 		return id;
 	}
 	
@@ -64,10 +66,10 @@ public class VisitorService {
 		visitorInfo.setImportance(Integer.parseInt(importance));
 		visitorInfo.setBirth(birth);
 		cloudDao.update(visitorInfo);
-		
-		ServiceDistribution.handleJson104_11(deviceId, id, name, company, position, telphone, email, importance, birth);
-		CheckResponse response=new CheckResponse(deviceId, "104_12");
+		SyncFuture<String> future=AddFuture.setFuture(deviceId);
+		CheckResponse response=new CheckResponse(deviceId, "104_12",future);
 		response.start();
+		ServiceDistribution.handleJson104_11(deviceId, id, name, company, position, telphone, email, importance, birth);	
 		return true;
 		
 	}
@@ -94,10 +96,10 @@ public class VisitorService {
 		if(visitorInfo!=null){
 			cloudDao.delete(visitorInfo);
 		}
-		
-		boolean state=ServiceDistribution.handleJson105_11(deviceId,visitorId);
-		CheckResponse response=new CheckResponse(deviceId, "105_12");
+		SyncFuture<String> future=AddFuture.setFuture(deviceId);
+		CheckResponse response=new CheckResponse(deviceId, "105_12",future);
 		response.start();
+		boolean state=ServiceDistribution.handleJson105_11(deviceId,visitorId);
 		return state;
 	}
 	

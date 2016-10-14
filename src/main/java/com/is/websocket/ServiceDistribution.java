@@ -2,13 +2,16 @@ package com.is.websocket;
 
 import static com.is.constant.ParameterKeys.CLOCK_PHOTO_PATH;
 import static com.is.constant.ParameterKeys.EMPLOYEE_TEMPLATE;
-import static com.is.constant.ParameterKeys.VISITOR_TEMPLATE;
 import static com.is.constant.ParameterKeys.FACE_PHOTO_PATH;
+import static com.is.constant.ParameterKeys.VISITOR_TEMPLATE;
+import static com.is.constant.ParameterKeys.STRANGER_PHOTO;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.UUID;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -18,7 +21,6 @@ import org.springframework.stereotype.Component;
 import com.is.map.ChannelNameToDeviceMap;
 import com.is.map.DeviceService;
 import com.is.map.PhotoMap;
-import com.is.model.Employee;
 import com.is.service.AdminService;
 import com.is.service.ClockService;
 import com.is.service.EmployeeService;
@@ -27,7 +29,6 @@ import com.is.service.VisitorService;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
-import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import sun.misc.BASE64Decoder;
 
@@ -53,7 +54,15 @@ public class ServiceDistribution implements ApplicationContextAware {
 		if (DeviceService.getSocketMap(devcieSn) == null) {
 			DeviceService.addSocketMap(devcieSn, socketChannel);
 		}
+		else{
+			DeviceService.removeSocketMap(devcieSn);
+			DeviceService.addSocketMap(devcieSn, socketChannel);
+		}
 		if(ChannelNameToDeviceMap.getDeviceMap(socketChannel.name())==null){
+			ChannelNameToDeviceMap.addDeviceMap(socketChannel.name(), devcieSn);
+		}
+		else{
+			ChannelNameToDeviceMap.removeDeviceMap(socketChannel.name());
 			ChannelNameToDeviceMap.addDeviceMap(socketChannel.name(), devcieSn);
 		}
 		JSONObject responseCode = new JSONObject();
@@ -110,26 +119,33 @@ public class ServiceDistribution implements ApplicationContextAware {
 		return responseCode;
 		
 	}
+	
+	public static JSONObject handleJson100_100() {	
+		JSONObject responseCode = new JSONObject();
+		responseCode.put("type", 100);
+		responseCode.put("code", 100);
+		return responseCode;
+	}
 
 	public static boolean handleJson101_1(String deviceId) {
 		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
 		JSONObject jsonObject = new JSONObject();
-		jsonObject.put("type", "101");
-		jsonObject.put("code", "1");
+		jsonObject.put("type", 101);
+		jsonObject.put("code", 1);
 		byte[] result = SocketService.responseByte(jsonObject, "101", "1");
 		if (null != channel) {
-			ByteBuf encoded = Unpooled.buffer();
-			encoded.writeBytes(result);
-			channel.write(encoded);
-			channel.flush();
+			excuteWrite(result, channel);
 			return true;
 		} else
 			return false;
 	}
 
 	public static JSONObject handleJson3_21(JSONObject jsonObject,ChannelHandlerContext ctx) {
-		String photo = jsonObject.getString("photo").substring(23);
-		String id = jsonObject.getString("strangerId");
+		String photo = jsonObject.getString("photo");
+		if(photo.startsWith("data")){
+			photo = photo.substring(photo.indexOf(",")+1);
+		}
+		String id =jsonObject.getString("strangerId");
 		String deviceId = ChannelNameToDeviceMap.getDeviceMap(ctx.name());
 		String path = FACE_PHOTO_PATH + deviceId;
 		if (!(new File(path).isDirectory())) {
@@ -141,8 +157,32 @@ public class ServiceDistribution implements ApplicationContextAware {
 			PhotoMap.addMap(deviceId, path);
 		}
 		JSONObject response = new JSONObject();
-		response.put("type", "3");
-		response.put("code", "22");
+		response.put("type", 3);
+		response.put("code", 22);
+		response.put("strangerId",id);
+		return response;
+	}
+	
+	public static JSONObject handleJson3_23(JSONObject jsonObject,ChannelHandlerContext ctx) {
+		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+		String photo = jsonObject.getString("photo");
+		if(photo.startsWith("data")){
+			photo = photo.substring(photo.indexOf(",")+1);
+		}
+		String id = jsonObject.getString("strangerId");
+		String deviceId = ChannelNameToDeviceMap.getDeviceMap(ctx.name());
+		String path = STRANGER_PHOTO + deviceId+"/"+sdf.format(new Date());
+		if (!(new File(path).isDirectory())) {
+			new File(path).mkdirs();
+		}
+		path=path+"/"+id+".jpg";
+		boolean state=GenerateImage(photo, path);
+		if(state && PhotoMap.getMap(deviceId)==null){
+			PhotoMap.addMap(deviceId, path);
+		}
+		JSONObject response = new JSONObject();
+		response.put("type", 3);
+		response.put("code", 24);
 		response.put("strangerId", id);
 		return response;
 	}
@@ -150,32 +190,26 @@ public class ServiceDistribution implements ApplicationContextAware {
 	public static void handleJson102_1(String deviceId) {
 		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
 		JSONObject jsonObject = new JSONObject();
-		jsonObject.put("type", "102");
-		jsonObject.put("code", "1");
+		jsonObject.put("type", 102);
+		jsonObject.put("code", 1);
 		byte[] result = SocketService.responseByte(jsonObject, "102", "1");
 		if (null != channel) {
-			ByteBuf encoded = Unpooled.buffer();
-			encoded.writeBytes(result);
-			channel.write(encoded);
-			channel.flush();
+			excuteWrite(result, channel);
 		} 
 	}
 
 	public static Boolean handleJson103_1(String employeeId,String strangerId,String employeeName,String birth,String deviceId) {
 		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
 		JSONObject jsonObject = new JSONObject();
-		jsonObject.put("type", "103");
-		jsonObject.put("code", "1");
+		jsonObject.put("type", 103);
+		jsonObject.put("code", 1);
 		jsonObject.put("employeeId", employeeId);
 		jsonObject.put("strangerId", strangerId);
 		jsonObject.put("employeeName", employeeName);
 		jsonObject.put("birth", birth);
 		byte[] result = SocketService.responseByte(jsonObject, "103", "1");
 		if (null != channel) {
-			ByteBuf encoded = Unpooled.buffer();
-			encoded.writeBytes(result);
-			channel.write(encoded);
-			channel.flush();
+			excuteWrite(result, channel);
 			return true;
 		} 
 		else {
@@ -186,8 +220,8 @@ public class ServiceDistribution implements ApplicationContextAware {
 	public static Boolean handleJson103_11(String visitorId,String strangerId,String visitorName,String company,String position,String birth,String deviceId) {
 		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
 		JSONObject jsonObject = new JSONObject();
-		jsonObject.put("type", "103");
-		jsonObject.put("code", "11");
+		jsonObject.put("type", 103);
+		jsonObject.put("code", 11);
 		jsonObject.put("visitorId", visitorId);
 		jsonObject.put("strangerId", strangerId);
 		jsonObject.put("visitorName", visitorName);
@@ -196,10 +230,7 @@ public class ServiceDistribution implements ApplicationContextAware {
 		jsonObject.put("birth", birth);
 		byte[] result = SocketService.responseByte(jsonObject, "103", "11");
 		if (null != channel) {
-			ByteBuf encoded = Unpooled.buffer();
-			encoded.writeBytes(result);
-			channel.write(encoded);
-			channel.flush();
+			excuteWrite(result, channel);
 			return true;
 		} 
 		else {
@@ -210,16 +241,13 @@ public class ServiceDistribution implements ApplicationContextAware {
 	public static boolean handleJson111_1(String deviceId,String employeeId,String time) {
 		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
 		JSONObject jsonObject = new JSONObject();
-		jsonObject.put("type", "111");
-		jsonObject.put("code", "1");
+		jsonObject.put("type", 111);
+		jsonObject.put("code", 1);
 		jsonObject.put("employeeId", employeeId);
 		jsonObject.put("time", time);
 		byte[] result = SocketService.responseByte(jsonObject, "111", "1");
 		if (null != channel) {
-			ByteBuf encoded = Unpooled.buffer();
-			encoded.writeBytes(result);
-			channel.write(encoded);
-			channel.flush();
+			excuteWrite(result, channel);
 			return true;
 		} 
 		else {
@@ -250,8 +278,8 @@ public class ServiceDistribution implements ApplicationContextAware {
 			String telphone,String email,String importance,String birth){
 		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
 		JSONObject jsonObject = new JSONObject();
-		jsonObject.put("type", "104");
-		jsonObject.put("code", "11");
+		jsonObject.put("type", 104);
+		jsonObject.put("code", 11);
 		jsonObject.put("visitorId", id);
 		jsonObject.put("visitorName", name);
 		jsonObject.put("birth", birth);
@@ -262,10 +290,7 @@ public class ServiceDistribution implements ApplicationContextAware {
 		jsonObject.put("email", email);
 		byte[] result = SocketService.responseByte(jsonObject, "104", "11");
 		if (null != channel) {
-			ByteBuf encoded = Unpooled.buffer();
-			encoded.writeBytes(result);
-			channel.write(encoded);
-			channel.flush();
+			excuteWrite(result, channel);
 			return true;
 		} 
 		else {
@@ -276,17 +301,14 @@ public class ServiceDistribution implements ApplicationContextAware {
 	public static Boolean handleJson104_1(String deviceId,String employeeId, String name, String birth){
 		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
 		JSONObject jsonObject = new JSONObject();
-		jsonObject.put("type", "104");
-		jsonObject.put("code", "1");
+		jsonObject.put("type", 104);
+		jsonObject.put("code", 1);
 		jsonObject.put("employeeId", employeeId);
 		jsonObject.put("employeeName", name);
 		jsonObject.put("birth", birth);
 		byte[] result = SocketService.responseByte(jsonObject, "104", "1");
 		if (null != channel) {
-			ByteBuf encoded = Unpooled.buffer();
-			encoded.writeBytes(result);
-			channel.write(encoded);
-			channel.flush();
+			excuteWrite(result, channel);
 			return true;
 		} 
 		else {
@@ -297,15 +319,12 @@ public class ServiceDistribution implements ApplicationContextAware {
 	public static Boolean handleJson105_1(String deviceId,String employeeId){
 		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
 		JSONObject jsonObject = new JSONObject();
-		jsonObject.put("type", "105");
-		jsonObject.put("code", "1");
+		jsonObject.put("type", 105);
+		jsonObject.put("code", 1);
 		jsonObject.put("employeeId", employeeId);
 		byte[] result = SocketService.responseByte(jsonObject, "105", "1");
 		if (null != channel) {
-			ByteBuf encoded = Unpooled.buffer();
-			encoded.writeBytes(result);
-			channel.write(encoded);
-			channel.flush();
+			excuteWrite(result, channel);
 			return true;
 		} 
 		else {
@@ -316,15 +335,12 @@ public class ServiceDistribution implements ApplicationContextAware {
 	public static Boolean handleJson105_11(String deviceId,String visitorId){
 		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
 		JSONObject jsonObject = new JSONObject();
-		jsonObject.put("type", "105");
-		jsonObject.put("code", "11");
+		jsonObject.put("type", 105);
+		jsonObject.put("code", 11);
 		jsonObject.put("visitorId", visitorId);
 		byte[] result = SocketService.responseByte(jsonObject, "105", "11");
 		if (null != channel) {
-			ByteBuf encoded = Unpooled.buffer();
-			encoded.writeBytes(result);
-			channel.write(encoded);
-			channel.flush();
+			excuteWrite(result, channel);
 			return true;
 		} 
 		else {
@@ -335,15 +351,12 @@ public class ServiceDistribution implements ApplicationContextAware {
 	public static Boolean handleJson109_1(String employeeId,ChannelHandlerContext channel) {
 		//ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
 		JSONObject jsonObject = new JSONObject();
-		jsonObject.put("type", "109");
-		jsonObject.put("code", "1");
+		jsonObject.put("type", 109);
+		jsonObject.put("code", 1);
 		jsonObject.put("employeeId", employeeId);
 		byte[] result = SocketService.responseByte(jsonObject, "109", "1");
 		if (null != channel) {
-			ByteBuf encoded = Unpooled.buffer();
-			encoded.writeBytes(result);
-			channel.write(encoded);
-			channel.flush();
+			excuteWrite(result, channel);
 			return true;
 		} 
 		else {
@@ -354,15 +367,12 @@ public class ServiceDistribution implements ApplicationContextAware {
 	public static Boolean handleJson109_11(String visitorId,ChannelHandlerContext channel) {
 		//ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
 		JSONObject jsonObject = new JSONObject();
-		jsonObject.put("type", "109");
-		jsonObject.put("code", "11");
+		jsonObject.put("type", 109);
+		jsonObject.put("code", 11);
 		jsonObject.put("visitorId", visitorId);
 		byte[] result = SocketService.responseByte(jsonObject, "109", "11");
 		if (null != channel) {
-			ByteBuf encoded = Unpooled.buffer();
-			encoded.writeBytes(result);
-			channel.write(encoded);
-			channel.flush();
+			excuteWrite(result, channel);
 			return true;
 		} 
 		else {
@@ -424,7 +434,7 @@ public class ServiceDistribution implements ApplicationContextAware {
 					b[i] += 256;
 				}
 			}
-			OutputStream out = new FileOutputStream(path);
+			OutputStream out = new FileOutputStream(new File(path));
 			out.write(b);
 			out.flush();
 			out.close();
@@ -432,5 +442,13 @@ public class ServiceDistribution implements ApplicationContextAware {
 		} catch (Exception e) {
 			return false;
 		}
+	}
+	
+	public static void excuteWrite(byte[] responseMsg,ChannelHandlerContext socketChannel){
+		ByteBuf encoded = Unpooled.buffer();
+		encoded.writeBytes(responseMsg);
+		//System.out.println(encoded.getByte(0));
+		socketChannel.write(encoded);
+		socketChannel.flush();
 	}
 }

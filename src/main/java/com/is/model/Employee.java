@@ -7,6 +7,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
+
 @Entity(name = "Employee")
 @Table(name = "employee")
 public class Employee {
@@ -35,10 +38,12 @@ public class Employee {
 	
 	@ManyToOne
 	@JoinColumn(name = "admin_id")
+	@NotFound(action=NotFoundAction.IGNORE) 
 	private Admin admin;
 	
 	@ManyToOne
 	@JoinColumn(name = "company_id")
+	@NotFound(action=NotFoundAction.IGNORE) 
 	private Company company;
 
 	
@@ -75,6 +80,7 @@ public class Employee {
 	
 	@ManyToOne
 	@JoinColumn(name="department_id")
+	@NotFound(action=NotFoundAction.IGNORE)  
 	private Department department;
 	
 	public void setTemplatePath(String templatePath) {

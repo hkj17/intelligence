@@ -1,15 +1,15 @@
 package com.is.rest;
 
-import static com.is.constant.ParameterKeys.COMPANY_NAME;
-import static com.is.constant.ParameterKeys.DEVICE_ID;
 import static com.is.constant.ParameterKeys.ADDRESS;
-import static com.is.constant.ParameterKeys.START_TIME;
+import static com.is.constant.ParameterKeys.COMPANY_ID;
+import static com.is.constant.ParameterKeys.COMPANY_NAME;
+import static com.is.constant.ParameterKeys.CONTACT;
 import static com.is.constant.ParameterKeys.END_TIME;
+import static com.is.constant.ParameterKeys.GRADE;
+import static com.is.constant.ParameterKeys.NAME;
+import static com.is.constant.ParameterKeys.START_TIME;
 import static com.is.constant.ParameterKeys.USER_NAME;
 import static com.is.constant.ParameterKeys.USER_PSW;
-import static com.is.constant.ParameterKeys.NAME;
-import static com.is.constant.ParameterKeys.CONTACT;
-import static com.is.constant.ParameterKeys.COMPANY_ID;
 
 import java.util.List;
 import java.util.Map;
@@ -66,7 +66,8 @@ public class CompanyHandle {
 	@Path("/deleteCompany")
 	public Response deleteCompany(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams){
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
-		boolean state=companyService.deleteCompany(requestMap.get(DEVICE_ID),requestMap.get(COMPANY_ID));
+		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		boolean state=companyService.deleteCompany(deviceId,requestMap.get(COMPANY_ID));
 		if(state){
 			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
 		}else{
@@ -79,6 +80,59 @@ public class CompanyHandle {
 	public Response getDepartmentByCompany(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams){
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		List<Department> list=companyService.getDepartmentByCompany(requestMap.get(COMPANY_ID));
+		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, list);
+	}
+	
+	
+	@POST
+	@Path("/getDepartmentByGrade")
+	public Response getDepartmentByGrade(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams){
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		List<Department> list=companyService.getDepartmentByGrade(requestMap.get(COMPANY_ID),requestMap.get(GRADE));
+		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, list);
+	}
+	
+	@POST
+	@Path("/insertDepartment")
+	public Response insertDepartment(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams){
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		boolean state=companyService.insertDepartment(requestMap.get("name"), requestMap.get("people"), requestMap.get("grade"), requestMap.get("parentId"), requestMap.get("companyId"));
+		if(state){
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
+		}else{
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.REQUEST_FAIL, null);
+		}
+	}
+	
+	@POST
+	@Path("/editDepartment")
+	public Response editDepartment(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams){
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		boolean state=companyService.editDepartment(requestMap.get("name"), requestMap.get("people"), requestMap.get("grade"), requestMap.get("parentId"), requestMap.get("departmentId"));
+		if(state){
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
+		}else{
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.REQUEST_FAIL, null);
+		}
+	}
+	
+	@POST
+	@Path("/deleteDepartment")
+	public Response deleteDepartment(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams){
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		boolean state=companyService.deleteDepartment(requestMap.get("departmentId"));
+		if(state){
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
+		}else{
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.REQUEST_FAIL, null);
+		}
+	}
+	
+	@POST
+	@Path("/getDepartmentOrganization")
+	public Response getDepartmentOrganization(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams){
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		Map<String, String> list=companyService.getDepartmentOrganization(requestMap.get("departmentId"),requestMap.get("grade"));
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, list);
 	}
 	

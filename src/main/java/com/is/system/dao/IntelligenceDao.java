@@ -1,9 +1,11 @@
 package com.is.system.dao;
 
 import java.util.List;
+import java.util.Map;
 
 import com.is.model.Admin;
 import com.is.model.Appointment;
+import com.is.model.ClockAppeal;
 import com.is.model.ClockTime;
 import com.is.model.ClockRecord;
 import com.is.model.Company;
@@ -46,6 +48,11 @@ public interface IntelligenceDao {
 	
 	public ClockRecord getClockByNc(int id,String nightClock);
 	
+	public List<ClockAppeal> getClockTimeAppealByEmployee(String employeeId);
+	
+	public List<ClockAppeal> getClockAuditList(String auditId);
+	
+	public ClockAppeal getClockAppealById(String id);
 	
 	public Admin getAdminById(String id);
 	
@@ -80,5 +87,9 @@ public interface IntelligenceDao {
 	public Visitor getVisitorById(String id);
 	
 	public List<Employee> getAuditPersonList(String deviceId);
+	
+	public List<Department> getDepartmentByGrade(String companyId,int grade);
+	
+	public Map<String, String> getDepartmentOrganization(String departmentId,String grade);
 	
 }

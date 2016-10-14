@@ -1,5 +1,7 @@
 package com.is.dao.impl;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,12 +10,14 @@ import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.transform.Transformers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.is.constant.Hql;
 import com.is.model.Admin;
 import com.is.model.Appointment;
+import com.is.model.ClockAppeal;
 import com.is.model.ClockTime;
 import com.is.model.ClockRecord;
 import com.is.model.Company;
@@ -74,46 +78,44 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 	
 	@Override
 	public List<ClockRecord> getClockList(){
-		Query query=getSession().createSQLQuery("SELECT a.*,b.employee_name as name,b.job_id as jobId,b.department_id as department from clockrecord a LEFT JOIN employee b on b.employee_id=a.employee_id where a.employee_id is not null");
-		List<ClockRecord> list=((SQLQuery) query).addEntity(ClockRecord.class).list();
-		return list;
+		return cloudDao.findByHql(Hql.GET_CLOCK_LIST);
 	}
 	
 	@Override
 	public List<ClockRecord> getClockByWhere(String department,String user,String startClock,String endClock,String rule){
-		String sql="select clock.*,b.employee_name as name,b.job_id as jobId,b.department_id as department from clockrecord clock,employee b where clock.employee_id=b.employee_id";
+		String sql="select clock,b.employeeName,b.jobId,b.department.department from ClockRecord clock,Employee b where clock.employeeId=b.employeeId";
 		Map<Integer, String> map=new HashMap<>();
 		int i=0;
-		if(!user.equals("") && !user.equals(null)){
-			sql=sql+" and (b.pingyin like ? or b.pingyin like ? or b.employee_name like ?)";
+		if(user!=null){
+			sql=sql+" and (b.pingyin like ? or b.pingyin like ? or b.employeeName like ?)";
 			map.put(i, user + '%');
 			map.put(i+1, '%' +","+ user + '%');
 			map.put(i+2, '%' + user + '%');
 			i=i+3;
 		}
 		if(startClock!=null){
-			sql+=" and clock.start_clock>=?";
+			sql+=" and clock.startClock>=?";
 			map.put(i, startClock);
 			i=i+1;
 		}
 		if(department!=null){
-			sql+=" and b.department_id=?";
+			sql+=" and b.department.id=?";
 			map.put(i, department);
 			i=i+1;
 		}
 		if(endClock!=null){
-			sql+=" and clock.end_clock<=?";
+			sql+=" and clock.endClock<=?";
 			map.put(i, endClock);
 		}
 		if("1".equals(rule)){
 			sql+=" and clock.state!=0";
 		}
 
-		Query query = getSession().createSQLQuery(sql);
+		Query query = getSession().createQuery(sql);
 		for(int p=0;p<map.size();p++){
 			query.setParameter(p, map.get(p));
 		}
-		return ((SQLQuery) query).addEntity(ClockRecord.class).list();
+		return query.list();
 	}
 	
 	@Override
@@ -228,9 +230,7 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 	
 	@Override
 	public List<ClockRecord> getClockByEmployee(String id){
-		Query query=getSession().createSQLQuery("SELECT a.*,b.employee_name as name,b.job_id as jobId,b.department_id as department from clockrecord a,employee b where b.employee_id=a.employee_id and a.employee_id='"+id+"'");
-		List<ClockRecord> list=((SQLQuery) query).addEntity(ClockRecord.class).list();
-		return list;
+		return cloudDao.findByHql(Hql.GET_CLOCK_BY_EMPLOYEE, id);
 	}
 	
 	@Override
@@ -245,36 +245,48 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 	
 	@Override
 	public List<Visitor> indexVisitor(String depaertmentId,String name,String startTime,String endTime){
-		String sql="select a.*,b.employee_name as employeeName from visitor a LEFT JOIN employee b on a.employee_id=b.employee_id where a.employee_id is not null";
-		Map<Integer, String> map=new HashMap<>();
+		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+		
+		String sql="select a,b.employeeName from Visitor a,Employee b where a.employeeId=b.employeeId ";
+		Map<Integer, Object> map=new HashMap<>();
 		int i=0;
 		if(depaertmentId!=null){
-			sql=sql+" and b.department_id=?";
+			sql=sql+" and b.department.id=?";
 			map.put(i, depaertmentId);
 			i=i+1;
 		}
 		if(name!=null){
-			sql+=" and (b.pingyin like ? or b.pingyin like ? or b.employee_name like ?)";
+			sql+=" and (b.pingyin like ? or b.pingyin like ? or b.employeeName like ?)";
 			map.put(i, name+"%");
 			map.put(i+1, "%" +","+name + "%");
 			map.put(i+2, "%"+name + "%");
 			i=i+3;
 		}
 		if(startTime!=null){
-			sql+=" and a.start_time>=?";
-			map.put(i, startTime);
+			sql+=" and a.startTime>=?";
+			try {
+				map.put(i, sdf.parse(startTime));
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			i=i+1;
 		}
 		if(endTime!=null){
-			sql+=" and a.end_time<=?";
-			map.put(i, endTime);
+			sql+=" and a.endTime<=?";
+			try {
+				map.put(i, sdf.parse(endTime));
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		
-		Query query = getSession().createSQLQuery(sql);
+		Query query = getSession().createQuery(sql);
 		for(int p=0;p<map.size();p++){
 			query.setParameter(p, map.get(p));
 		}
-		List<Visitor> list=((SQLQuery) query).addEntity(Visitor.class).list();
+		List<Visitor> list=query.list();
 		return list;
 	}
 	
@@ -330,6 +342,51 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 		Query query=getSession().createSQLQuery("select a.* from employee a LEFT JOIN admin b on b.admin_id=a.admin_id where b.device_id='"+deviceId+"' and b.audit_auth=1");
 		List<Employee> list=((SQLQuery) query).addEntity(Employee.class).list();
 		return list;
+	}
+
+	@Override
+	public List<Department> getDepartmentByGrade(String companyId, int grade) {
+		return cloudDao.findByHql(Hql.GET_DEPARTMENT_BY_GRADE, companyId,grade);
+	}
+
+	@Override
+	public List<ClockAppeal> getClockTimeAppealByEmployee(String employeeId) {
+		// TODO Auto-generated method stub
+		return cloudDao.findByHql(Hql.GET_CLOCK_APPEAL_BY_EMPLOYEE, employeeId);
+	}
+
+	@Override
+	public ClockAppeal getClockAppealById(String id) {
+		// TODO Auto-generated method stub
+		return (ClockAppeal) cloudDao.getByHql(Hql.GET_CLOCK_APPEAL_BY_ID, id);
+	}
+
+	@Override
+	public Map<String, String> getDepartmentOrganization(String departmentId,String grade) {
+		// TODO Auto-generated method stub
+		String sql=null;
+		if(grade.equals("1")){
+			sql="select a.department as one from department a where a.id='"+departmentId+"'";
+		}
+		else if(grade.equals("2")){
+			sql="select a.department as one,b.department as two from department a,department b where b.parent_id=a.id and b.id='"+departmentId+"'";
+		}
+		else if(grade.equals("3")){
+			sql="select a.department as one,b.department as two,c.department as three from department a,department b,department c where b.parent_id=a.id and c.parent_id=b.id and c.id='"+departmentId+"'";
+		}
+		else if(grade.equals("4")){
+			sql="select a.department as one,b.department as two,c.department as three,d.department as four from department a,department b,department c,department d where b.parent_id=a.id and c.parent_id=b.id and d.parent_id=c.id and d.id='"+departmentId+"'";
+		}else{
+			sql="select a.department as one,b.department as two,c.department as three,d.department as four,e.department as five from department a,department b,department c,department d,department e where b.parent_id=a.id and c.parent_id=b.id and d.parent_id=c.id and e.parent_id=d.id and e.id='"+departmentId+"'";
+		}
+		Query query=getSession().createSQLQuery(sql);
+		return (Map)query.setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP).uniqueResult();
+	}
+
+	@Override
+	public List<ClockAppeal> getClockAuditList(String auditId) {
+		// TODO Auto-generated method stub
+		return cloudDao.findByHql(Hql.GET_CLOCK_APPEAL_BY_AUDIT, auditId);
 	}
 	
 

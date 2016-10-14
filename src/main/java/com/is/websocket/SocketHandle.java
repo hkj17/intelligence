@@ -20,15 +20,15 @@ public class SocketHandle implements ApplicationListener<ContextRefreshedEvent>{
 	private static Logger logger = Logger.getLogger(SocketHandle.class);
 	
 
-	//private static final String IP = "120.26.60.164";
-	private static final String IP = "192.168.223.31";
+	private static final String IP = "120.26.60.164";
+	//private static final String IP = "192.168.223.31";
 
-	protected static final int BIZGROUPSIZE = Runtime.getRuntime().availableProcessors() * 2; // 默认
+	//protected static final int BIZGROUPSIZE = Runtime.getRuntime().availableProcessors() * 2; // 默认
 
-	protected static final int BIZTHREADSIZE = 4;
+	//protected static final int BIZTHREADSIZE = 4;
 
-	private static final EventLoopGroup bossGroup = new NioEventLoopGroup(BIZGROUPSIZE);
-	private static final EventLoopGroup workerGroup = new NioEventLoopGroup(BIZTHREADSIZE);
+	private static final EventLoopGroup bossGroup = new NioEventLoopGroup();
+	private static final EventLoopGroup workerGroup = new NioEventLoopGroup();
 
 	@SuppressWarnings("rawtypes")
 	protected static void start() throws Exception {

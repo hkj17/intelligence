@@ -11,7 +11,7 @@ public class Hql {
 	
 	public static final String GET_COMPANY_LIST = "from Company c";
 	
-	public static final String GET_CLOCK_LIST = "from ClockRecord clock";
+	public static final String GET_CLOCK_LIST = "SELECT a,b.employeeName,b.jobId,b.department.department from ClockRecord a,Employee b where b.employeeId=a.employeeId and a.employeeId is not null";
 	
 	public static final String GET_NOTIFY_LIST = "from Notification no";
 	
@@ -37,7 +37,7 @@ public class Hql {
 	
 	public static final String GET_EMPLOYEE_BY_MOBILE="select e.employeeName from Employee e where e.telphone=? limit 1";
 	
-	public static final String GET_CLOCK_BY_EMPLOYEE="from ClockRecord where employeeId=?";
+	public static final String GET_CLOCK_BY_EMPLOYEE="SELECT a,b.employeeName,b.jobId,b.department.department from ClockRecord a,Employee b where b.employeeId=a.employeeId and a.employeeId=?";
 	
 	//public static final String GET_PINGYIN_BY_NAME="from Employee where pingyin like ?%";
 	
@@ -52,6 +52,14 @@ public class Hql {
 	public static final String GET_COMPANY_BY_DEVICE_ID="from Company a where a.deviceId = ?";
 	
 	public static final String GET_VISITOR_BY_ID="from Visitor where id=?";
+	
+	public static final String GET_DEPARTMENT_BY_GRADE="from Department a where a.companyId=? and grade=?";
+	
+	public static final String GET_CLOCK_APPEAL_BY_EMPLOYEE="select a,b.employeeName,b.department.department from ClockAppeal a,Employee b where a.employeeId=b.employeeId and a.employeeId=?";
+	
+	public static final String GET_CLOCK_APPEAL_BY_AUDIT="select a,b.employeeName,b.department.department from ClockAppeal a,Employee b where a.employeeId=b.employeeId and a.auditPersonId=?";
+	
+	public static final String GET_CLOCK_APPEAL_BY_ID="from ClockAppeal where id=?";
 	
 	//public static final String GET_AUDIT_PERSON_LIST="select employeeId,employeeName,admin.auditAuth,admin.deviceId from Employee where admin.auditAuth=1 and admin.deviceId=?";
 

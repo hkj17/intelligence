@@ -33,9 +33,10 @@ public class VisitorHandler {
 	@Path("/addVisitorInfo") 
 	public Response addVisitorInfo(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		String deviceId=(String) request.getSession().getAttribute("deviceSn");
 		String id=visitorService.addVisitorInfo(requestMap.get("name"), requestMap.get("company"), 
 				requestMap.get("position"), requestMap.get("telphone"), requestMap.get("email"), 
-				requestMap.get("companyUrl"),requestMap.get("deviceId"),requestMap.get("importance"),requestMap.get("birth"),requestMap.get("path"));
+				requestMap.get("companyUrl"),deviceId,requestMap.get("importance"),requestMap.get("birth"),requestMap.get("path"));
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, id);
 		
 	}
@@ -74,7 +75,8 @@ public class VisitorHandler {
 	@Path("/updateVisitorInfo")
 	public Response updateVisitorInfo(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws ParseException{
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
-		boolean state=visitorService.updateVisitorInfo(requestMap.get("deviceId"),requestMap.get("visitorId"),requestMap.get("name"), requestMap.get("company"), 
+		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		boolean state=visitorService.updateVisitorInfo(deviceId,requestMap.get("visitorId"),requestMap.get("name"), requestMap.get("company"), 
 				requestMap.get("position"), requestMap.get("telphone"), requestMap.get("email"), 
 				requestMap.get("importance"),requestMap.get("birth"));
 		if(state){
@@ -88,7 +90,8 @@ public class VisitorHandler {
 	@Path("/deleteVisitorInfo")
 	public Response deleteVisitorInfo(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws ParseException{
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
-		boolean state=visitorService.deleteVisitorInfo(requestMap.get("deviceId"), requestMap.get("visitorId"));
+		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		boolean state=visitorService.deleteVisitorInfo(deviceId, requestMap.get("visitorId"));
 		if(state){
 			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
 		}else{

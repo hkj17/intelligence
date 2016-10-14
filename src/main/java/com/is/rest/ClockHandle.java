@@ -4,7 +4,6 @@ import static com.is.constant.ParameterKeys.CLOCK_TIME;
 import static com.is.constant.ParameterKeys.COMPANY_ID;
 import static com.is.constant.ParameterKeys.CR_ID;
 import static com.is.constant.ParameterKeys.DEPARTMENT;
-import static com.is.constant.ParameterKeys.DEVICE_ID;
 import static com.is.constant.ParameterKeys.EMPLOYEE_ID;
 import static com.is.constant.ParameterKeys.END_TIME;
 import static com.is.constant.ParameterKeys.MORNING_CLOCK;
@@ -33,8 +32,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.is.constant.ResponseCode;
-import com.is.model.ClockTime;
+import com.is.model.ClockAppeal;
 import com.is.model.ClockRecord;
+import com.is.model.ClockTime;
 import com.is.model.Employee;
 import com.is.service.ClockService;
 import com.is.util.BusinessHelper;
@@ -93,8 +93,49 @@ public class ClockHandle {
 	@Path("/clockTimeAppeal")
 	public Response clockTimeAppeal(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
-		boolean state = clockService.clockTimeAppeal(requestMap.get("deviceId"),requestMap.get("employeeId"), requestMap.get("firstClock"), requestMap.get("lastClock"), 
+		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		boolean state = clockService.clockTimeAppeal(deviceId,requestMap.get("employeeId"), requestMap.get("firstClock"), requestMap.get("lastClock"), 
 				requestMap.get("appealReason"), requestMap.get("appealContent"), requestMap.get("auditPersonId"), requestMap.get("appealTime"));
+		if (state) {
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
+		} else {
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.REQUEST_FAIL, null);
+		}
+	}
+	
+	@POST
+	@Path("/getClockTimeAppeal")
+	public Response getClockTimeAppeal(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		List<ClockAppeal> list=clockService.getClockTimeAppeal(requestMap.get(EMPLOYEE_ID));
+		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, list);
+	}
+	
+	@POST
+	@Path("/getClockAuditList")
+	public Response getClockAuditList(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		List<ClockAppeal> list=clockService.getClockAuditList(requestMap.get(EMPLOYEE_ID));
+		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, list);
+	}
+
+	@POST
+	@Path("/deleteClockTimeAppeal")
+	public Response deleteClockTimeAppeal(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		boolean state = clockService.deleteClockTimeAppeal(requestMap.get("appealId"));
+		if (state) {
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
+		} else {
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.REQUEST_FAIL, null);
+		}
+	}
+	
+	@POST
+	@Path("/handleClockAppeal")
+	public Response handleClockAppeal(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		boolean state = clockService.handleClockAppeal(requestMap.get("appealId"),requestMap.get("result"));
 		if (state) {
 			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
 		} else {
@@ -107,8 +148,8 @@ public class ClockHandle {
 	public Response addClockMobile(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams)
 			throws IOException {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
-
-		boolean state = clockService.addClockAbnormal(requestMap.get(DEVICE_ID),requestMap.get(EMPLOYEE_ID), requestMap.get(CLOCK_TIME));
+		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		boolean state = clockService.addClockAbnormal(deviceId,requestMap.get(EMPLOYEE_ID), requestMap.get(CLOCK_TIME));
 		if (state) {
 			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
 		} else {

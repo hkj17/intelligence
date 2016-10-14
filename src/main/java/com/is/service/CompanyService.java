@@ -1,6 +1,7 @@
 package com.is.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,6 +81,43 @@ public class CompanyService {
 	
 	public List<Department> getDepartmentByCompany(String company){
 		return intelligenceDao.getDepartmentByCompany(company);
+	}
+	
+	public List<Department> getDepartmentByGrade(String companyId,String grade){
+		return intelligenceDao.getDepartmentByGrade(companyId, Integer.parseInt(grade));
+	}
+	
+	public Map<String, String> getDepartmentOrganization(String departmentId,String grade){
+		return intelligenceDao.getDepartmentOrganization(departmentId,grade);
+	}
+	
+	public Boolean insertDepartment(String name,String people,String grade,String parentId,String companyId){
+		Department department=new Department();
+		String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
+		department.setId(id);
+		department.setCompanyId(companyId);
+		department.setDepartment(name);
+		department.setGrade(Integer.parseInt(grade));
+		department.setLeadingPeople(people);
+		department.setParentId(parentId);
+		cloudDao.add(department);
+		return true;
+	}
+	
+	public Boolean editDepartment(String name,String people,String grade,String parentId,String departmentId){
+		Department department=intelligenceDao.getDepartmentById(departmentId);
+		department.setDepartment(name);
+		department.setGrade(Integer.parseInt(grade));
+		department.setLeadingPeople(people);
+		department.setParentId(parentId);
+		cloudDao.update(department);
+		return true;
+	}
+	
+	public Boolean deleteDepartment(String id){
+		Department department=intelligenceDao.getDepartmentById(id);
+		cloudDao.delete(department);
+		return true;
 	}
 
 }

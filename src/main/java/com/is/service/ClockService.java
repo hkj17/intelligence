@@ -19,8 +19,10 @@ import com.is.model.Company;
 import com.is.model.Employee;
 import com.is.system.dao.CloudDao;
 import com.is.system.dao.IntelligenceDao;
+import com.is.websocket.AddFuture;
 import com.is.websocket.CheckResponse;
 import com.is.websocket.ServiceDistribution;
+import com.is.websocket.SyncFuture;
 
 /**
  * @author lishuhuan
@@ -126,7 +128,31 @@ public class ClockService {
 		clockAppeal.setDeviceId(deviceId);
 		cloudDao.add(clockAppeal);
 		return true;
+	}
+	
+	public Boolean deleteClockTimeAppeal(String appealId){
+		ClockAppeal clockAppeal=intelligenceDao.getClockAppealById(appealId);
+		cloudDao.delete(clockAppeal);
+		return true;
+	}
+	
+	public Boolean handleClockAppeal(String appealId,String result){
+		ClockAppeal clockAppeal=intelligenceDao.getClockAppealById(appealId);
+		clockAppeal.setResult(Integer.parseInt(result));
+		cloudDao.update(clockAppeal);
+		if(result.equals("0")){
+			addClock(clockAppeal.getEmployeeId(), clockAppeal.getFirstClock(), clockAppeal.getLastClock());
+		}
+		return true;
+	}
+	
+	public List<ClockAppeal> getClockTimeAppeal(String employeeId){
+		return intelligenceDao.getClockTimeAppealByEmployee(employeeId);
 		
+	}
+	
+	public List<ClockAppeal> getClockAuditList(String auditId){
+		return intelligenceDao.getClockAuditList(auditId);
 	}
 
 	public ClockRecord getClockByMc(String id, String morningClock) {
@@ -153,9 +179,10 @@ public class ClockService {
 	}
 
 	public Boolean addClockAbnormal(String deviceId,String id, String time) {
-		boolean state=ServiceDistribution.handleJson111_1(deviceId, id, time);
-		CheckResponse response=new CheckResponse(deviceId, "111_2");
+		SyncFuture<String> future=AddFuture.setFuture(deviceId);
+		CheckResponse response=new CheckResponse(deviceId, "111_2",future);
 		response.start();
+		boolean state=ServiceDistribution.handleJson111_1(deviceId, id, time);
 		return state;
 	}
 	

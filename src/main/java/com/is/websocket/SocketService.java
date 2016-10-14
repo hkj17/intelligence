@@ -71,6 +71,13 @@ public class SocketService {
 			byte[] answer=responseByte(responseCode,anType,anCode);
 			excuteWrite(answer,socketChannel);
 		}
+		else if (type.equals("3") && code.equals("23")) {
+			responseCode=ServiceDistribution.handleJson3_23(jsonObject,socketChannel);
+			anType="3";
+			anCode="23";
+			byte[] answer=responseByte(responseCode,anType,anCode);
+			excuteWrite(answer,socketChannel);
+		}
 		else if (type.equals("5") && code.equals("1")) {
 			responseCode=ServiceDistribution.handleJson5_1(jsonObject,socketChannel);
 			anType="5";
@@ -78,9 +85,17 @@ public class SocketService {
 			byte[] answer=responseByte(responseCode,anType,anCode);
 			excuteWrite(answer,socketChannel);
 		}
+		else if (type.equals("100") && code.equals("100")) {
+			responseCode=ServiceDistribution.handleJson100_100();
+			anType="100";
+			anCode="100";
+			byte[] answer=responseByte(responseCode,anType,anCode);
+			excuteWrite(answer,socketChannel);
+		}
 		else if (type.equals("101") && code.equals("2")) {
 			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.name());
 			 future.setResponse("101_2");
+			 System.out.println("accept!");
 		}
 		else if (type.equals("102") && code.equals("2")) {
 			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.name());
@@ -90,7 +105,7 @@ public class SocketService {
 			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.name());
 			 future.setResponse("103_2");
 			 String employeeId=jsonObject.getString("employeeId");
-			 ServiceDistribution.handleJson109_1(employeeId, socketChannel);
+			 //ServiceDistribution.handleJson109_1(employeeId, socketChannel);
 		}
 		else if (type.equals("103") && code.equals("12")) {
 			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.name());
