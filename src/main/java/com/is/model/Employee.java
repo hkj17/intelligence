@@ -22,7 +22,7 @@ public class Employee {
 	private String employeeName;
 	
 	@Column(name = "sex")
-	private String sex;
+	private int sex;
 	
 	@Column(name = "birth")
 	private String birth;
@@ -75,6 +75,9 @@ public class Employee {
 	@Column(name = "work_pos")
 	private String workPos;
 	
+	@Column(name = "isDuty")
+	private int isDuty;
+	
 	@Column(name = "template_path")
 	private String templatePath;
 	
@@ -85,6 +88,14 @@ public class Employee {
 	
 	public void setTemplatePath(String templatePath) {
 		this.templatePath = templatePath;
+	}
+	
+	public int getIsDuty() {
+		return isDuty;
+	}
+	
+	public void setIsDuty(int isDuty) {
+		this.isDuty = isDuty;
 	}
 	
 	public String getTemplatePath() {
@@ -176,10 +187,10 @@ public class Employee {
 	public void setEmployeeName(String employeeName) {
 		this.employeeName = employeeName;
 	}
-	public String getSex() {
+	public int getSex() {
 		return sex;
 	}
-	public void setSex(String sex) {
+	public void setSex(int sex) {
 		this.sex = sex;
 	}
 	public String getBirth() {

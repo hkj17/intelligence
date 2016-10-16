@@ -85,7 +85,7 @@ public class AdminHandle {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		Admin admin = (Admin) request.getSession().getAttribute(SESSION_USER);
 		if (null == admin) {
-			return ResponseFactory.response(Response.Status.OK, ResponseCode.REQUEST_FAIL, "登录过期，请重新登录！");
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.REQUEST_FAIL, "鐧诲綍杩囨湡锛岃閲嶆柊鐧诲綍锛�");
 		}
 		String username = admin.getUsername();
 		Admin newadmin = adminService.login(username, requestMap.get(OLD_PASSWORD));
@@ -93,7 +93,7 @@ public class AdminHandle {
 
 			return ResponseFactory.response(Response.Status.OK, newadmin.getResponseCode(), null);
 		} else {
-			return ResponseFactory.response(Response.Status.OK, newadmin.getResponseCode(), "原密码错误！");
+			return ResponseFactory.response(Response.Status.OK, newadmin.getResponseCode(), "鍘熷瘑鐮侀敊璇紒");
 		}
 	}
 
@@ -231,9 +231,12 @@ public class AdminHandle {
 	public Response addEmployeeInfo(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams)  {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		String deviceId=(String) request.getSession().getAttribute("deviceSn");
-		String employeeId = adminService.addEmployee(requestMap.get("name"), requestMap.get("birth"), requestMap.get("contact"),
-				 deviceId,   requestMap.get("path"), 
-				 requestMap.get("position"), requestMap.get("jobId"),  requestMap.get("address"),  requestMap.get("email"),  requestMap.get("idCard"),requestMap.get("workPos"),requestMap.get("department"));
+		String employeeId = adminService.addEmployee(requestMap.get("name"), 
+				requestMap.get("birth"), requestMap.get("contact"),deviceId,   requestMap.get("path"), 
+				 requestMap.get("position"), requestMap.get("jobId"),  requestMap.get("address"),  
+				 requestMap.get("email"),  requestMap.get("idCard"),
+				 requestMap.get("workPos"),requestMap.get("departmentId"),
+				 requestMap.get("sex"),requestMap.get("isDuty"));
 
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, employeeId);
 	}

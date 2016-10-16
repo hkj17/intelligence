@@ -35,7 +35,7 @@ import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombi
 
 /**
  * @author lishuhuan
- * @date 2016年3月31日 类说明
+ * @date 2016骞�3鏈�31鏃� 绫昏鏄�
  */
 @Transactional
 @Component("adminService")
@@ -102,9 +102,9 @@ public class AdminService {
 
 	public String addEmployee(String name, String birth, String contact,
 			String deviceId,  String photo, String position, String jobId, String address, String email,
-			String idCard, String workPos,String department) {
+			String idCard, String workPos,String department,String sex,String isduty) {
 		Employee employee = new Employee();
-		// 判断是否为汉字
+		// 鍒ゆ柇鏄惁涓烘眽瀛�
 		Pattern p = Pattern.compile("[\u4e00-\u9fa5]");
 		Matcher m = p.matcher(name);
 		if (m.find()) {
@@ -120,8 +120,6 @@ public class AdminService {
 		employee.setAddress(address);
 		employee.setEmail(email);
 		employee.setWorkPos(workPos);
-		
-		department="77fc5ea8-955c-46d9-a5f3-d492c308e5ab";
 		if (null != department) {
 			Department depart = intelligenceDao.getDepartmentById(department);
 			employee.setDepartment(depart);
@@ -134,7 +132,12 @@ public class AdminService {
 		employee.setTelphone(contact);
 		Company company=intelligenceDao.getCompanyByDeviceId(deviceId);
 		employee.setCompany(company);
-
+		if(sex!=null){
+			employee.setSex(Integer.parseInt(sex));
+		}
+		if(isduty!=null){
+			employee.setIsDuty(Integer.parseInt(isduty));
+		}
 		String strangerId=null;
 		if(photo!=null){
 			employee.setPhotoPath(photo);
@@ -208,37 +211,37 @@ public class AdminService {
 			if (employee.getEmployeeId().length() <= 5) {
 				Message message = new Message();
 				message.setEmployeeId(employee.getEmployeeId());
-				message.setMessage("请等待");
+				message.setMessage("璇风瓑寰�");
 				message.setTime(new Date());
 				cloudDao.add(message);
 
 				Message message2 = new Message();
 				message2.setEmployeeId(employee.getEmployeeId());
-				message2.setMessage("请留言");
+				message2.setMessage("璇风暀瑷�");
 				message2.setTime(new Date());
 				cloudDao.add(message2);
 
 				Message message3 = new Message();
 				message3.setEmployeeId(employee.getEmployeeId());
-				message3.setMessage("门口有快递");
+				message3.setMessage("闂ㄥ彛鏈夊揩閫�");
 				message3.setTime(new Date());
 				cloudDao.add(message3);
 
 				Message message4 = new Message();
 				message4.setEmployeeId(employee.getEmployeeId());
-				message4.setMessage("您的外卖到了");
+				message4.setMessage("鎮ㄧ殑澶栧崠鍒颁簡");
 				message4.setTime(new Date());
 				cloudDao.add(message4);
 
 				Message message5 = new Message();
 				message5.setEmployeeId(employee.getEmployeeId());
-				message5.setMessage("司机正在楼下");
+				message5.setMessage("鍙告満姝ｅ湪妤间笅");
 				message5.setTime(new Date());
 				cloudDao.add(message5);
 
 				Message message6 = new Message();
 				message6.setEmployeeId(employee.getEmployeeId());
-				message6.setMessage("您的大饼糊啦！");
+				message6.setMessage("鎮ㄧ殑澶чゼ绯婂暒锛�");
 				message6.setTime(new Date());
 				cloudDao.add(message6);
 			}
@@ -272,13 +275,13 @@ public class AdminService {
 	}
 
 	/**
-	 * 汉字转换位汉语全拼，英文字符不变，特殊字符丢失
-	 * 支持多音字，生成方式如（重当参:zhongdangcen,zhongdangcan,chongdangcen
-	 * ,chongdangshen,zhongdangshen,chongdangcan）
+	 * 姹夊瓧杞崲浣嶆眽璇叏鎷硷紝鑻辨枃瀛楃涓嶅彉锛岀壒娈婂瓧绗︿涪澶�
+	 * 鏀寔澶氶煶瀛楋紝鐢熸垚鏂瑰紡濡傦紙閲嶅綋鍙�:zhongdangcen,zhongdangcan,chongdangcen
+	 * ,chongdangshen,zhongdangshen,chongdangcan锛�
 	 * 
 	 * @param chines
-	 *            汉字
-	 * @return 拼音
+	 *            姹夊瓧
+	 * @return 鎷奸煶
 	 */
 	public static String converterToSpell(String chines) {
 		StringBuffer pinyinName = new StringBuffer();
@@ -289,7 +292,7 @@ public class AdminService {
 		for (int i = 0; i < nameChar.length; i++) {
 			if (nameChar[i] > 128) {
 				try {
-					// 取得当前汉字的所有全拼
+					// 鍙栧緱褰撳墠姹夊瓧鐨勬墍鏈夊叏鎷�
 					String[] strs = PinyinHelper.toHanyuPinyinStringArray(nameChar[i], defaultFormat);
 					if (strs != null) {
 						for (int j = 0; j < strs.length; j++) {
@@ -312,26 +315,26 @@ public class AdminService {
 	}
 
 	/**
-	 * 解析并组合拼音，对象合并方案(推荐使用)
+	 * 瑙ｆ瀽骞剁粍鍚堟嫾闊筹紝瀵硅薄鍚堝苟鏂规(鎺ㄨ崘浣跨敤)
 	 * 
 	 * @return
 	 */
 	private static String parseTheChineseByObject(List<Map<String, Integer>> list) {
-		Map<String, Integer> first = null; // 用于统计每一次,集合组合数据
-		// 遍历每一组集合
+		Map<String, Integer> first = null; // 鐢ㄤ簬缁熻姣忎竴娆�,闆嗗悎缁勫悎鏁版嵁
+		// 閬嶅巻姣忎竴缁勯泦鍚�
 		for (int i = 0; i < list.size(); i++) {
-			// 每一组集合与上一次组合的Map
+			// 姣忎竴缁勯泦鍚堜笌涓婁竴娆＄粍鍚堢殑Map
 			Map<String, Integer> temp = new Hashtable<String, Integer>();
-			// 第一次循环，first为空
+			// 绗竴娆″惊鐜紝first涓虹┖
 			if (first != null) {
-				// 取出上次组合与此次集合的字符，并保存
+				// 鍙栧嚭涓婃缁勫悎涓庢娆￠泦鍚堢殑瀛楃锛屽苟淇濆瓨
 				for (String s : first.keySet()) {
 					for (String s1 : list.get(i).keySet()) {
 						String str = s + s1;
 						temp.put(str, 1);
 					}
 				}
-				// 清理上一次组合数据
+				// 娓呯悊涓婁竴娆＄粍鍚堟暟鎹�
 				if (temp != null && temp.size() > 0) {
 					first.clear();
 				}
@@ -341,14 +344,14 @@ public class AdminService {
 					temp.put(str, 1);
 				}
 			}
-			// 保存组合数据以便下次循环使用
+			// 淇濆瓨缁勫悎鏁版嵁浠ヤ究涓嬫寰幆浣跨敤
 			if (temp != null && temp.size() > 0) {
 				first = temp;
 			}
 		}
 		String returnStr = "";
 		if (first != null) {
-			// 遍历取出组合字符串
+			// 閬嶅巻鍙栧嚭缁勫悎瀛楃涓�
 			for (String str : first.keySet()) {
 				returnStr += (str + ",");
 			}
@@ -360,22 +363,22 @@ public class AdminService {
 	}
 
 	/**
-	 * 去除多音字重复数据
+	 * 鍘婚櫎澶氶煶瀛楅噸澶嶆暟鎹�
 	 * 
 	 * @param theStr
 	 * @return
 	 */
 	private static List<Map<String, Integer>> discountTheChinese(String theStr) {
-		// 去除重复拼音后的拼音列表
+		// 鍘婚櫎閲嶅鎷奸煶鍚庣殑鎷奸煶鍒楄〃
 		List<Map<String, Integer>> mapList = new ArrayList<Map<String, Integer>>();
-		// 用于处理每个字的多音字，去掉重复
+		// 鐢ㄤ簬澶勭悊姣忎釜瀛楃殑澶氶煶瀛楋紝鍘绘帀閲嶅
 		Map<String, Integer> onlyOne = null;
 		String[] firsts = theStr.split(" ");
-		// 读出每个汉字的拼音
+		// 璇诲嚭姣忎釜姹夊瓧鐨勬嫾闊�
 		for (String str : firsts) {
 			onlyOne = new Hashtable<String, Integer>();
 			String[] china = str.split(",");
-			// 多音字处理
+			// 澶氶煶瀛楀鐞�
 			for (String s : china) {
 				Integer count = onlyOne.get(s);
 				if (count == null) {
