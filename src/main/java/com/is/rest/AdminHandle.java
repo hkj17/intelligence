@@ -33,6 +33,7 @@ import com.is.model.Company;
 import com.is.model.Employee;
 import com.is.service.AdminService;
 import com.is.util.BusinessHelper;
+import com.is.util.LoginRequired;
 import com.is.util.ResponseFactory;
 
 @Component("adminHandler")
@@ -44,10 +45,15 @@ public class AdminHandle {
 
 
 	@POST
+	@LoginRequired
 	@Path("/AccountAssignment")
 	public Response AccountAssignment(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		Admin admin=adminService.getAdminByName(requestMap.get(USER_NAME));
+		if(admin!=null){
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.REQUEST_FAIL, "user exist!");
+		}
 		boolean state = adminService.AccountAssignment(requestMap.get(USER_NAME), requestMap.get(USER_PSW),
 				requestMap.get(AUTHORITY), requestMap.get(EMPLOYEE_ID), deviceId);
 		if (state) {
@@ -98,6 +104,7 @@ public class AdminHandle {
 	}
 
 	@POST
+	@LoginRequired
 	@Path("/editPassword")
 	public Response editPassword(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
@@ -112,6 +119,7 @@ public class AdminHandle {
 
 	@GET
 	@Path("/getUserList")
+	@LoginRequired
 	public Response getUserList(@Context HttpServletRequest request) {
 		List<Employee> userlist = adminService.getEmployeeList();
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, userlist);
@@ -119,6 +127,7 @@ public class AdminHandle {
 
 	@GET
 	@Path("/getCompanyList")
+	@LoginRequired
 	public Response getCompanyList(@Context HttpServletRequest request) {
 		List<Company> companyList = adminService.getCompanyList();
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, companyList);
@@ -126,6 +135,7 @@ public class AdminHandle {
 
 	@POST
 	@Path("/deleteUser")
+	@LoginRequired
 	public Response deleteUser(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		String deviceId=(String) request.getSession().getAttribute("deviceSn");
@@ -139,6 +149,7 @@ public class AdminHandle {
 
 	@POST
 	@Path("/editEmployee")
+	@LoginRequired
 	public Response editEmployee(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		boolean state = adminService.editEmployee(requestMap.get(EMPLOYEE_ID), requestMap.get(NAME),
@@ -154,6 +165,7 @@ public class AdminHandle {
 
 	@POST
 	@Path("/getEmployeeInfo")
+	@LoginRequired
 	public Response getEmployeeInfo(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		Employee employee = adminService.getEmployeeById(requestMap.get(EMPLOYEE_ID));
@@ -162,9 +174,11 @@ public class AdminHandle {
 
 	@POST
 	@Path("/getEmployeeByName")
+	@LoginRequired
 	public Response getEmployeeByName(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
+		String deviceId=(String) request.getSession().getAttribute("deviceSn");
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
-		List<Employee> employees = adminService.getEmployeeByName(requestMap.get(EMPLOYEE_NAME));
+		List<Employee> employees = adminService.getEmployeeByName(requestMap.get(EMPLOYEE_NAME),deviceId);
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, employees);
 	}
 
@@ -184,6 +198,7 @@ public class AdminHandle {
 
 	@GET
 	@Path("/addEmployeeGetPhotoList")
+	@LoginRequired
 	public Response addEmployeeGetPhotoList(@Context HttpServletRequest request,
 			MultivaluedMap<String, String> formParams) {
 		List<Map<String, String>> list = new ArrayList<>();
@@ -198,6 +213,7 @@ public class AdminHandle {
 
 
 	@POST
+	@LoginRequired
 	@Path("/getEmployeeByWhere")
 	public Response getEmployeeByWhere(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
@@ -207,6 +223,7 @@ public class AdminHandle {
 	}
 
 	@POST
+	@LoginRequired
 	@Path("/excuteCollection")
 	public Response excuteCollection(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		String deviceId=(String) request.getSession().getAttribute("deviceSn");
@@ -219,6 +236,7 @@ public class AdminHandle {
 	}
 
 	@POST
+	@LoginRequired
 	@Path("/completeCollection")
 	public Response completeCollection(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		String deviceId=(String) request.getSession().getAttribute("deviceSn");
@@ -227,6 +245,7 @@ public class AdminHandle {
 	}
 
 	@POST
+	@LoginRequired
 	@Path("/addEmployee")
 	public Response addEmployeeInfo(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams)  {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
@@ -242,14 +261,17 @@ public class AdminHandle {
 	}
 	
 	@POST
+	@LoginRequired
 	@Path("/searchAdmin")
 	public Response searchAdmin(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams)  {
+		String deviceId=(String) request.getSession().getAttribute("deviceSn");
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
-		List<Admin> list=adminService.searchAdmin(requestMap.get("name"), requestMap.get("auth"));
+		List<Admin> list=adminService.searchAdmin(requestMap.get("name"), requestMap.get("auth"),deviceId);
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, list);
 	}
 	
 	@POST
+	@LoginRequired
 	@Path("/editAdmin")
 	public Response editAdmin(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams){
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
@@ -262,6 +284,7 @@ public class AdminHandle {
 	}
 	
 	@POST
+	@LoginRequired
 	@Path("/deleteAdmin")
 	public Response deleteAdmin(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams){
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
@@ -274,6 +297,7 @@ public class AdminHandle {
 	}
 	
 	@POST
+	@LoginRequired
 	@Path("/getAuditPerson")
 	public Response getAuditPerson(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams){
 		String deviceId=(String) request.getSession().getAttribute("deviceSn");

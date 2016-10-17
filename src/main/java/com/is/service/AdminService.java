@@ -67,6 +67,10 @@ public class AdminService {
 		return true;
 
 	}
+	
+	public Admin getAdminByName(String name){
+		return intelligenceDao.getAdminByName(name);
+	}
 
 	public Admin login(String username, String password) {
 		Admin admin = null;
@@ -201,8 +205,8 @@ public class AdminService {
 		return intelligenceDao.getEmployeeById(id);
 	}
 
-	public List<Employee> getEmployeeByName(String name) {
-		return intelligenceDao.getEmployeeByName(name);
+	public List<Employee> getEmployeeByName(String name,String deviceId) {
+		return intelligenceDao.getEmployeeByName(name,deviceId);
 	}
 
 	/*public Boolean updateEmployee() {
@@ -269,7 +273,7 @@ public class AdminService {
 		response.start();
 		//String path="/cloudweb/server/tomcat_intel/webapps/employee_img/1.jpg";
 		String path = PhotoMap.getMap(deviceId);
-		PhotoMap.removeMap(deviceId);
+		//PhotoMap.removeMap(deviceId);
 		ServiceDistribution.handleJson102_1(deviceId);
 		return path;
 	}
@@ -408,8 +412,8 @@ public class AdminService {
 		}
 	}
 	
-	public List<Admin> searchAdmin(String name,String auth){
-		return intelligenceDao.searchAdmin(name, auth);
+	public List<Admin> searchAdmin(String name,String auth,String deviceId){
+		return intelligenceDao.searchAdmin(name, auth,deviceId);
 	}
 	
 	public Boolean editAdmin(String id,String name,String password,String auth){

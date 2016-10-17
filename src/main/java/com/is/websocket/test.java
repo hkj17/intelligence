@@ -6,6 +6,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Array;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Arrays;
 
 import sun.misc.BASE64Encoder;
 import sun.misc.BASE64Decoder;
@@ -77,8 +81,40 @@ public class test {
 		   }  
 	
 	public static void main(String[] args) {
-		String abc=GetImageStr();
-		System.out.println(abc);
-		GenerateImage(abc, "D:\\community\\1.jpg");
+		String methodName="handleJson103_1";
+		Object[] params=new Object[]{"2","2","2","2","2"};
+		try {
+			Class<?> c = Class.forName("com.is.websocket.ServiceDistribution");
+			Object obj = c.newInstance();
+			Class[] cla = new Class[params.length];
+			Arrays.fill(cla, String.class);
+			Method method = c.getMethod(methodName, cla);
+			method.invoke(obj , params);
+			
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (NoSuchMethodException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

@@ -2,6 +2,8 @@ package com.is.dao.impl;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -82,9 +84,10 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 	}
 	
 	@Override
-	public List<ClockRecord> getClockByWhere(String department,String user,String startClock,String endClock,String rule){
-		String sql="select clock,b.employeeName,b.jobId,b.department.department from ClockRecord clock,Employee b where clock.employeeId=b.employeeId";
+	public List<ClockRecord> getClockByWhere(String department,String user,String startClock,String endClock,String rule,String deviceId){
+		String sql="select clock,b.employeeName,b.jobId,b.department.department from ClockRecord clock,Employee b where clock.employeeId=b.employeeId and b.admin.deviceId='"+deviceId+"'";
 		Map<Integer, String> map=new HashMap<>();
+		endClock=endClock+" 23:59:59";
 		int i=0;
 		if(user!=null){
 			sql=sql+" and (b.pingyin like ? or b.pingyin like ? or b.employeeName like ?)";
@@ -191,8 +194,8 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 	}
 	
 	@Override
-	public List<Employee> getEmployeeByName(String name){
-		return cloudDao.findByHql(Hql.GET_EMPLOYEE_BY_NAME,name);
+	public List<Employee> getEmployeeByName(String name,String deviceId){
+		return cloudDao.findByHql(Hql.GET_EMPLOYEE_BY_NAME,name,deviceId);
 	}
 	
 	@Override
@@ -230,7 +233,12 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 	
 	@Override
 	public List<ClockRecord> getClockByEmployee(String id){
-		return cloudDao.findByHql(Hql.GET_CLOCK_BY_EMPLOYEE, id);
+		Calendar now=Calendar.getInstance();
+		now.set(Calendar.DATE,now.get(Calendar.DATE)-10);
+		Date startTime=now.getTime();
+		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+		String start=sdf.format(startTime);
+		return cloudDao.findByHql(Hql.GET_CLOCK_BY_EMPLOYEE, id,start);
 	}
 	
 	@Override
@@ -307,8 +315,8 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 	}
 
 	@Override
-	public List<Admin> searchAdmin(String name, String auth) {
-		String sql="select * from admin where username is NOT null";
+	public List<Admin> searchAdmin(String name, String auth,String deviceId) {
+		String sql="select * from admin where device_id='"+deviceId+"'";
 		Map<Integer, String> map=new HashMap<>();
 		int i=0;
 		if(name!=null){

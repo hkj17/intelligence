@@ -38,6 +38,7 @@ import com.is.model.ClockTime;
 import com.is.model.Employee;
 import com.is.service.ClockService;
 import com.is.util.BusinessHelper;
+import com.is.util.LoginRequired;
 import com.is.util.ResponseFactory;
 
 @Component("clockHandle")
@@ -53,6 +54,7 @@ public class ClockHandle {
 
 	@POST
 	@Path("/getClockList")
+	@LoginRequired
 	public Response getClockList(@Context HttpServletRequest request) throws ParseException {
 		List<ClockRecord> clocklist = clockService.getClockList();
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, clocklist);
@@ -60,10 +62,12 @@ public class ClockHandle {
 
 	@POST
 	@Path("/getClockByWhere")
+	@LoginRequired
 	public Response getClockByWhere(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		String deviceId=(String) request.getSession().getAttribute("deviceSn");
 		List<ClockRecord> clockRecords = clockService.getClockByWhere(requestMap.get(DEPARTMENT),requestMap.get(NAME), requestMap.get(START_TIME),
-				requestMap.get(END_TIME), requestMap.get(RULE));
+				requestMap.get(END_TIME), requestMap.get(RULE),deviceId);
 		if (!clockRecords.equals(null)) {
 			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, clockRecords);
 		} else {
@@ -72,6 +76,7 @@ public class ClockHandle {
 	}
 
 	@POST
+	@LoginRequired
 	@Path("/getEmployeeByCompany")
 	public Response getEmployeeByCompany(@Context HttpServletRequest request,
 			MultivaluedMap<String, String> formParams) {
@@ -81,6 +86,7 @@ public class ClockHandle {
 	}
 
 	@GET
+	@LoginRequired
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Path("/getEmployeeByCompanyId/{company_id}")
 	public Response getEmployeeByCompanyId(@PathParam("company_id") String companyId) {
@@ -91,6 +97,7 @@ public class ClockHandle {
 	
 	@POST
 	@Path("/clockTimeAppeal")
+	@LoginRequired
 	public Response clockTimeAppeal(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		String deviceId=(String) request.getSession().getAttribute("deviceSn");
@@ -105,6 +112,7 @@ public class ClockHandle {
 	
 	@POST
 	@Path("/getClockTimeAppeal")
+	@LoginRequired
 	public Response getClockTimeAppeal(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		List<ClockAppeal> list=clockService.getClockTimeAppeal(requestMap.get(EMPLOYEE_ID));
@@ -113,6 +121,7 @@ public class ClockHandle {
 	
 	@POST
 	@Path("/getClockAuditList")
+	@LoginRequired
 	public Response getClockAuditList(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		List<ClockAppeal> list=clockService.getClockAuditList(requestMap.get(EMPLOYEE_ID));
@@ -121,6 +130,7 @@ public class ClockHandle {
 
 	@POST
 	@Path("/deleteClockTimeAppeal")
+	@LoginRequired
 	public Response deleteClockTimeAppeal(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		boolean state = clockService.deleteClockTimeAppeal(requestMap.get("appealId"));
@@ -133,6 +143,7 @@ public class ClockHandle {
 	
 	@POST
 	@Path("/handleClockAppeal")
+	@LoginRequired
 	public Response handleClockAppeal(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		boolean state = clockService.handleClockAppeal(requestMap.get("appealId"),requestMap.get("result"));
@@ -145,6 +156,7 @@ public class ClockHandle {
 
 	@POST
 	@Path("/addClockMobile")
+	@LoginRequired
 	public Response addClockMobile(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams)
 			throws IOException {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
@@ -159,6 +171,7 @@ public class ClockHandle {
 
 	@POST
 	@Path("/getClockByDate")
+	@LoginRequired
 	public Response getClockByDate(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		String employee = requestMap.get(EMPLOYEE_ID);
@@ -187,6 +200,7 @@ public class ClockHandle {
 
 	@POST
 	@Path("/updateClock")
+	@LoginRequired
 	public Response updateClock(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		boolean state = clockService.updateClock(requestMap.get(CR_ID), requestMap.get(EMPLOYEE_ID),
@@ -200,6 +214,7 @@ public class ClockHandle {
 
 	@POST
 	@Path("/getClockPhoto")
+	@LoginRequired
 	public Response getClockPhoto(@Context HttpServletRequest request) {
 		List<ClockTime> clockPhotos = clockService.getClockPhoto();
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, clockPhotos);
@@ -207,6 +222,7 @@ public class ClockHandle {
 	
 	@POST
 	@Path("/getClockByEmployee")
+	@LoginRequired
 	public Response getClockByEmployee(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		List<ClockRecord> list=clockService.getClockByEmployee(requestMap.get(EMPLOYEE_ID));

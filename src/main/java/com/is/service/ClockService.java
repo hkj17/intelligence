@@ -93,8 +93,8 @@ public class ClockService {
 	}
 
 	public List<ClockRecord> getClockByWhere(String department, String user, String stratClock, String endClock,
-			String rule) {
-		return intelligenceDao.getClockByWhere(department, user, stratClock, endClock, rule);
+			String rule,String deviceId) {
+		return intelligenceDao.getClockByWhere(department, user, stratClock, endClock, rule,deviceId);
 	}
 
 	public List<Employee> getEmployeeByCompany(String companyId) {

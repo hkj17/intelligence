@@ -28,7 +28,7 @@ public interface IntelligenceDao {
 	
 	public List<ClockRecord> getClockList();
 	
-	public List<ClockRecord> getClockByWhere(String department,String user,String stratClock,String endClock,String rule);
+	public List<ClockRecord> getClockByWhere(String department,String user,String stratClock,String endClock,String rule,String deviceId);
 	
 	public List<Notification> getNotifyList();
 	
@@ -60,7 +60,7 @@ public interface IntelligenceDao {
 	
 	public List<ClockTime> getClockPhoto();
 	
-	public List<Employee> getEmployeeByName(String name);
+	public List<Employee> getEmployeeByName(String name,String deviceId);
 	
 	public String getEmployeeByMobile(String mobile);
 	
@@ -82,7 +82,7 @@ public interface IntelligenceDao {
 	
 	public Company getCompanyByDeviceId(String deviceId);
 	
-	public List<Admin> searchAdmin(String name,String auth); 
+	public List<Admin> searchAdmin(String name,String auth,String deviceId); 
 	
 	public Visitor getVisitorById(String id);
 	

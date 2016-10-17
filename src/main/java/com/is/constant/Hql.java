@@ -31,13 +31,13 @@ public class Hql {
 	
 	//public static final String GET_CLOCK_BY_NC="from ClockRecord cr where cr.employee.employeeId=? and cr.endClock like ?%";
 	
-	public static final String GET_EMPLOYEE_BY_NAME="from Employee e where e.employeeName=?";
+	public static final String GET_EMPLOYEE_BY_NAME="from Employee e where e.employeeName=? and e.admin.deviceId=?";
 	
 	public static final String GET_CLOCK_PHOTO="from ClockPhoto cp";
 	
 	public static final String GET_EMPLOYEE_BY_MOBILE="select e.employeeName from Employee e where e.telphone=? limit 1";
 	
-	public static final String GET_CLOCK_BY_EMPLOYEE="SELECT a,b.employeeName,b.jobId,b.department.department from ClockRecord a,Employee b where b.employeeId=a.employeeId and a.employeeId=?";
+	public static final String GET_CLOCK_BY_EMPLOYEE="SELECT a,b.employeeName,b.jobId,b.department.department from ClockRecord a,Employee b where b.employeeId=a.employeeId and a.employeeId=? and a.startClock>=?";
 	
 	//public static final String GET_PINGYIN_BY_NAME="from Employee where pingyin like ?%";
 	

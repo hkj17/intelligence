@@ -19,6 +19,7 @@ import com.is.model.Visitor;
 import com.is.model.VisitorInfo;
 import com.is.service.VisitorService;
 import com.is.util.BusinessHelper;
+import com.is.util.LoginRequired;
 import com.is.util.ResponseFactory;
 
 @Component("visitorHandler")
@@ -30,6 +31,7 @@ public class VisitorHandler {
 	
 	
 	@POST
+	@LoginRequired
 	@Path("/addVisitorInfo") 
 	public Response addVisitorInfo(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
@@ -42,6 +44,7 @@ public class VisitorHandler {
 	}
 	
 	@POST
+	@LoginRequired
 	@Path("/indexVisitor")
 	public Response indexVisitor(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws ParseException{
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
@@ -51,6 +54,7 @@ public class VisitorHandler {
 	
 	@POST
 	@Path("/getVisitorById")
+	@LoginRequired
 	public Response getVisitorById(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws ParseException{
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		VisitorInfo info=visitorService.getVisitorById(requestMap.get("visitorId"));
@@ -60,6 +64,7 @@ public class VisitorHandler {
 	
 	@POST
 	@Path("/addVisitorLeaveTime")
+	@LoginRequired
 	public Response addVisitorLeaveTime(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws ParseException{
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		boolean state=visitorService.addVisitorLeaveTime(requestMap.get("time"), requestMap.get("id"));
@@ -73,6 +78,7 @@ public class VisitorHandler {
 	
 	@POST
 	@Path("/updateVisitorInfo")
+	@LoginRequired
 	public Response updateVisitorInfo(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws ParseException{
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		String deviceId=(String) request.getSession().getAttribute("deviceSn");
@@ -88,6 +94,7 @@ public class VisitorHandler {
 	
 	@POST
 	@Path("/deleteVisitorInfo")
+	@LoginRequired
 	public Response deleteVisitorInfo(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws ParseException{
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		String deviceId=(String) request.getSession().getAttribute("deviceSn");
@@ -101,6 +108,7 @@ public class VisitorHandler {
 	
 	@POST
 	@Path("/deleteVisitorRecord")
+	@LoginRequired
 	public Response deleteVisitorRecord(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws ParseException{
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		boolean state=visitorService.deleteVisitorRecord(requestMap.get("id"));
