@@ -68,6 +68,8 @@ public interface IntelligenceDao {
 	
 	public List<ClockRecord> getClockByEmployee(String id);
 	
+	public List<ClockRecord> getDetailClock(String employeeId);
+	
 	public List<Employee> getEmployeeByWhere(String word,String company,String department);
 	
 	public VisitorInfo getVisitorInfoById(String id);

@@ -396,6 +396,21 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 		// TODO Auto-generated method stub
 		return cloudDao.findByHql(Hql.GET_CLOCK_APPEAL_BY_AUDIT, auditId);
 	}
+
+	@Override
+	public List<ClockRecord> getDetailClock(String employeeId) {
+		// TODO Auto-generated method stub
+		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+		String time=sdf.format(new Date());
+		
+		String sql="SELECT a,b.employeeName,b.jobId,b.department.department from ClockRecord a,Employee b where b.employeeId=a.employeeId and a.employeeId=? and a.startClock like ?";
+		Query query = getSession().createQuery(sql);
+		query.setParameter(0, employeeId);
+		query.setParameter(1, '%' + time + '%');
+		
+		List<ClockRecord> list=query.list();
+		return list;
+	}
 	
 
 }

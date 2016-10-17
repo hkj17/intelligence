@@ -222,6 +222,9 @@ public class ClockService {
 
 	public List<ClockRecord> getClockByEmployee(String id) {
 		return intelligenceDao.getClockByEmployee(id);
-
+	}
+	
+	public List<ClockRecord> getDetailClock(String employeeId){
+		return intelligenceDao.getDetailClock(employeeId);
 	}
 }

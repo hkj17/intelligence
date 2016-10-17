@@ -230,5 +230,13 @@ public class ClockHandle {
 	}
 
 
+	@POST
+	@Path("/getDetailClock")
+	@LoginRequired
+	public Response getDetailClock(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		List<ClockRecord> list=clockService.getDetailClock(requestMap.get(EMPLOYEE_ID));
+		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, list);
+	}
 
 }
