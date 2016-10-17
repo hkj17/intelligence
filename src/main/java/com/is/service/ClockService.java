@@ -180,13 +180,14 @@ public class ClockService {
 
 	public Boolean addClockAbnormal(String deviceId,String id, String time) {
 		SyncFuture<String> future=AddFuture.setFuture(deviceId);
-		CheckResponse response=new CheckResponse(deviceId, "111_2",future);
+		CheckResponse response=new CheckResponse(deviceId, "110_2",future);
 		response.start();
-		boolean state=ServiceDistribution.handleJson111_1(deviceId, id, time);
+		boolean state=ServiceDistribution.handleJson110_1(deviceId, id, time);
 		return state;
 	}
 	
 	public Boolean addClocknormal(String deviceId,String id, String time) {
+		System.out.println(time);
 		ClockRecord clockRecord = getClockByMc(id, time.substring(0, 10));
 		if (null == clockRecord) {
 			addClock(id, time, null);

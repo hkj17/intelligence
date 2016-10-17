@@ -74,7 +74,7 @@ public class SocketService {
 		else if (type.equals("3") && code.equals("23")) {
 			responseCode=ServiceDistribution.handleJson3_23(jsonObject,socketChannel);
 			anType="3";
-			anCode="23";
+			anCode="24";
 			byte[] answer=responseByte(responseCode,anType,anCode);
 			excuteWrite(answer,socketChannel);
 		}
@@ -113,10 +113,10 @@ public class SocketService {
 			 String visitorId=jsonObject.getString("visitorId");
 			 ServiceDistribution.handleJson109_11(visitorId, socketChannel);
 		}
-		else if (type.equals("111") && code.equals("2")) {
+		else if (type.equals("110") && code.equals("2")) {
 			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.name());
-			 future.setResponse("111_2");
-			 ServiceDistribution.handleJson111_2(jsonObject, socketChannel);
+			 future.setResponse("110_2");
+			 ServiceDistribution.handleJson110_2(jsonObject, socketChannel);
 		}
 		else if (type.equals("104") && code.equals("2")) {
 			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.name());

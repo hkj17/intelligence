@@ -3,15 +3,14 @@ package com.is.websocket;
 import static com.is.constant.ParameterKeys.CLOCK_PHOTO_PATH;
 import static com.is.constant.ParameterKeys.EMPLOYEE_TEMPLATE;
 import static com.is.constant.ParameterKeys.FACE_PHOTO_PATH;
-import static com.is.constant.ParameterKeys.VISITOR_TEMPLATE;
 import static com.is.constant.ParameterKeys.STRANGER_PHOTO;
+import static com.is.constant.ParameterKeys.VISITOR_TEMPLATE;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.UUID;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -141,29 +140,7 @@ public class ServiceDistribution implements ApplicationContextAware {
 	}
 
 	public static JSONObject handleJson3_21(JSONObject jsonObject,ChannelHandlerContext ctx) {
-		String photo = jsonObject.getString("photo");
-		if(photo.startsWith("data")){
-			photo = photo.substring(photo.indexOf(",")+1);
-		}
-		String id =jsonObject.getString("strangerId");
-		String deviceId = ChannelNameToDeviceMap.getDeviceMap(ctx.name());
-		String path = FACE_PHOTO_PATH + deviceId;
-		if (!(new File(path).isDirectory())) {
-			new File(path).mkdirs();
-		}
-		path=path+"/"+id+".jpg";
-		boolean state=GenerateImage(photo, path);
-		if(state && PhotoMap.getMap(deviceId)==null){
-			PhotoMap.addMap(deviceId, path);
-		}
-		JSONObject response = new JSONObject();
-		response.put("type", 3);
-		response.put("code", 22);
-		response.put("strangerId",id);
-		return response;
-	}
-	
-	public static JSONObject handleJson3_23(JSONObject jsonObject,ChannelHandlerContext ctx) {
+
 		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
 		String photo = jsonObject.getString("photo");
 		if(photo.startsWith("data")){
@@ -176,15 +153,36 @@ public class ServiceDistribution implements ApplicationContextAware {
 			new File(path).mkdirs();
 		}
 		path=path+"/"+id+".jpg";
+		GenerateImage(photo, path);
+		JSONObject response = new JSONObject();
+		response.put("type", 3);
+		response.put("code", 22);
+		response.put("strangerId", id);
+		return response;
+	}
+	
+	public static JSONObject handleJson3_23(JSONObject jsonObject,ChannelHandlerContext ctx) {
+		String photo = jsonObject.getString("photo");
+		if(photo.startsWith("data")){
+			photo = photo.substring(photo.indexOf(",")+1);
+		}
+		String id =jsonObject.getString("strangerId");
+		String deviceId = ChannelNameToDeviceMap.getDeviceMap(ctx.name());
+		String path = FACE_PHOTO_PATH + deviceId;
+		if (!(new File(path).isDirectory())) {
+			new File(path).mkdirs();
+		}
+		path=path+"/"+id+".jpg";
 		boolean state=GenerateImage(photo, path);
-		if(state && PhotoMap.getMap(deviceId)==null){
+		if(state){
 			PhotoMap.addMap(deviceId, path);
 		}
 		JSONObject response = new JSONObject();
 		response.put("type", 3);
 		response.put("code", 24);
-		response.put("strangerId", id);
+		response.put("strangerId",id);
 		return response;
+		
 	}
 	
 	public static void handleJson102_1(String deviceId) {
@@ -238,14 +236,14 @@ public class ServiceDistribution implements ApplicationContextAware {
 		}
 	}
 	
-	public static boolean handleJson111_1(String deviceId,String employeeId,String time) {
+	public static boolean handleJson110_1(String deviceId,String employeeId,String time) {
 		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
 		JSONObject jsonObject = new JSONObject();
-		jsonObject.put("type", 111);
+		jsonObject.put("type", 110);
 		jsonObject.put("code", 1);
 		jsonObject.put("employeeId", employeeId);
 		jsonObject.put("time", time);
-		byte[] result = SocketService.responseByte(jsonObject, "111", "1");
+		byte[] result = SocketService.responseByte(jsonObject, "110", "1");
 		if (null != channel) {
 			excuteWrite(result, channel);
 			return true;
@@ -255,7 +253,7 @@ public class ServiceDistribution implements ApplicationContextAware {
 		}
 	}
 	
-	public static void handleJson111_2(JSONObject jsonObject,ChannelHandlerContext ctx){
+	public static void handleJson110_2(JSONObject jsonObject,ChannelHandlerContext ctx){
 		String employeeId=jsonObject.getString("employeeId");
 		String photoId=jsonObject.getString("photoId");
 		String photo=jsonObject.getString("photo");

@@ -89,24 +89,24 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 		Map<Integer, String> map=new HashMap<>();
 		endClock=endClock+" 23:59:59";
 		int i=0;
-		if(user!=null){
+		if(user!=null && !"".equals(user)){
 			sql=sql+" and (b.pingyin like ? or b.pingyin like ? or b.employeeName like ?)";
 			map.put(i, user + '%');
 			map.put(i+1, '%' +","+ user + '%');
 			map.put(i+2, '%' + user + '%');
 			i=i+3;
 		}
-		if(startClock!=null){
+		if(startClock!=null && !"".equals(startClock)){
 			sql+=" and clock.startClock>=?";
 			map.put(i, startClock);
 			i=i+1;
 		}
-		if(department!=null){
+		if(department!=null && !"".equals(department)){
 			sql+=" and b.department.id=?";
 			map.put(i, department);
 			i=i+1;
 		}
-		if(endClock!=null){
+		if(endClock!=null && !"".equals(endClock)){
 			sql+=" and clock.endClock<=?";
 			map.put(i, endClock);
 		}
@@ -258,19 +258,19 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 		String sql="select a,b.employeeName from Visitor a,Employee b where a.employeeId=b.employeeId ";
 		Map<Integer, Object> map=new HashMap<>();
 		int i=0;
-		if(depaertmentId!=null){
+		if(depaertmentId!=null && !"".equals(depaertmentId)){
 			sql=sql+" and b.department.id=?";
 			map.put(i, depaertmentId);
 			i=i+1;
 		}
-		if(name!=null){
+		if(name!=null && !"".equals(name)){
 			sql+=" and (b.pingyin like ? or b.pingyin like ? or b.employeeName like ?)";
 			map.put(i, name+"%");
 			map.put(i+1, "%" +","+name + "%");
 			map.put(i+2, "%"+name + "%");
 			i=i+3;
 		}
-		if(startTime!=null){
+		if(startTime!=null && !"".equals(startTime)){
 			sql+=" and a.startTime>=?";
 			try {
 				map.put(i, sdf.parse(startTime));
@@ -280,7 +280,7 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 			}
 			i=i+1;
 		}
-		if(endTime!=null){
+		if(endTime!=null && !"".equals(endTime)){
 			sql+=" and a.endTime<=?";
 			try {
 				map.put(i, sdf.parse(endTime));
@@ -319,12 +319,12 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 		String sql="select * from admin where device_id='"+deviceId+"'";
 		Map<Integer, String> map=new HashMap<>();
 		int i=0;
-		if(name!=null){
+		if(name!=null && !"".equals(name)){
 			sql=sql+" and username like ?";
 			map.put(i, '%' + name + '%');
 			i=i+1;
 		}
-		if(auth!=null){
+		if(auth!=null && !"".equals(auth)){
 			sql+=" and authority=?";
 			map.put(i, auth);
 		}
