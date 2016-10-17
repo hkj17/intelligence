@@ -123,8 +123,10 @@ public class VisitorService {
 		Visitor visitor=new Visitor();
 		String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
 		visitor.setId(id);
-		VisitorInfo visitorInfo=intelligenceDao.getVisitorInfoById(infoId);
-		visitor.setVisitorInfo(visitorInfo);
+		if(infoId!=null){
+			VisitorInfo visitorInfo=intelligenceDao.getVisitorInfoById(infoId);
+			visitor.setVisitorInfo(visitorInfo);
+		}
 		visitor.setEmployeeId(employeeId);
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		try {

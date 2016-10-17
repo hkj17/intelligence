@@ -78,6 +78,13 @@ public class SocketService {
 			byte[] answer=responseByte(responseCode,anType,anCode);
 			excuteWrite(answer,socketChannel);
 		}
+		else if (type.equals("4") && code.equals("1")) {
+			responseCode=ServiceDistribution.handleJson4_1(jsonObject,socketChannel);
+			anType="4";
+			anCode="2";
+			byte[] answer=responseByte(responseCode,anType,anCode);
+			excuteWrite(answer,socketChannel);
+		}
 		else if (type.equals("5") && code.equals("1")) {
 			responseCode=ServiceDistribution.handleJson5_1(jsonObject,socketChannel);
 			anType="5";
