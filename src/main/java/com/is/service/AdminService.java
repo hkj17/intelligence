@@ -425,6 +425,30 @@ public class AdminService {
 		return true;
 	}
 	
+	public Boolean adminManage(String deviceId,String username,String password,String company,
+			String address,String contact,String startTime,String endTime){
+		Admin admin=new Admin();
+		String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
+		admin.setAdminId(id);
+		admin.setAuditAuth(1);
+		admin.setAuthority(0);
+		admin.setDeviceId(deviceId);
+		admin.setPassword(password);
+		admin.setUsername(username);
+		cloudDao.add(admin);
+		
+		Company com=new Company();
+		com.setAddress(address);
+		com.setAdminId(id);
+		com.setCompanyName(company);
+		com.setContact(contact);
+		com.setDeviceId(deviceId);
+		com.setTimeWork(startTime);
+		com.setTimeRest(endTime);
+		cloudDao.add(com);
+		return true;
+	}
+	
 	public Boolean deleteAdmin(String id){
 		Admin admin=intelligenceDao.getAdminById(id);
 		Employee employee=intelligenceDao.getEmployeeByAdmin(id);

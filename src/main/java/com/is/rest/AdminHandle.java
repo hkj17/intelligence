@@ -305,4 +305,17 @@ public class AdminHandle {
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, list);
 	}
 	
+	@POST
+	@Path("/adminManage")
+	public Response adminManage(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams){
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		boolean state=adminService.adminManage(requestMap.get("deviceSn"), requestMap.get("username"),requestMap.get("password"), requestMap.get("company"),
+				requestMap.get("address"), requestMap.get("contact"),requestMap.get("startTime"), requestMap.get("endTime"));
+		if (state) {
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
+		} else {
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.REQUEST_FAIL, null);
+		}
+	}
+	
 }

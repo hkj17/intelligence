@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>管理界面</title>
+<script src="./js/jquery-1.11.1.js"></script>
+<script type="text/javascript" src="My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript">
+
+function confirm(){
+	var deviceSn=$("#deviceSn").val();
+	var username=$("#username").val();
+	var password=$("#password").val();
+	var company=$("#company").val();
+	var address=$("#address").val();
+	var contact=$("#contact").val();
+	var startTime=$("#startTime").val();
+	var endTime=$("#endTime").val();
+	
+	
+	$.ajax({
+		"type" : 'post',
+		"url" : "/intelligentStage-system-manage/rest/admin/adminManage",
+		"dataType" : "json",
+		"data" : {
+			"deviceSn" : deviceSn,
+			"username" : username,
+			"password" : password,
+			"company" : company,
+			"address" : address,
+			"contact" : contact,
+			"startTime" : startTime,
+			"endTime":endTime
+		},
+		success : function(data) {
+			if(data.result_code==0){
+                alert("添加成功");
+                window.location.href="index.html";
+            }else{
+                alert("添加失败");
+            }
+		}
+	})
+}
+
+</script>
+<style type="text/css">
+.main {
+	text-align: right;
+	width: 320px;
+}
+</style>
+</head>
+<body>
+<div style="font-size: 20px;font-weight: bold;margin-left: 100px;">管理员系统</div>
+<div style="margin-top:30px" class="main">
+<label>设备id:</label>
+<input id="deviceSn" type="text" /><br>
+<label>超级管理员账号:</label>
+<input id="username" type="text" style="margin-top: 10px;"/><br>
+<label>密码:</label>
+<input id="password" type="password" style="margin-top: 10px;"/><br>
+
+<label>公司名称:</label>
+<input id="company" type="text" style="margin-top: 10px;"/><br>
+
+<label>地址:</label>
+<input id="address" type="text" style="margin-top: 10px;"/><br>
+
+<label>联系方式:</label>
+<input id="contact" type="text" style="margin-top: 10px;"/><br>
+
+<label>上班时间:</label>
+<input id="startTime" type="text" style="margin-top: 10px;" onClick="WdatePicker({dateFmt:'HH:mm:ss'})" /><br>
+
+<label>下班时间:</label>
+<input id="endTime" type="text" style="margin-top: 10px;" onClick="WdatePicker({dateFmt:'HH:mm:ss'})" /><br>
+
+<input type="button" value="保存" onclick="confirm()" style="margin-top: 30px;"/>
+</div>
+
+</body>
+</html>
