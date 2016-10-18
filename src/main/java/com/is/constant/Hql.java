@@ -37,8 +37,6 @@ public class Hql {
 	
 	public static final String GET_CLOCK_BY_EMPLOYEE="SELECT a,b.employeeName,b.jobId,b.department.department from ClockRecord a,Employee b where b.employeeId=a.employeeId and a.employeeId=? and a.startClock>=?";
 	
-	public static final String GET_CLOCK_DETAIL="SELECT a,b.employeeName,b.jobId,b.department.department from ClockRecord a,Employee b where b.employeeId=a.employeeId and a.employeeId=? and a.startClock like ?";
-	
 	//public static final String GET_PINGYIN_BY_NAME="from Employee where pingyin like ?%";
 	
 	public static final String GET_VISITORINFO_BY_ID="from VisitorInfo where id=?";
