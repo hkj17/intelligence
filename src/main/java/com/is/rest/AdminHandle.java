@@ -62,6 +62,27 @@ public class AdminHandle {
 			return ResponseFactory.response(Response.Status.OK, ResponseCode.REQUEST_FAIL, null);
 		}
 	}
+	
+	@POST
+	@Path("/checkname")
+	public Response checkname(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		Admin admin=adminService.getAdminByName(requestMap.get(USER_NAME));
+		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, admin);
+	}
+	
+	@POST
+	@Path("/adminLogin")
+	public Response adminLogin(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		String username=requestMap.get("adminName");
+		String password=requestMap.get("password");
+		if (username.equals("superadmin") && password.equals("123456")) {
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
+		} else {
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.REQUEST_FAIL, null);
+		}
+	}
 
 	@POST
 	@Path("/login")

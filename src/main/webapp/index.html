@@ -6,6 +6,13 @@
 <script src="./js/jquery-1.11.1.js"></script>
 <script type="text/javascript" src="My97DatePicker/WdatePicker.js"></script>
 <script type="text/javascript">
+$(function() {
+	var url=window.location.href;
+	if(url.substring(url.indexOf("#")+1)!="admin"){
+		 window.location.href="login.html";
+	}
+})
+
 
 function confirm(){
 	var deviceSn=$("#deviceSn").val();
@@ -43,6 +50,24 @@ function confirm(){
 	})
 }
 
+function checkname(){
+	var username=$("#username").val();
+	$.ajax({
+		"type" : 'post',
+		"url" : "/intelligentStage-system-manage/rest/admin/checkname",
+		"dataType" : "json",
+		"data" : {
+			"adminName" : username
+		},
+		success : function(data) {
+			var info=data.data;
+			if(info!=null){
+				alert("用户名已存在");
+			}
+		}
+	})
+}
+
 </script>
 <style type="text/css">
 .main {
@@ -57,7 +82,7 @@ function confirm(){
 <label>设备id:</label>
 <input id="deviceSn" type="text" /><br>
 <label>超级管理员账号:</label>
-<input id="username" type="text" style="margin-top: 10px;"/><br>
+<input id="username" type="text" style="margin-top: 10px;" onblur="checkname()"/><br>
 <label>密码:</label>
 <input id="password" type="password" style="margin-top: 10px;"/><br>
 

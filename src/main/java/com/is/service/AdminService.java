@@ -446,6 +446,16 @@ public class AdminService {
 		com.setTimeWork(startTime);
 		com.setTimeRest(endTime);
 		cloudDao.add(com);
+		
+		Employee employee=new Employee();
+		String employeeId = UUID.randomUUID().toString().trim().replaceAll("-", "");
+		employee.setEmployeeId(employeeId);
+		employee.setAddress(address);
+		employee.setAdmin(admin);
+		employee.setCompany(com);
+		employee.setEmployeeName(username);
+		cloudDao.add(employee);
+		
 		return true;
 	}
 	
