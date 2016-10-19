@@ -78,7 +78,9 @@ public class EmployeeService {
 			return null;
 		}
 		List<Visitor> all=visitors;
+		List<String> time=new ArrayList<>();
 		while(true){
+			time.add(date);
 			Map<String, Object> map=group(all, date);
 			List<String> result=(List<String>) map.get("result");	
 			jsonArray.add(result);
@@ -91,6 +93,7 @@ public class EmployeeService {
 				break;
 			}
 		}
+		jsonObject.put("time", time);
 		jsonObject.put("photo", jsonArray);
 		return jsonObject;
 	}
