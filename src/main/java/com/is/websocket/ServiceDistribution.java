@@ -91,7 +91,7 @@ public class ServiceDistribution implements ApplicationContextAware {
 		String time=jsonObject.getString("time");
 		VisitorService visitorService = (VisitorService) ServiceDistribution.getContext().getBean("visitorService");
 		String deviceId=ChannelNameToDeviceMap.getDeviceMap(socketChannel.name());
-		visitorService.insertVisitor(deviceId, visitorId, time,null);
+		visitorService.insertVisitor(deviceId, visitorId, time,null,null);
 		
 		JSONObject responseCode = new JSONObject();
 		responseCode.put("type", 3);
@@ -107,7 +107,7 @@ public class ServiceDistribution implements ApplicationContextAware {
 		String employeeId=jsonObject.getString("employeeId");
 		VisitorService visitorService = (VisitorService)getContext().getBean("visitorService");
 		String deviceId=ChannelNameToDeviceMap.getDeviceMap(socketChannel.name());
-		visitorService.insertVisitor(deviceId, visitorId, time,employeeId);
+		visitorService.insertVisitor(deviceId, visitorId, time,employeeId,null);
 		EmployeeService employeeService= (EmployeeService)getContext().getBean("employeeService");
 		employeeService.sendMsg(employeeId);
 		
@@ -137,7 +137,7 @@ public class ServiceDistribution implements ApplicationContextAware {
 		String time=jsonObject.getString("time");
 		String employeeId=jsonObject.getString("employeeId");
 		VisitorService visitorService = (VisitorService)getContext().getBean("visitorService");
-		visitorService.insertVisitor(deviceId, null, time,employeeId);
+		visitorService.insertVisitor(deviceId, null, time,employeeId,path);
 		EmployeeService employeeService= (EmployeeService)getContext().getBean("employeeService");
 		employeeService.sendMsg(employeeId);
 		
@@ -192,13 +192,14 @@ public class ServiceDistribution implements ApplicationContextAware {
 	}
 	
 	public static JSONObject handleJson3_23(JSONObject jsonObject,ChannelHandlerContext ctx) {
+		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
 		String photo = jsonObject.getString("photo");
 		if(photo.startsWith("data")){
 			photo = photo.substring(photo.indexOf(",")+1);
 		}
 		String id =jsonObject.getString("strangerId");
 		String deviceId = ChannelNameToDeviceMap.getDeviceMap(ctx.name());
-		String path = FACE_PHOTO_PATH + deviceId;
+		String path = FACE_PHOTO_PATH + deviceId+"/"+sdf.format(new Date());;
 		if (!(new File(path).isDirectory())) {
 			new File(path).mkdirs();
 		}

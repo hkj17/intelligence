@@ -2,6 +2,7 @@ package com.is.service;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.is.model.Employee;
 import com.is.model.Visitor;
 import com.is.model.VisitorInfo;
 import com.is.system.dao.CloudDao;
@@ -75,8 +77,8 @@ public class VisitorService {
 	}
 	
 	
-	public List<Visitor> indexVisitor(String depaertmentId,String name,String startTime,String endTime){
-		return intelligenceDao.indexVisitor(depaertmentId,name,startTime, endTime);
+	public List<Visitor> indexVisitor(String depaertmentId,String name,String startTime,String endTime,String deviceId){
+		return intelligenceDao.indexVisitor(depaertmentId,name,startTime, endTime,deviceId);
 	}
 	
 	public VisitorInfo getVisitorById(String id){
@@ -119,18 +121,30 @@ public class VisitorService {
 		}
 	}
 	
-	public void insertVisitor(String deviceId,String infoId,String time,String employeeId){
+	public void insertVisitor(String deviceId,String infoId,String time,String employeeId,String path){
 		Visitor visitor=new Visitor();
 		String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
 		visitor.setId(id);
 		if(infoId!=null){
 			VisitorInfo visitorInfo=intelligenceDao.getVisitorInfoById(infoId);
 			visitor.setVisitorInfo(visitorInfo);
+			visitor.setPhoto(visitorInfo.getPhotoPath());
 		}
-		visitor.setEmployeeId(employeeId);
+		if(path!=null){
+			visitor.setPhoto(path);
+		}
+		if(employeeId!=null){
+			Employee employee=intelligenceDao.getEmployeeById(employeeId);
+			visitor.setEmployee(employee);
+		}
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		try {
-			visitor.setStartTime(formatter.parse(time));
+			if(time!=null){
+				visitor.setStartTime(formatter.parse(time));
+			}
+			else{
+				visitor.setStartTime(new Date());
+			}
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

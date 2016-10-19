@@ -4,6 +4,7 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -37,14 +38,27 @@ public class Visitor implements CloudEntity {
 	@Column(name = "end_time")
 	private Date endTime;
 	
-	@Column(name = "employee_id")
-	private String employeeId;
+	@JoinColumn(name = "employee_id")
+	@ManyToOne(fetch = FetchType.LAZY)
+	@NotFound(action=NotFoundAction.IGNORE)
+	private Employee employee;
 	
 	@Column(name = "device_id")
 	private String deviceId;
 	
+	@Column(name = "photo")
+	private String photo;
+	
 	@Transient
 	private String employeeName;
+	
+	public void setPhoto(String photo) {
+		this.photo = photo;
+	}
+	
+	public String getPhoto() {
+		return photo;
+	}
 	
 	public void setDeviceId(String deviceId) {
 		this.deviceId = deviceId;
@@ -97,12 +111,12 @@ public class Visitor implements CloudEntity {
 	}
 
 
-	public void setEmployeeId(String employeeId) {
-		this.employeeId = employeeId;
+	public void setEmployee(Employee employee) {
+		this.employee = employee;
 	}
 	
-	public String getEmployeeId() {
-		return employeeId;
+	public Employee getEmployee() {
+		return employee;
 	}
 	
 	

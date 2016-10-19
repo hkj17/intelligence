@@ -142,7 +142,8 @@ public class AdminHandle {
 	@Path("/getUserList")
 	@LoginRequired
 	public Response getUserList(@Context HttpServletRequest request) {
-		List<Employee> userlist = adminService.getEmployeeList();
+		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		List<Employee> userlist = adminService.getEmployeeList(deviceId);
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, userlist);
 	}
 
@@ -173,8 +174,9 @@ public class AdminHandle {
 	@LoginRequired
 	public Response editEmployee(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		String deviceId=(String) request.getSession().getAttribute("deviceSn");
 		boolean state = adminService.editEmployee(requestMap.get(EMPLOYEE_ID), requestMap.get(NAME),
-				requestMap.get(BIRTH), requestMap.get(CONTACT),  requestMap.get("deviceId"),
+				requestMap.get(BIRTH), requestMap.get(CONTACT),  deviceId,
 				requestMap.get("positon"), requestMap.get("jobId"), requestMap.get("address"),
 				requestMap.get("email"), requestMap.get("idCard"), requestMap.get("workPos"));
 		if (state) {
@@ -201,12 +203,6 @@ public class AdminHandle {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		List<Employee> employees = adminService.getEmployeeByName(requestMap.get(EMPLOYEE_NAME),deviceId);
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, employees);
-	}
-
-	@GET
-	@Path("/demo")
-	public void demo() {
-		adminService.test();
 	}
 
 	/*@POST
@@ -238,8 +234,9 @@ public class AdminHandle {
 	@Path("/getEmployeeByWhere")
 	public Response getEmployeeByWhere(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
-		List<Employee> employees = adminService.getEmployeeByWhere(requestMap.get("word"), requestMap.get("company"),
-				requestMap.get("department"));
+		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		List<Employee> employees = adminService.getEmployeeByWhere(requestMap.get("word"),
+				requestMap.get("department"),deviceId);
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, employees);
 	}
 
