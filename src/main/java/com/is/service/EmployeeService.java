@@ -69,6 +69,15 @@ public class EmployeeService {
 		List<Visitor> visitors=intelligenceDao.indexVisitorPath(departmentId, name, startTime, endTime,deviceId,first);
 		jsonObject.put("currentPage", tagnum);
 		JSONArray jsonArray=new JSONArray();
+		for(Visitor visitor:visitors){
+			JSONObject viJsonObject=new JSONObject();
+			viJsonObject.put("visitorInfo", visitor.getVisitorInfo());
+			viJsonObject.put("url", visitor.getPhoto());
+			viJsonObject.put("time", visitor.getStartTime());
+			jsonArray.add(viJsonObject);
+		}
+		jsonObject.put("photo", jsonArray);
+		/*JSONArray jsonArray=new JSONArray();
 		String date=null;
 		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
 		if(visitors.size()>0){
@@ -94,7 +103,7 @@ public class EmployeeService {
 			}
 		}
 		jsonObject.put("time", time);
-		jsonObject.put("photo", jsonArray);
+		jsonObject.put("photo", jsonArray);*/
 		return jsonObject;
 	}
 	

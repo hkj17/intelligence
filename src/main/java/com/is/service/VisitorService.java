@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +18,7 @@ import com.is.system.dao.CloudDao;
 import com.is.system.dao.IntelligenceDao;
 import com.is.websocket.AddFuture;
 import com.is.websocket.CheckResponse;
+import com.is.websocket.HttpServerInboundHandler;
 import com.is.websocket.ServiceDistribution;
 import com.is.websocket.SyncFuture;
 
@@ -24,7 +26,7 @@ import com.is.websocket.SyncFuture;
 @Component("visitorService")
 public class VisitorService {
 
-	
+	private static Logger logger = Logger.getLogger(VisitorService.class);
 	@Autowired
 	private IntelligenceDao intelligenceDao;
 
@@ -138,6 +140,7 @@ public class VisitorService {
 			visitor.setEmployee(employee);
 		}
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		logger.info(time);
 		try {
 			if(time!=null){
 				visitor.setStartTime(formatter.parse(time));

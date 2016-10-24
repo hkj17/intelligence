@@ -342,7 +342,7 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 			query.setParameter(p, map.get(p));
 		}
 		query.setFirstResult(firstResult);
-		query.setMaxResults(20);
+		query.setMaxResults(25);
 		List<Visitor> list=((SQLQuery) query).addEntity(Visitor.class).list();
 		return list;
 	}

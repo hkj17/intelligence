@@ -19,11 +19,9 @@ public class HttpServerInboundHandler extends ChannelInboundHandlerAdapter {
 		
 		String resultStr = new String(result1);
 		if(resultStr.length()<100){
-			System.out.println("Client said:" + resultStr);
 			logger.info("Client said:" + resultStr);
 		}
 		else {
-			System.out.println("Client said:" + resultStr.substring(0,98));
 			logger.info("Client said:" + resultStr.substring(0,98));
 		}
 		result.release();
