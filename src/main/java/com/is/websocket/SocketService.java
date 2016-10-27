@@ -92,6 +92,13 @@ public class SocketService {
 			byte[] answer=responseByte(responseCode,anType,anCode);
 			excuteWrite(answer,socketChannel);
 		}
+		else if (type.equals("8") && code.equals("1")) {
+			responseCode=ServiceDistribution.handleJson8_1(jsonObject,socketChannel);
+			anType="8";
+			anCode="2";
+			byte[] answer=responseByte(responseCode,anType,anCode);
+			excuteWrite(answer,socketChannel);
+		}
 		else if (type.equals("100") && code.equals("100")) {
 			responseCode=ServiceDistribution.handleJson100_100();
 			anType="100";

@@ -107,6 +107,38 @@ public class VisitorService {
 		return state;
 	}
 	
+	public String updateVisitorInfoByRecord(String name,String company,String position,
+			String telphone,String email,String companyUrl,
+			String deviceId,String importance,String birth,String visitorId){
+		Visitor visitor=intelligenceDao.getVisitorById(visitorId);
+		String path=visitor.getPhoto();
+		VisitorInfo info=new VisitorInfo();
+		String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
+		info.setId(id);
+		info.setDeviceId(deviceId);
+		info.setName(name);
+		info.setCompany(company);
+		info.setPosition(position);
+		info.setTelphone(telphone);
+		info.setEmail(email);
+		info.setCompanyUrl(companyUrl);
+		info.setImportance(Integer.parseInt(importance));
+		info.setBirth(birth);
+		info.setPhotoPath(path);
+		cloudDao.add(info);
+		
+		visitor.setVisitorInfo(info);
+		cloudDao.update(visitor);
+		
+		String strangerId=path==null?null:path.substring(path.lastIndexOf("/")+1,path.lastIndexOf("."));
+		SyncFuture<String> future=AddFuture.setFuture(deviceId);
+		CheckResponse response=new CheckResponse(deviceId, "103_12",future);
+		response.start();
+		ServiceDistribution.handleJson103_11(id, strangerId, name, company,position,birth, deviceId);
+		return id;
+		
+	}
+	
 	public Boolean deleteVisitorRecord(String id){
 		Visitor visitor=intelligenceDao.getVisitorById(id);
 		if(visitor!=null){

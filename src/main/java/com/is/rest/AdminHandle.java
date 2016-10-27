@@ -178,7 +178,7 @@ public class AdminHandle {
 		boolean state = adminService.editEmployee(requestMap.get(EMPLOYEE_ID), requestMap.get(NAME),
 				requestMap.get(BIRTH), requestMap.get(CONTACT),  deviceId,
 				requestMap.get("positon"), requestMap.get("jobId"), requestMap.get("address"),
-				requestMap.get("email"), requestMap.get("idCard"), requestMap.get("workPos"));
+				requestMap.get("email"), requestMap.get("idCard"), requestMap.get("workPos"),requestMap.get("sex"));
 		if (state) {
 			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
 		} else {

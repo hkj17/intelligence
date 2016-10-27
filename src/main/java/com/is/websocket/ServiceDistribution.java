@@ -118,6 +118,22 @@ public class ServiceDistribution implements ApplicationContextAware {
 		return responseCode;
 		
 	}
+	
+	public static JSONObject handleJson8_1(JSONObject jsonObject, ChannelHandlerContext socketChannel) {
+		String employeeId=jsonObject.getString("employeeId");
+		String templateSeqno=jsonObject.getString("templateSeqno");
+		String templateId=jsonObject.getString("templateId");
+		String photo=jsonObject.getString("templatePic");
+		
+		JSONObject responseCode = new JSONObject();
+		responseCode.put("type", 8);
+		responseCode.put("code", 2);
+		responseCode.put("employeeId", employeeId);
+		responseCode.put("templateId", templateId);
+		responseCode.put("templateSeqno", templateSeqno);
+		return responseCode;
+		
+	}
 	public static JSONObject handleJson4_1(JSONObject jsonObject, ChannelHandlerContext socketChannel) {
 		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
 		String photo = jsonObject.getString("photo");

@@ -176,7 +176,7 @@ public class AdminService {
 
 	public Boolean editEmployee(String employeeId, String name, String birth, String contact, 
 			String deviceId, String position, String jobId, String address, String email,
-			String idCard, String workPos) {
+			String idCard, String workPos,String sex) {
 		Employee employee = intelligenceDao.getEmployeeById(employeeId);
 		employee.setEmployeeName(name);
 		employee.setBirth(birth);
@@ -186,6 +186,7 @@ public class AdminService {
 		employee.setAddress(address);
 		employee.setEmail(email);
 		employee.setIdCard(idCard);
+		employee.setSex(Integer.parseInt(sex));
 		employee.setWorkPos(workPos);
 		cloudDao.update(employee);
 		SyncFuture<String> future=AddFuture.setFuture(deviceId);

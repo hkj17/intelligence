@@ -61,6 +61,7 @@ public class EmployeeService {
 
 	public JSONObject getStrangerPhoto(String departmentId,String name,String startTime,String endTime,String tag,String deviceId){
 		JSONObject jsonObject=new JSONObject();
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		int tagnum=Integer.parseInt(tag);
 		int count=intelligenceDao.indexVisitorCount(departmentId, name, startTime, endTime,deviceId);
 		jsonObject.put("totalPage", count);	
@@ -71,9 +72,11 @@ public class EmployeeService {
 		JSONArray jsonArray=new JSONArray();
 		for(Visitor visitor:visitors){
 			JSONObject viJsonObject=new JSONObject();
-			viJsonObject.put("visitorInfo", visitor.getVisitorInfo());
+			viJsonObject.put("visitor", visitor);
 			viJsonObject.put("url", visitor.getPhoto());
-			viJsonObject.put("time", visitor.getStartTime());
+			if(visitor.getStartTime()!=null){
+				viJsonObject.put("time", formatter.format(visitor.getStartTime()));
+			}
 			jsonArray.add(viJsonObject);
 		}
 		jsonObject.put("photo", jsonArray);
