@@ -96,8 +96,8 @@ public class AdminService {
 		}
 	}
 
-	public List<Employee> getEmployeeList() {
-		return intelligenceDao.getEmployeeList();
+	public List<Employee> getEmployeeList(String deviceId) {
+		return intelligenceDao.getEmployeeList(deviceId);
 	}
 
 	public List<Company> getCompanyList() {
@@ -122,6 +122,7 @@ public class AdminService {
 		employee.setPosition(position);
 		employee.setJobId(jobId);
 		employee.setAddress(address);
+		employee.setDeviceId(deviceId);
 		employee.setEmail(email);
 		employee.setWorkPos(workPos);
 		if (null != department) {
@@ -175,7 +176,7 @@ public class AdminService {
 
 	public Boolean editEmployee(String employeeId, String name, String birth, String contact, 
 			String deviceId, String position, String jobId, String address, String email,
-			String idCard, String workPos) {
+			String idCard, String workPos,String sex) {
 		Employee employee = intelligenceDao.getEmployeeById(employeeId);
 		employee.setEmployeeName(name);
 		employee.setBirth(birth);
@@ -185,6 +186,7 @@ public class AdminService {
 		employee.setAddress(address);
 		employee.setEmail(email);
 		employee.setIdCard(idCard);
+		employee.setSex(Integer.parseInt(sex));
 		employee.setWorkPos(workPos);
 		cloudDao.update(employee);
 		SyncFuture<String> future=AddFuture.setFuture(deviceId);
@@ -255,8 +257,8 @@ public class AdminService {
 	}*/
 
 
-	public List<Employee> getEmployeeByWhere(String word, String company, String department) {
-		return intelligenceDao.getEmployeeByWhere(word, company, department);
+	public List<Employee> getEmployeeByWhere(String word,String department,String deviceId) {
+		return intelligenceDao.getEmployeeByWhere(word, department,deviceId);
 	}
 
 	public Boolean excuteCollection(String deviceId) {
@@ -398,19 +400,6 @@ public class AdminService {
 		return mapList;
 	}
 
-	public void test() {
-		List<Employee> list = intelligenceDao.getEmployeeList();
-		int i=0;
-		for (Employee employee : list) {
-			List<Department> departments=intelligenceDao.getDepartmentByCompany("3");
-			if(i>12){
-				i=0;
-			}
-			employee.setDepartment(departments.get(i));
-			cloudDao.update(employee);
-			i++;
-		}
-	}
 	
 	public List<Admin> searchAdmin(String name,String auth,String deviceId){
 		return intelligenceDao.searchAdmin(name, auth,deviceId);

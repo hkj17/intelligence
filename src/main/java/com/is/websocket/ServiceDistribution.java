@@ -91,7 +91,7 @@ public class ServiceDistribution implements ApplicationContextAware {
 		String time=jsonObject.getString("time");
 		VisitorService visitorService = (VisitorService) ServiceDistribution.getContext().getBean("visitorService");
 		String deviceId=ChannelNameToDeviceMap.getDeviceMap(socketChannel.name());
-		visitorService.insertVisitor(deviceId, visitorId, time,null);
+		visitorService.insertVisitor(deviceId, visitorId, time,null,null);
 		
 		JSONObject responseCode = new JSONObject();
 		responseCode.put("type", 3);
@@ -107,7 +107,7 @@ public class ServiceDistribution implements ApplicationContextAware {
 		String employeeId=jsonObject.getString("employeeId");
 		VisitorService visitorService = (VisitorService)getContext().getBean("visitorService");
 		String deviceId=ChannelNameToDeviceMap.getDeviceMap(socketChannel.name());
-		visitorService.insertVisitor(deviceId, visitorId, time,employeeId);
+		visitorService.insertVisitor(deviceId, visitorId, time,employeeId,null);
 		EmployeeService employeeService= (EmployeeService)getContext().getBean("employeeService");
 		employeeService.sendMsg(employeeId);
 		
@@ -115,6 +115,22 @@ public class ServiceDistribution implements ApplicationContextAware {
 		responseCode.put("type", 5);
 		responseCode.put("code", 2);
 		responseCode.put("visitorId", visitorId);
+		return responseCode;
+		
+	}
+	
+	public static JSONObject handleJson8_1(JSONObject jsonObject, ChannelHandlerContext socketChannel) {
+		String employeeId=jsonObject.getString("employeeId");
+		String templateSeqno=jsonObject.getString("templateSeqno");
+		String templateId=jsonObject.getString("templateId");
+		String photo=jsonObject.getString("templatePic");
+		
+		JSONObject responseCode = new JSONObject();
+		responseCode.put("type", 8);
+		responseCode.put("code", 2);
+		responseCode.put("employeeId", employeeId);
+		responseCode.put("templateId", templateId);
+		responseCode.put("templateSeqno", templateSeqno);
 		return responseCode;
 		
 	}
@@ -137,7 +153,7 @@ public class ServiceDistribution implements ApplicationContextAware {
 		String time=jsonObject.getString("time");
 		String employeeId=jsonObject.getString("employeeId");
 		VisitorService visitorService = (VisitorService)getContext().getBean("visitorService");
-		visitorService.insertVisitor(deviceId, null, time,employeeId);
+		visitorService.insertVisitor(deviceId, null, time,employeeId,path);
 		EmployeeService employeeService= (EmployeeService)getContext().getBean("employeeService");
 		employeeService.sendMsg(employeeId);
 		
@@ -192,13 +208,14 @@ public class ServiceDistribution implements ApplicationContextAware {
 	}
 	
 	public static JSONObject handleJson3_23(JSONObject jsonObject,ChannelHandlerContext ctx) {
+		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
 		String photo = jsonObject.getString("photo");
 		if(photo.startsWith("data")){
 			photo = photo.substring(photo.indexOf(",")+1);
 		}
 		String id =jsonObject.getString("strangerId");
 		String deviceId = ChannelNameToDeviceMap.getDeviceMap(ctx.name());
-		String path = FACE_PHOTO_PATH + deviceId;
+		String path = FACE_PHOTO_PATH + deviceId+"/"+sdf.format(new Date());;
 		if (!(new File(path).isDirectory())) {
 			new File(path).mkdirs();
 		}

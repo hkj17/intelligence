@@ -36,6 +36,9 @@ public class Employee {
 	@Column(name = "wechat")
 	private String wechat;
 	
+	@Column(name = "device_id")
+	private String deviceId;
+	
 	@ManyToOne
 	@JoinColumn(name = "admin_id")
 	@NotFound(action=NotFoundAction.IGNORE) 
@@ -89,6 +92,15 @@ public class Employee {
 	public void setTemplatePath(String templatePath) {
 		this.templatePath = templatePath;
 	}
+	
+	public void setDeviceId(String deviceId) {
+		this.deviceId = deviceId;
+	}
+	
+	public String getDeviceId() {
+		return deviceId;
+	}
+	
 	
 	public int getIsDuty() {
 		return isDuty;

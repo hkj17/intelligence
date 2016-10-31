@@ -47,8 +47,10 @@ public class VisitorHandler {
 	@LoginRequired
 	@Path("/indexVisitor")
 	public Response indexVisitor(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws ParseException{
+		String deviceId=(String) request.getSession().getAttribute("deviceSn");
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
-		List<Visitor> list=visitorService.indexVisitor(requestMap.get("departmentId"), requestMap.get("name"),requestMap.get("startTime"), requestMap.get("endTime"));
+		List<Visitor> list=visitorService.indexVisitor(requestMap.get("departmentId"), requestMap.get("name"),
+				requestMap.get("startTime"), requestMap.get("endTime"),deviceId);
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, list);
 	}
 	
@@ -119,4 +121,16 @@ public class VisitorHandler {
 		}
 	}
 	
+	
+	@POST
+	@Path("/updateVisitorInfoByRecord")
+	@LoginRequired
+	public Response updateVisitorInfoByRecord(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws ParseException{
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		String id=visitorService.updateVisitorInfoByRecord(requestMap.get("name"), requestMap.get("company"), 
+				requestMap.get("position"), requestMap.get("telphone"), requestMap.get("email"), 
+				requestMap.get("companyUrl"),deviceId,requestMap.get("importance"),requestMap.get("birth"),requestMap.get("id"));
+		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, id);
+	}
 }

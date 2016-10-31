@@ -64,8 +64,8 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 	}
 	
 	@Override
-	public List<Employee> getEmployeeList(){
-		return cloudDao.findByHql(Hql.GET_EMPLOYEE_LIST);
+	public List<Employee> getEmployeeList(String deviceId){
+		return cloudDao.findByHql(Hql.GET_EMPLOYEE_LIST,deviceId);
 	}
 	
 	@Override
@@ -85,7 +85,7 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 	
 	@Override
 	public List<ClockRecord> getClockByWhere(String department,String user,String startClock,String endClock,String rule,String deviceId){
-		String sql="select clock,b.employeeName,b.jobId,b.department.department from ClockRecord clock,Employee b where clock.employeeId=b.employeeId and b.admin.deviceId='"+deviceId+"'";
+		String sql="select clock,b.employeeName,b.jobId,b.department.department from ClockRecord clock,Employee b where clock.employeeId=b.employeeId and b.deviceId='"+deviceId+"'";
 		Map<Integer, String> map=new HashMap<>();
 		endClock=endClock+" 23:59:59";
 		int i=0;
@@ -122,21 +122,21 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 	}
 	
 	@Override
-	public List<Employee> getEmployeeByWhere(String word,String company,String department){
+	public List<Employee> getEmployeeByWhere(String word,String department,String deviceId){
 		if(word!=null){
-			Query query=getSession().createSQLQuery("select * from employee where company_id=? and (pingyin like ? or pingyin like ? or employee_name like ?)");
-			query.setParameter(0, company);
+			Query query=getSession().createQuery("select a from Employee a where a.department.id=? and (a.pingyin like ? or a.pingyin like ? or a.employeeName like ?) and a.deviceId=?");
+			query.setParameter(0, department);
 			query.setParameter(1, word + "%");
 			query.setParameter(2, "%" +","+word + "%");
 			query.setParameter(3, "%" +"%"+word + "%");
-			@SuppressWarnings("unchecked")
-			List<Employee> list=((SQLQuery) query).addEntity(Employee.class).list();
-			return list;
+			query.setParameter(4, deviceId);
+			return query.list();
 		}
 		else{
-			Query query=getSession().createSQLQuery("select * from employee where company_id='"+company+"' and department_id='"+department+"'");
-			List<Employee> list=((SQLQuery) query).addEntity(Employee.class).list();
-			return list;
+			Query query=getSession().createQuery("select a from Employee a where a.department.id=? and a.deviceId=?");
+			query.setParameter(0, department);
+			query.setParameter(1, deviceId);
+			return query.list();
 		}
 		
 	}
@@ -252,19 +252,19 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 	}
 	
 	@Override
-	public List<Visitor> indexVisitor(String depaertmentId,String name,String startTime,String endTime){
+	public List<Visitor> indexVisitor(String depaertmentId,String name,String startTime,String endTime,String deviceId){
 		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
 		
-		String sql="select a,b.employeeName from Visitor a,Employee b where a.employeeId=b.employeeId ";
+		String sql="select a from Visitor a where a.deviceId='"+deviceId+"' ";
 		Map<Integer, Object> map=new HashMap<>();
 		int i=0;
 		if(depaertmentId!=null && !"".equals(depaertmentId)){
-			sql=sql+" and b.department.id=?";
+			sql=sql+" and a.employee.department.id=?";
 			map.put(i, depaertmentId);
 			i=i+1;
 		}
 		if(name!=null && !"".equals(name)){
-			sql+=" and (b.pingyin like ? or b.pingyin like ? or b.employeeName like ?)";
+			sql+=" and (a.employee.pingyin like ? or a.employee.pingyin like ? or a.employee.employeeName like ?)";
 			map.put(i, name+"%");
 			map.put(i+1, "%" +","+name + "%");
 			map.put(i+2, "%"+name + "%");
@@ -281,7 +281,7 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 			i=i+1;
 		}
 		if(endTime!=null && !"".equals(endTime)){
-			sql+=" and a.endTime<=?";
+			sql+=" and a.startTime<=?";
 			try {
 				map.put(i, sdf.parse(endTime));
 			} catch (ParseException e) {
@@ -297,6 +297,102 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 		List<Visitor> list=query.list();
 		return list;
 	}
+	
+	@Override
+	public List<Visitor> indexVisitorPath(String depaertmentId,String name,String startTime,String endTime,String deviceId,int firstResult){
+		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+		
+		String sql="select a.* from visitor a left join employee b on a.employee_id=b.employee_id where a.device_id='"+deviceId+"' ";
+		Map<Integer, Object> map=new HashMap<>();
+		int i=0;
+		if(depaertmentId!=null && !"".equals(depaertmentId)){
+			sql=sql+" and b.department_id=?";
+			map.put(i, depaertmentId);
+			i=i+1;
+		}
+		if(name!=null && !"".equals(name)){
+			sql+=" and (b.pingyin like ? or b.pingyin like ? or b.employee_name like ?)";
+			map.put(i, name+"%");
+			map.put(i+1, "%" +","+name + "%");
+			map.put(i+2, "%"+name + "%");
+			i=i+3;
+		}
+		if(startTime!=null && !"".equals(startTime)){
+			sql+=" and a.start_time>=?";
+			try {
+				map.put(i, sdf.parse(startTime));
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			i=i+1;
+		}
+		if(endTime!=null && !"".equals(endTime)){
+			sql+=" and a.start_time<=?";
+			try {
+				map.put(i, sdf.parse(endTime));
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		sql+=" order by a.start_time desc";
+		Query query = getSession().createSQLQuery(sql);
+		for(int p=0;p<map.size();p++){
+			query.setParameter(p, map.get(p));
+		}
+		query.setFirstResult(firstResult);
+		query.setMaxResults(25);
+		List<Visitor> list=((SQLQuery) query).addEntity(Visitor.class).list();
+		return list;
+	}
+	
+	@Override
+	public int indexVisitorCount(String depaertmentId,String name,String startTime,String endTime,String deviceId){
+		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+		
+		String sql="select count(*) from visitor a left join employee b on a.employee_id=b.employee_id where a.device_id='"+deviceId+"' ";
+		Map<Integer, Object> map=new HashMap<>();
+		int i=0;
+		if(depaertmentId!=null && !"".equals(depaertmentId)){
+			sql=sql+" and b.department_id=?";
+			map.put(i, depaertmentId);
+			i=i+1;
+		}
+		if(name!=null && !"".equals(name)){
+			sql+=" and (b.pingyin like ? or b.pingyin like ? or b.employee_name like ?)";
+			map.put(i, name+"%");
+			map.put(i+1, "%" +","+name + "%");
+			map.put(i+2, "%"+name + "%");
+			i=i+3;
+		}
+		if(startTime!=null && !"".equals(startTime)){
+			sql+=" and a.start_time>=?";
+			try {
+				map.put(i, sdf.parse(startTime));
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			i=i+1;
+		}
+		if(endTime!=null && !"".equals(endTime)){
+			sql+=" and a.start_time<=?";
+			try {
+				map.put(i, sdf.parse(endTime));
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		Query query = getSession().createSQLQuery(sql);
+		for(int p=0;p<map.size();p++){
+			query.setParameter(p, map.get(p));
+		}
+		Object count=query.uniqueResult();
+		return Integer.parseInt(count.toString());
+	}
+	
 	
 	@Override
 	public Department getDepartmentById(String id){

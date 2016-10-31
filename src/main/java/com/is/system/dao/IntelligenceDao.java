@@ -20,7 +20,7 @@ public interface IntelligenceDao {
 	
 	public Admin getAdminByName(String username);
 	
-	public List<Employee> getEmployeeList();
+	public List<Employee> getEmployeeList(String deviceId);
 	
 	public Company getCompanyById(int id);
 	
@@ -37,6 +37,11 @@ public interface IntelligenceDao {
 	public Employee getEmployeeByAdmin(String adminId);
 	
 	public Employee getEmployeeById(String id);
+	
+	public List<Visitor> indexVisitorPath(String depaertmentId,String name,String startTime,
+			String endTime,String deviceId,int first);
+	
+	public int indexVisitorCount(String departmentId, String name, String startTime,String endTime,String deviceId);
 	
 	public Notification getNotifyById(int id);
 	
@@ -70,13 +75,13 @@ public interface IntelligenceDao {
 	
 	public List<ClockTime> getDetailClock(String employeeId);
 	
-	public List<Employee> getEmployeeByWhere(String word,String company,String department);
+	public List<Employee> getEmployeeByWhere(String word,String department,String deviceId);
 	
 	public VisitorInfo getVisitorInfoById(String id);
 
 	public List<Department> getDepartmentByCompany(String company);
 	
-	public List<Visitor> indexVisitor(String depaertmentId,String name,String startTime,String endTime);
+	public List<Visitor> indexVisitor(String depaertmentId,String name,String startTime,String endTime,String deviceId);
 	
 	public Department getDepartmentById(String id);
 	

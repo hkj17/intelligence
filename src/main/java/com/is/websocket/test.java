@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -80,41 +81,13 @@ public class test {
 		   }  
 		   }  
 	
-	public static void main(String[] args) {
-		String methodName="handleJson103_1";
-		Object[] params=new Object[]{"2","2","2","2","2"};
-		try {
-			Class<?> c = Class.forName("com.is.websocket.ServiceDistribution");
-			Object obj = c.newInstance();
-			Class[] cla = new Class[params.length];
-			Arrays.fill(cla, String.class);
-			Method method = c.getMethod(methodName, cla);
-			method.invoke(obj , params);
-			
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		catch (NoSuchMethodException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	public static void main(String[] args) throws UnsupportedEncodingException {
+		byte[] b = new byte[4];
+		 b[0] = (byte) (192 & 0xff);
+		  b[1] = (byte) (168 >> 8 & 0xff);
+		  b[2] = (byte) (223 >> 16 & 0xff);
+		  b[3] = (byte) (31 >> 24 & 0xff);
+		  String str = new String(b, "GB2312");
+		  System.out.println(str);
 	}
 }

@@ -3,7 +3,7 @@ package com.is.constant;
 public class Hql {
 	public static final String GET_USER_BY_NAME = "from Admin a where a.username = ?";
 	
-	public static final String GET_EMPLOYEE_LIST = "from Employee em";
+	public static final String GET_EMPLOYEE_LIST = "from Employee em where em.deviceId=?";
 	
 	public static final String GET_COMPANY_BY_ID = "from Company a where a.companyId = ?";
 	
@@ -29,7 +29,7 @@ public class Hql {
 	
 	//public static final String GET_CLOCK_BY_NC="from ClockRecord cr where cr.employee.employeeId=? and cr.endClock like ?%";
 	
-	public static final String GET_EMPLOYEE_BY_NAME="from Employee e where e.employeeName=? and e.admin.deviceId=?";
+	public static final String GET_EMPLOYEE_BY_NAME="from Employee e where e.employeeName=? and e.deviceId=?";
 	
 	public static final String GET_CLOCK_PHOTO="from ClockPhoto cp";
 	
