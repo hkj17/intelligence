@@ -33,7 +33,6 @@ import com.is.model.Company;
 import com.is.model.Employee;
 import com.is.service.AdminService;
 import com.is.util.BusinessHelper;
-import com.is.util.LoginRequired;
 import com.is.util.ResponseFactory;
 
 @Component("adminHandler")
@@ -178,7 +177,7 @@ public class AdminHandle {
 		boolean state = adminService.editEmployee(requestMap.get(EMPLOYEE_ID), requestMap.get(NAME),
 				requestMap.get(BIRTH), requestMap.get(CONTACT),  deviceId,
 				requestMap.get("positon"), requestMap.get("jobId"), requestMap.get("address"),
-				requestMap.get("email"), requestMap.get("idCard"), requestMap.get("workPos"),requestMap.get("sex"));
+				requestMap.get("email"), requestMap.get("idCard"), requestMap.get("workPos"),requestMap.get("sex"),requestMap.get("path"));
 		if (state) {
 			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
 		} else {
@@ -334,6 +333,15 @@ public class AdminHandle {
 		} else {
 			return ResponseFactory.response(Response.Status.OK, ResponseCode.REQUEST_FAIL, null);
 		}
+	}
+	
+	
+	@POST
+	@Path("/getPhotoByTemplate")
+	public Response getPhotoByTemplate(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams){
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		List<String> list=adminService.getPhotoByTemplate(requestMap.get("employeeId"));
+		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, list);
 	}
 	
 }

@@ -191,7 +191,7 @@ public class AdminService {
 
 	public Boolean editEmployee(String employeeId, String name, String birth, String contact, 
 			String deviceId, String position, String jobId, String address, String email,
-			String idCard, String workPos,String sex) {
+			String idCard, String workPos,String sex,String path) {
 		Employee employee = intelligenceDao.getEmployeeById(employeeId);
 		employee.setEmployeeName(name);
 		employee.setBirth(birth);
@@ -203,6 +203,10 @@ public class AdminService {
 		employee.setIdCard(idCard);
 		employee.setSex(Integer.parseInt(sex));
 		employee.setWorkPos(workPos);
+		if(path!=null){
+			employee.setPhotoPath(path);
+		}
+		
 		cloudDao.update(employee);
 		SyncFuture<String> future=AddFuture.setFuture(deviceId);
 		CheckResponse response=new CheckResponse(deviceId, "104_2",future);
@@ -274,6 +278,12 @@ public class AdminService {
 
 	public List<Employee> getEmployeeByWhere(String word,String department,String deviceId) {
 		return intelligenceDao.getEmployeeByWhere(word, department,deviceId);
+	}
+	
+	public void updateEmployeeTemplatePhoto(String employeeId,String path){
+		Employee employee=intelligenceDao.getEmployeeById(employeeId);
+		employee.setTemplatePath(path);
+		cloudDao.update(employee);
 	}
 
 	public Boolean excuteCollection(String deviceId) {
@@ -493,5 +503,23 @@ public class AdminService {
 			cloudDao.update(employee);
 		}
 	}
+	
+	public List<String> getPhotoByTemplate(String employeeId){
+		String path=intelligenceDao.getEmployeeById(employeeId).getTemplatePath();
+		File file=new File(path);
+		List<String> list=new ArrayList<>();
+		if(file.isDirectory()){
+			File[] all = file.listFiles();
+			if(all!=null){
+				for(File photo:all){
+					String photoPath=photo.getAbsolutePath();
+					list.add(photoPath);
+				}
+			}
+		}
+		return list;
+	}
+	
+	
 
 }

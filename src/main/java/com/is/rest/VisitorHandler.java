@@ -1,5 +1,6 @@
 package com.is.rest;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
@@ -161,5 +162,21 @@ public class VisitorHandler {
 				requestMap.get("position"), requestMap.get("telphone"), requestMap.get("email"), 
 				requestMap.get("companyUrl"),deviceId,requestMap.get("importance"),requestMap.get("birth"),requestMap.get("id"));
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, id);
+	}
+	
+	@POST
+	@Path("/deleteVisitorPhoto")
+	//@LoginRequired
+	public Response deleteVisitorPhoto(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws ParseException{
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		String path=requestMap.get("path");
+		File file=new File(path);
+		if(file.exists()){
+			file.delete();
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
+		}
+		else {
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.REQUEST_FAIL, "file not found!");
+		}
 	}
 }

@@ -100,4 +100,6 @@ public interface IntelligenceDao {
 	
 	public Map<String, String> getDepartmentOrganization(String departmentId,String grade);
 	
+	public List<Visitor> getVisitorAll();
+	
 }

@@ -128,9 +128,13 @@ public class ServiceDistribution implements ApplicationContextAware {
 		if (!(new File(path).isDirectory())) {
 			new File(path).mkdirs();
 		}
-		path=path+"/"+templateId+templateSeqno+".jpg";
-		GenerateImage(photo, path);
+		String photopath=path+"/"+templateId;
+		GenerateImage(photo, photopath);
 		
+		if(templateSeqno.equals("1")){
+			AdminService adminService = (AdminService) ServiceDistribution.getContext().getBean("adminService");
+			adminService.updateEmployeeTemplatePhoto(employeeId, path);
+		}
 		JSONObject responseCode = new JSONObject();
 		responseCode.put("type", 8);
 		responseCode.put("code", 2);

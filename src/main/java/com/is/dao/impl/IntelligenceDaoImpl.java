@@ -507,6 +507,11 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 		List<ClockTime> list=query.list();
 		return list;
 	}
+
+	@Override
+	public List<Visitor> getVisitorAll() {
+		return cloudDao.findByHql(Hql.GET_VISITOR_ALL);
+	}
 	
 
 }
