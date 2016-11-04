@@ -66,7 +66,7 @@ public class EmployeeService {
 		int count=intelligenceDao.indexVisitorCount(departmentId, name, startTime, endTime,deviceId);
 		jsonObject.put("totalPage", count);	
 		
-		int first=(tagnum-1)*20+1;
+		int first=(tagnum-1)*25;
 		List<Visitor> visitors=intelligenceDao.indexVisitorPath(departmentId, name, startTime, endTime,deviceId,first);
 		jsonObject.put("currentPage", tagnum);
 		JSONArray jsonArray=new JSONArray();

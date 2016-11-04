@@ -89,6 +89,7 @@ public interface IntelligenceDao {
 	
 	public Company getCompanyByDeviceId(String deviceId);
 	
+	
 	public List<Admin> searchAdmin(String name,String auth,String deviceId); 
 	
 	public Visitor getVisitorById(String id);

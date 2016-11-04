@@ -1,5 +1,7 @@
 package com.is.websocket;
 
+import static com.is.constant.ParameterKeys.EMPLOYEE_FACE;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -82,12 +84,7 @@ public class test {
 		   }  
 	
 	public static void main(String[] args) throws UnsupportedEncodingException {
-		byte[] b = new byte[4];
-		 b[0] = (byte) (192 & 0xff);
-		  b[1] = (byte) (168 >> 8 & 0xff);
-		  b[2] = (byte) (223 >> 16 & 0xff);
-		  b[3] = (byte) (31 >> 24 & 0xff);
-		  String str = new String(b, "GB2312");
-		  System.out.println(str);
+		File file=new File("D:\\IotCloud\\test\\3.txt");
+		System.out.println(file.getName());
 	}
 }

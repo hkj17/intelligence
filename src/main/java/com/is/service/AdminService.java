@@ -1,7 +1,7 @@
 package com.is.service;
 
+import java.io.File;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +19,7 @@ import com.is.model.Admin;
 import com.is.model.Company;
 import com.is.model.Department;
 import com.is.model.Employee;
-import com.is.model.Message;
+import com.is.model.Visitor;
 import com.is.system.dao.CloudDao;
 import com.is.system.dao.IntelligenceDao;
 import com.is.websocket.AddFuture;
@@ -32,6 +32,8 @@ import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
 import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat;
 import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
 import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombination;
+
+import static com.is.constant.ParameterKeys.EMPLOYEE_FACE;
 
 /**
  * @author lishuhuan
@@ -106,7 +108,7 @@ public class AdminService {
 
 	public String addEmployee(String name, String birth, String contact,
 			String deviceId,  String photo, String position, String jobId, String address, String email,
-			String idCard, String workPos,String department,String sex,String isduty) {
+			String idCard, String workPos,String department,String sex,String isduty,String visitorId) {
 		Employee employee = new Employee();
 		// 鍒ゆ柇鏄惁涓烘眽瀛�
 		Pattern p = Pattern.compile("[\u4e00-\u9fa5]");
@@ -145,11 +147,24 @@ public class AdminService {
 		}
 		String strangerId=null;
 		if(photo!=null){
-			employee.setPhotoPath(photo);
-			strangerId=photo.substring(photo.lastIndexOf("/")+1,photo.lastIndexOf("."));
+			File file=new File(photo);
+			strangerId=file.getName();
+			
+			String newpath=EMPLOYEE_FACE+deviceId;
+			if (!(new File(newpath).isDirectory())) {
+				new File(newpath).mkdirs();
+			}
+			newpath=newpath+"/"+strangerId;
+			file.renameTo(new File(newpath));		
+			employee.setPhotoPath(newpath);
 		}
 
 		cloudDao.add(employee);
+		
+		if(visitorId!=null && !"".equals(visitorId)){
+			Visitor visitor=intelligenceDao.getVisitorById(visitorId);
+			cloudDao.delete(visitor);
+		}
 		SyncFuture<String> future=AddFuture.setFuture(deviceId);
 		CheckResponse response=new CheckResponse(deviceId, "103_2",future);
 		response.start();

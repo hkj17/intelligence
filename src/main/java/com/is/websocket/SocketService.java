@@ -2,6 +2,8 @@ package com.is.websocket;
 
 import java.io.IOException;
 
+import org.apache.log4j.Logger;
+
 import com.is.map.FutureMap;
 
 import io.netty.buffer.ByteBuf;
@@ -9,7 +11,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import net.sf.json.JSONObject;
 public class SocketService {
-
+	private static Logger logger = Logger.getLogger(SocketService.class);
 	//private static ByteArrayOutputStream databuff = new ByteArrayOutputStream();
 
 	public static void handleSocketMsg(byte[] bytes,ChannelHandlerContext socketChannel) throws IOException {
@@ -38,12 +40,12 @@ public class SocketService {
 		JSONObject responseCode = new JSONObject();
 		String type = jsonObject.getString("type");
 		String code = jsonObject.getString("code");
+		
+		logger.info("record:"+type+","+code);
 		String anType=null;
 		String anCode=null;
-		if (type.equals("8") && code.equals("1")) {
-			
-		}
-		else if (type.equals("1") && code.equals("1")) {
+	
+		if (type.equals("1") && code.equals("1")) {
 			responseCode=ServiceDistribution.handleJson1_1(jsonObject,socketChannel);
 			anType="1";
 			anCode="2";
@@ -119,13 +121,17 @@ public class SocketService {
 			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.name());
 			 future.setResponse("103_2");
 			 String employeeId=jsonObject.getString("employeeId");
-			 //ServiceDistribution.handleJson109_1(employeeId, socketChannel);
+			 ServiceDistribution.handleJson109_1(employeeId, socketChannel);
 		}
 		else if (type.equals("103") && code.equals("12")) {
 			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.name());
 			 future.setResponse("103_12");
 			 String visitorId=jsonObject.getString("visitorId");
 			 ServiceDistribution.handleJson109_11(visitorId, socketChannel);
+		}
+		else if (type.equals("106") && code.equals("2")) {
+			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.name());
+			 future.setResponse("106_2");
 		}
 		else if (type.equals("110") && code.equals("2")) {
 			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.name());
@@ -153,6 +159,10 @@ public class SocketService {
 		}
 		else if (type.equals("109") && code.equals("12")) {
 			ServiceDistribution.handleJson109_12(jsonObject,socketChannel);
+		}
+		else if (type.equals("114") && code.equals("2")) {
+			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.name());
+			 future.setResponse("114_2");
 		}
 		else {
 			excuteWrite("error type or code!".getBytes(),socketChannel);

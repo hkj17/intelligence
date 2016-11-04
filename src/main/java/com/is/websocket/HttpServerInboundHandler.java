@@ -18,11 +18,11 @@ public class HttpServerInboundHandler extends ChannelInboundHandlerAdapter {
 		result.readBytes(result1);
 		
 		String resultStr = new String(result1);
-		if(resultStr.length()<100){
+		if(resultStr.length()<200){
 			logger.info("Client said:" + resultStr);
 		}
 		else {
-			logger.info("Client said:" + resultStr.substring(0,98));
+			logger.info("Client said:" + resultStr.substring(0,198));
 		}
 		result.release();
 		SocketService.handleSocketMsg(result1,ctx);

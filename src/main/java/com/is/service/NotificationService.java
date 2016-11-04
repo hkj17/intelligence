@@ -52,17 +52,6 @@ public class NotificationService {
 		return intelligenceDao.getEmployeeByAdmin(adminId);
 	}
 	
-	public Boolean addAppointment(String employeeId,String type,String text) {
-		Appointment appointment=new Appointment();
-		Employee employee=intelligenceDao.getEmployeeById(employeeId);
-		appointment.setEmployee(employee);
-		appointment.setType(Integer.parseInt(type));
-		appointment.setThings(text);
-		 SimpleDateFormat df=new SimpleDateFormat("yyyy-MM-dd HH:MM:ss");
-		appointment.setTime(df.format(new Date()));
-		cloudDao.add(appointment);
-		return true;
-	}
 	
 	public Boolean deleteNews(String id){
 		Notification notification=intelligenceDao.getNotifyById(Integer.parseInt(id));

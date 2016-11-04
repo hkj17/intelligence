@@ -41,7 +41,7 @@ public class CompanyHandle {
 	
 	
 	@POST
-	@LoginRequired
+	//@LoginRequired
 	@Path("/addCompany")
 	public Response addCompany(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams){
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
@@ -54,7 +54,7 @@ public class CompanyHandle {
 	}
 	
 	@POST
-	@LoginRequired
+	//@LoginRequired
 	@Path("/editCompany")
 	public Response editCompany(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams){
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
@@ -68,7 +68,7 @@ public class CompanyHandle {
 	
 	@POST
 	@Path("/deleteCompany")
-	@LoginRequired
+	//@LoginRequired
 	public Response deleteCompany(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams){
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		String deviceId=(String) request.getSession().getAttribute("deviceSn");
@@ -82,7 +82,7 @@ public class CompanyHandle {
 	
 	@POST
 	@Path("/getDepartmentByCompany")
-	@LoginRequired
+	//@LoginRequired
 	public Response getDepartmentByCompany(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams){
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		List<Department> list=companyService.getDepartmentByCompany(requestMap.get(COMPANY_ID));
@@ -92,7 +92,7 @@ public class CompanyHandle {
 	
 	@POST
 	@Path("/getDepartmentByGrade")
-	@LoginRequired
+	//@LoginRequired
 	public Response getDepartmentByGrade(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams){
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		List<Department> list=companyService.getDepartmentByGrade(requestMap.get(COMPANY_ID),requestMap.get(GRADE));
@@ -101,7 +101,7 @@ public class CompanyHandle {
 	
 	@POST
 	@Path("/insertDepartment")
-	@LoginRequired
+	//@LoginRequired
 	public Response insertDepartment(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams){
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		boolean state=companyService.insertDepartment(requestMap.get("name"), requestMap.get("people"), requestMap.get("grade"), requestMap.get("parentId"), requestMap.get("companyId"));
@@ -114,7 +114,7 @@ public class CompanyHandle {
 	
 	@POST
 	@Path("/editDepartment")
-	@LoginRequired
+	//@LoginRequired
 	public Response editDepartment(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams){
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		boolean state=companyService.editDepartment(requestMap.get("name"), requestMap.get("people"), requestMap.get("grade"), requestMap.get("parentId"), requestMap.get("departmentId"));
@@ -126,7 +126,7 @@ public class CompanyHandle {
 	}
 	
 	@POST
-	@LoginRequired
+	//@LoginRequired
 	@Path("/deleteDepartment")
 	public Response deleteDepartment(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams){
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
@@ -140,7 +140,7 @@ public class CompanyHandle {
 	
 	@POST
 	@Path("/getDepartmentOrganization")
-	@LoginRequired
+	//@LoginRequired
 	public Response getDepartmentOrganization(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams){
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		Map<String, String> map=companyService.getDepartmentOrganization(requestMap.get("departmentId"),requestMap.get("grade"));
