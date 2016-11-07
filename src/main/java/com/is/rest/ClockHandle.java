@@ -32,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.is.constant.ResponseCode;
+import com.is.model.ClockAbnormal;
 import com.is.model.ClockAppeal;
 import com.is.model.ClockRecord;
 import com.is.model.ClockTime;
@@ -142,11 +143,12 @@ public class ClockHandle {
 	}
 	
 	@POST
-	@Path("/handleClockAppeal")
+	@Path("/checkHandClock")
 	//@LoginRequired
-	public Response handleClockAppeal(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
+	public Response checkHandClock(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
-		boolean state = clockService.handleClockAppeal(requestMap.get("appealId"),requestMap.get("result"));
+		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		boolean state = clockService.checkHandClock(requestMap.get("clockId"),requestMap.get("result"),deviceId);
 		if (state) {
 			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
 		} else {
@@ -236,6 +238,16 @@ public class ClockHandle {
 	public Response getDetailClock(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		List<ClockTime> list=clockService.getDetailClock(requestMap.get(EMPLOYEE_ID));
+		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, list);
+	}
+	
+	@POST
+	@Path("/getHandClockList")
+	//@LoginRequired
+	public Response getHandClockList(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		List<ClockAbnormal> list=clockService.getHandClockList(requestMap.get("startTime"), requestMap.get("endTime"), deviceId);
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, list);
 	}
 

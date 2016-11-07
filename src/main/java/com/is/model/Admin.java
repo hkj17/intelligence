@@ -38,7 +38,18 @@ public class Admin implements Serializable {
 	private int auditAuth;
 	
 	@Transient
+	private String employeeName;
+	
+	@Transient
 	private ResponseCode responseCode;
+	
+	public void setEmployeeName(String employeeName) {
+		this.employeeName = employeeName;
+	}
+	
+	public String getEmployeeName() {
+		return employeeName;
+	}
 	
 	public int getAuditAuth() {
 		return auditAuth;

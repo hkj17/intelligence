@@ -151,6 +151,16 @@ public class VisitorHandler {
 		}
 	}
 	
+	@POST
+	@Path("/getVisitorInfoList")
+	//@LoginRequired
+	public Response getVisitorInfoList(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws ParseException{
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		List<VisitorInfo> list=visitorService.getVisitorInfoByWhere(deviceId, requestMap.get("name"));
+		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, list);
+	}
+	
 	
 	@POST
 	@Path("/updateVisitorInfoByRecord")

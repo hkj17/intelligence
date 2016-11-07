@@ -14,6 +14,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
+import com.is.util.PasswordUtil;
+
 import sun.misc.BASE64Encoder;
 import sun.misc.BASE64Decoder;
 
@@ -84,7 +86,7 @@ public class test {
 		   }  
 	
 	public static void main(String[] args) throws UnsupportedEncodingException {
-		File file=new File("D:\\IotCloud\\test\\3.txt");
-		System.out.println(file.getName());
+		String aString=PasswordUtil.generatePassword("123456");
+		System.out.println(aString);
 	}
 }

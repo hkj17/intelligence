@@ -221,6 +221,10 @@ public class VisitorService {
 		}
 		return true;
 	}
+	
+	public List<VisitorInfo> getVisitorInfoByWhere(String deviceId,String name){
+		return intelligenceDao.getVisitorInfoByWhere(deviceId, name);
+	}
 
 	public void updateVisitorTemplate(String id, String path) {
 		VisitorInfo visitorInfo = intelligenceDao.getVisitorInfoById(id);

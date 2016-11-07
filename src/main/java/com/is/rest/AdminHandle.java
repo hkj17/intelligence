@@ -344,4 +344,18 @@ public class AdminHandle {
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, list);
 	}
 	
+	@POST
+	//@LoginRequired
+	@Path("/resetPassword")
+	public Response resetPassword(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams){
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		boolean state=adminService.resetPassword(requestMap.get("adminId"));
+		if (state) {
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
+		} else {
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.REQUEST_FAIL, null);
+		}
+				
+	}
+	
 }

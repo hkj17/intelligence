@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.is.model.Admin;
 import com.is.model.Appointment;
+import com.is.model.ClockAbnormal;
 import com.is.model.ClockAppeal;
 import com.is.model.ClockTime;
 import com.is.model.ClockRecord;
@@ -59,6 +60,8 @@ public interface IntelligenceDao {
 	
 	public ClockAppeal getClockAppealById(String id);
 	
+	public ClockAbnormal getHandClockById(String id);
+	
 	public Admin getAdminById(String id);
 	
 	public String getEmployeeIdByCompany(int id);
@@ -74,6 +77,8 @@ public interface IntelligenceDao {
 	public List<ClockRecord> getClockByEmployee(String id);
 	
 	public List<ClockTime> getDetailClock(String employeeId);
+	
+	public List<ClockAbnormal> getHandClockList(String startTime,String endTime,String deviceId);
 	
 	public List<Employee> getEmployeeByWhere(String word,String department,String deviceId);
 	
@@ -93,6 +98,8 @@ public interface IntelligenceDao {
 	public List<Admin> searchAdmin(String name,String auth,String deviceId); 
 	
 	public Visitor getVisitorById(String id);
+	
+	public List<VisitorInfo> getVisitorInfoByWhere(String deviceId,String name);
 	
 	public List<Employee> getAuditPersonList(String deviceId);
 	
