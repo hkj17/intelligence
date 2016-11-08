@@ -3,7 +3,6 @@ package com.is.websocket;
 import static com.is.constant.ParameterKeys.CLOCK_PHOTO_PATH;
 import static com.is.constant.ParameterKeys.EMPLOYEE_TEMPLATE;
 import static com.is.constant.ParameterKeys.FACE_PHOTO_PATH;
-import static com.is.constant.ParameterKeys.STRANGER_PHOTO;
 import static com.is.constant.ParameterKeys.VISITOR_TEMPLATE;
 
 import java.io.File;
@@ -124,7 +123,18 @@ public class ServiceDistribution implements ApplicationContextAware {
 		String templateSeqno=jsonObject.getString("templateSeqno");
 		String templateId=jsonObject.getString("templateId");
 		String photo=jsonObject.getString("templatePic");
+		String deviceId = ChannelNameToDeviceMap.getDeviceMap(socketChannel.name());
+		String path=EMPLOYEE_TEMPLATE+deviceId+"/"+employeeId;
+		if (!(new File(path).isDirectory())) {
+			new File(path).mkdirs();
+		}
+		String photopath=path+"/"+templateId;
+		GenerateImage(photo, photopath);
 		
+		if(templateSeqno.equals("1")){
+			AdminService adminService = (AdminService) ServiceDistribution.getContext().getBean("adminService");
+			adminService.updateEmployeeTemplatePhoto(employeeId, path);
+		}
 		JSONObject responseCode = new JSONObject();
 		responseCode.put("type", 8);
 		responseCode.put("code", 2);
@@ -142,7 +152,7 @@ public class ServiceDistribution implements ApplicationContextAware {
 		}
 		String id = jsonObject.getString("strangerId");
 		String deviceId = ChannelNameToDeviceMap.getDeviceMap(socketChannel.name());
-		String path = STRANGER_PHOTO + deviceId+"/"+sdf.format(new Date());
+		String path = FACE_PHOTO_PATH + deviceId+"/"+sdf.format(new Date());
 		if (!(new File(path).isDirectory())) {
 			new File(path).mkdirs();
 		}
@@ -194,7 +204,7 @@ public class ServiceDistribution implements ApplicationContextAware {
 		}
 		String id = jsonObject.getString("strangerId");
 		String deviceId = ChannelNameToDeviceMap.getDeviceMap(ctx.name());
-		String path = STRANGER_PHOTO + deviceId+"/"+sdf.format(new Date());
+		String path = FACE_PHOTO_PATH + deviceId+"/"+sdf.format(new Date());
 		if (!(new File(path).isDirectory())) {
 			new File(path).mkdirs();
 		}
@@ -253,6 +263,25 @@ public class ServiceDistribution implements ApplicationContextAware {
 		jsonObject.put("employeeName", employeeName);
 		jsonObject.put("birth", birth);
 		byte[] result = SocketService.responseByte(jsonObject, "103", "1");
+		if (null != channel) {
+			excuteWrite(result, channel);
+			return true;
+		} 
+		else {
+			return false;
+		}
+	}
+	
+	public static Boolean handleJson106_1(String deviceId,String employeeId,String time,String visitorId,String message){
+		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("type", 106);
+		jsonObject.put("code", 1);
+		jsonObject.put("employeeId", employeeId);
+		jsonObject.put("time", time);
+		jsonObject.put("visitorId", visitorId);
+		jsonObject.put("message", message);
+		byte[] result = SocketService.responseByte(jsonObject, "106", "1");
 		if (null != channel) {
 			excuteWrite(result, channel);
 			return true;
@@ -464,6 +493,27 @@ public class ServiceDistribution implements ApplicationContextAware {
 		}
 		VisitorService visitorService = (VisitorService) ServiceDistribution.getContext().getBean("visitorService");
 		visitorService.updateVisitorTemplate(visitorId, path);
+		
+	}
+	
+	public static Boolean handleJson114_1(String deviceId){
+		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
+		JSONObject jsonObject = new JSONObject();
+		String url="120.26.60.164:5555/update/package.zip";
+		jsonObject.put("type", 114);
+		jsonObject.put("code", 1);
+		jsonObject.put("url", url);
+		File file=new File(url);
+		long size=file.length();
+		jsonObject.put("length", size);	
+		byte[] result = SocketService.responseByte(jsonObject, "114", "1");
+		if (null != channel) {
+			excuteWrite(result, channel);
+			return true;
+		} 
+		else {
+			return false;
+		}
 		
 	}
 	

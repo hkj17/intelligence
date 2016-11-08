@@ -4,6 +4,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 @Entity(name = "ClockAbnormal")
 @Table(name = "clock_abnormal")
@@ -25,6 +26,28 @@ public class ClockAbnormal {
 	
 	@Column(name = "photo_path")
 	private String photoPath;
+	
+	@Column(name = "handle_result")
+	private int handleResult;
+	
+	@Transient
+	private String employeeName;
+	
+	public String getEmployeeName() {
+		return employeeName;
+	}
+	
+	public void setEmployeeName(String employeeName) {
+		this.employeeName = employeeName;
+	}
+	
+	public int getHandleResult() {
+		return handleResult;
+	}
+	
+	public void setHandleResult(int handleResult) {
+		this.handleResult = handleResult;
+	}
 
 	public String getId() {
 		return id;

@@ -1,6 +1,7 @@
 package com.is.model;
 
-import javax.persistence.CascadeType;
+import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -10,65 +11,93 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.NotFound;
-import org.hibernate.annotations.NotFoundAction;
-
 @Entity(name = "Appointment")
 @Table(name = "appointment")
 public class Appointment {
 	
 	
 	@Id
-	@Column(name = "ap_id")
+	@Column(name = "id")
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int apId;
+	private int id;
 	
 	@ManyToOne
-	@JoinColumn(name = "employee_id")
-	private Employee employee;
+	@JoinColumn(name = "visitor_id")
+	private VisitorInfo info;
 	
-	@Column(name = "things")
-	private String things;
+	@Column(name = "start_time")
+	private Date startTime;
 	
-	@Column(name = "type")
-	private int type;
+	@Column(name = "end_time")
+	private Date endTime;
 	
-	@Column(name = "time")
-	private String time;
+	@Column(name = "content")
+	private String content;
+	
+	@Column(name = "create_by")
+	private String createBy;
+	
+	@Column(name = "create_at")
+	private Date createAt;
 	
 	
+
+	public String getCreateBy() {
+		return createBy;
+	}
+
+	public void setCreateBy(String createBy) {
+		this.createBy = createBy;
+	}
+
+	public Date getCreateAt() {
+		return createAt;
+	}
+
+	public void setCreateAt(Date createAt) {
+		this.createAt = createAt;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public VisitorInfo getInfo() {
+		return info;
+	}
+
+	public void setInfo(VisitorInfo info) {
+		this.info = info;
+	}
+
+	public Date getStartTime() {
+		return startTime;
+	}
+
+	public void setStartTime(Date startTime) {
+		this.startTime = startTime;
+	}
+
+	public Date getEndTime() {
+		return endTime;
+	}
+
+	public void setEndTime(Date endTime) {
+		this.endTime = endTime;
+	}
+
+	public String getContent() {
+		return content;
+	}
+
+	public void setContent(String content) {
+		this.content = content;
+	}
 	
-	public int getType() {
-		return type;
-	}
-	public void setType(int type) {
-		this.type = type;
-	}
-	public String getTime() {
-		return time;
-	}
-	public void setTime(String time) {
-		this.time = time;
-	}
-	public int getApId() {
-		return apId;
-	}
-	public void setApId(int apId) {
-		this.apId = apId;
-	}
-	
-	public Employee getEmployee() {
-		return employee;
-	}
-	public void setEmployee(Employee employee) {
-		this.employee = employee;
-	}
-	public String getThings() {
-		return things;
-	}
-	public void setThings(String things) {
-		this.things = things;
-	}
 	
 	
 

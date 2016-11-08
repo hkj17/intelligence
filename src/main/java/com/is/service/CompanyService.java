@@ -14,6 +14,7 @@ import com.is.model.Department;
 import com.is.model.Employee;
 import com.is.system.dao.CloudDao;
 import com.is.system.dao.IntelligenceDao;
+import com.is.util.PasswordUtil;
 
 /** 
  * @author lishuhuan 
@@ -40,7 +41,7 @@ public class CompanyService {
 		admin.setAdminId(id);
 		admin.setAuthority(2);
 		admin.setUsername(adminName);
-		admin.setPassword(password);
+		admin.setPassword(PasswordUtil.generatePassword(password));
 		Company company=new Company();
 		company.setAddress(address);
 		company.setAdminId(id);

@@ -49,5 +49,6 @@ public class ParameterKeys {
 	public static final String CLOCK_PHOTO_PATH="/cloudweb/server/tomcat_intel/webapps/clock_img/";
 	public static final String EMPLOYEE_TEMPLATE="/cloudweb/server/tomcat_intel/webapps/template_photo/employee_template/";
 	public static final String VISITOR_TEMPLATE="/cloudweb/server/tomcat_intel/webapps/template_photo/visitor_template/";
-	public static final String STRANGER_PHOTO="/cloudweb/server/tomcat_intel/webapps/template_photo/stranger_photo/";
+	public static final String VISITOR_FACE="/cloudweb/server/tomcat_intel/webapps/template_photo/visitor_face/";
+	public static final String EMPLOYEE_FACE="/cloudweb/server/tomcat_intel/webapps/template_photo/employee_face/";
 }

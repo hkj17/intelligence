@@ -28,7 +28,6 @@ import com.is.websocket.SyncFuture;
  * @author lishuhuan
  * @date 2016年4月6日 类说明
  */
-@SuppressWarnings("deprecation")
 @Transactional
 @Component("clockService")
 public class ClockService {
@@ -136,12 +135,12 @@ public class ClockService {
 		return true;
 	}
 	
-	public Boolean handleClockAppeal(String appealId,String result){
-		ClockAppeal clockAppeal=intelligenceDao.getClockAppealById(appealId);
-		clockAppeal.setResult(Integer.parseInt(result));
-		cloudDao.update(clockAppeal);
-		if(result.equals("0")){
-			addClock(clockAppeal.getEmployeeId(), clockAppeal.getFirstClock(), clockAppeal.getLastClock());
+	public Boolean checkHandClock(String clockId,String result,String deviceId){
+		ClockAbnormal abnormal=intelligenceDao.getHandClockById(clockId);
+		abnormal.setHandleResult(Integer.parseInt(result));
+		cloudDao.update(abnormal);
+		if(result.equals("1")){
+			addClocknormal(deviceId,abnormal.getEmployeeId(), abnormal.getClockTime());
 		}
 		return true;
 	}
@@ -178,11 +177,19 @@ public class ClockService {
 		return true;
 	}
 
-	public Boolean addClockAbnormal(String deviceId,String id, String time) {
+	public Boolean addClockAbnormal(String deviceId,String employeeId, String time) {
+		ClockAbnormal abnormal=new ClockAbnormal();
+		String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
+		abnormal.setId(id);
+		abnormal.setDeviceId(deviceId);
+		abnormal.setClockTime(time);
+		abnormal.setEmployeeId(employeeId);
+		cloudDao.add(abnormal);
+		
 		SyncFuture<String> future=AddFuture.setFuture(deviceId);
 		CheckResponse response=new CheckResponse(deviceId, "110_2",future);
 		response.start();
-		boolean state=ServiceDistribution.handleJson110_1(deviceId, id, time);
+		boolean state=ServiceDistribution.handleJson110_1(deviceId, employeeId, time);
 		return state;
 	}
 	
@@ -226,5 +233,9 @@ public class ClockService {
 	
 	public List<ClockTime> getDetailClock(String employeeId){
 		return intelligenceDao.getDetailClock(employeeId);
+	}
+	
+	public List<ClockAbnormal> getHandClockList(String startTime,String endTime,String deviceId){
+		return intelligenceDao.getHandClockList(startTime, endTime,deviceId);
 	}
 }

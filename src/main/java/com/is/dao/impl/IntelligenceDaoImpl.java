@@ -19,6 +19,7 @@ import org.springframework.stereotype.Repository;
 import com.is.constant.Hql;
 import com.is.model.Admin;
 import com.is.model.Appointment;
+import com.is.model.ClockAbnormal;
 import com.is.model.ClockAppeal;
 import com.is.model.ClockTime;
 import com.is.model.ClockRecord;
@@ -412,25 +413,25 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 
 	@Override
 	public List<Admin> searchAdmin(String name, String auth,String deviceId) {
-		String sql="select * from admin where device_id='"+deviceId+"'";
+		String sql="select a.admin,a.employeeName from Employee a where a.admin.deviceId='"+deviceId+"'";
 		Map<Integer, String> map=new HashMap<>();
 		int i=0;
 		if(name!=null && !"".equals(name)){
-			sql=sql+" and username like ?";
+			sql=sql+" and a.admin.username like ?";
 			map.put(i, '%' + name + '%');
 			i=i+1;
 		}
 		if(auth!=null && !"".equals(auth)){
-			sql+=" and authority=?";
+			sql+=" and a.admin.authority=?";
 			map.put(i, auth);
 		}
 		
 
-		Query query = getSession().createSQLQuery(sql);
+		Query query = getSession().createQuery(sql);
 		for(int p=0;p<map.size();p++){
 			query.setParameter(p, map.get(p));
 		}
-		List<Admin> list=((SQLQuery) query).addEntity(Admin.class).list();
+		List<Admin> list=query.list();
 		return list;
 	}
 
@@ -506,6 +507,50 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 		
 		List<ClockTime> list=query.list();
 		return list;
+	}
+
+	@Override
+	public List<Visitor> getVisitorAll() {
+		return cloudDao.findByHql(Hql.GET_VISITOR_ALL);
+	}
+
+	@Override
+	public List<ClockAbnormal> getHandClockList(String startTime, String endTime, String deviceId) {
+		String sql="select a,b.employeeName from ClockAbnormal a,Employee b where a.employeeId=b.employeeId and a.deviceId='"+deviceId+"'";
+		Map<Integer, String> map=new HashMap<>();
+		int i=0;
+		if(startTime!=null && !"".equals(startTime)){
+			sql+=" and a.clockTime>=?";
+			map.put(i, startTime);
+			i=i+1;
+		}
+		if(endTime!=null && !"".equals(endTime)){
+			sql+=" and a.clockTime<=?";
+			map.put(i, endTime);
+		}
+
+		Query query = getSession().createQuery(sql);
+		for(int p=0;p<map.size();p++){
+			query.setParameter(p, map.get(p));
+		}
+		return query.list();
+	}
+
+	@Override
+	public ClockAbnormal getHandClockById(String id) {
+		// TODO Auto-generated method stub
+		return (ClockAbnormal) cloudDao.getByHql(Hql.GET_CLOCK_ABNORMAL_BY_ID, id);
+	}
+
+	@Override
+	public List<VisitorInfo> getVisitorInfoByWhere(String deviceId, String name) {
+		// TODO Auto-generated method stub
+		if(name==null || "".equals(name)){
+			return cloudDao.findByHql(Hql.GET_VISITOR_INFO_LIST, deviceId);
+		}
+		else {
+			return cloudDao.findByHql(Hql.GET_VISITOR_INFO_BY_NAME, deviceId,name);
+		}
 	}
 	
 

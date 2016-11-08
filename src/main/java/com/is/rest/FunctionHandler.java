@@ -18,8 +18,11 @@ import org.springframework.stereotype.Component;
 import com.is.constant.ResponseCode;
 import com.is.service.EmployeeService;
 import com.is.util.BusinessHelper;
-import com.is.util.LoginRequired;
 import com.is.util.ResponseFactory;
+import com.is.websocket.AddFuture;
+import com.is.websocket.CheckResponse;
+import com.is.websocket.ServiceDistribution;
+import com.is.websocket.SyncFuture;
 
 import net.sf.json.JSONObject;
 
@@ -40,8 +43,24 @@ public class FunctionHandler {
 	}
 	
 	@POST
+	@Path("/autoUpdate")
+	public Response autoUpdate(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws IOException{
+		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		SyncFuture<String> future=AddFuture.setFuture(deviceId);
+		CheckResponse response=new CheckResponse(deviceId, "114_2",future);
+		response.start();
+		boolean state=ServiceDistribution.handleJson114_1(deviceId);
+		if (state) {
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
+		} else {
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.REQUEST_FAIL, null);
+		}
+	}
+	
+	
+	@POST
 	@Path("/getStrangerPhoto")
-	@LoginRequired
+	//@LoginRequired
 	public Response getStrangerPhoto(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws IOException{
 		String deviceId=(String) request.getSession().getAttribute("deviceSn");
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);

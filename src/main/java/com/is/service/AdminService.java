@@ -1,7 +1,7 @@
 package com.is.service;
 
+import java.io.File;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -19,9 +19,10 @@ import com.is.model.Admin;
 import com.is.model.Company;
 import com.is.model.Department;
 import com.is.model.Employee;
-import com.is.model.Message;
+import com.is.model.Visitor;
 import com.is.system.dao.CloudDao;
 import com.is.system.dao.IntelligenceDao;
+import com.is.util.PasswordUtil;
 import com.is.websocket.AddFuture;
 import com.is.websocket.CheckResponse;
 import com.is.websocket.ServiceDistribution;
@@ -32,6 +33,8 @@ import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
 import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat;
 import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
 import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombination;
+
+import static com.is.constant.ParameterKeys.EMPLOYEE_FACE;
 
 /**
  * @author lishuhuan
@@ -57,7 +60,7 @@ public class AdminService {
 		String adminId = UUID.randomUUID().toString().trim().replaceAll("-", "");
 		admin.setAdminId(adminId);
 		admin.setUsername(adminName);
-		admin.setPassword(password);
+		admin.setPassword(PasswordUtil.generatePassword(password));
 		admin.setAuthority(Integer.parseInt(auth));
 		admin.setDeviceId(deviceId);
 		cloudDao.add(admin);
@@ -85,7 +88,7 @@ public class AdminService {
 				admin.setResponseCode(ResponseCode.USER_NOT_EXIST);
 				return admin;
 			}
-			if (admin.getPassword().equals(password)) {
+			if (PasswordUtil.validatePassword(admin.getPassword(), password)) {
 				admin.setResponseCode(ResponseCode.SUCCESS);
 				return admin;
 			} else {
@@ -106,7 +109,7 @@ public class AdminService {
 
 	public String addEmployee(String name, String birth, String contact,
 			String deviceId,  String photo, String position, String jobId, String address, String email,
-			String idCard, String workPos,String department,String sex,String isduty) {
+			String idCard, String workPos,String department,String sex,String isduty,String visitorId) {
 		Employee employee = new Employee();
 		// 鍒ゆ柇鏄惁涓烘眽瀛�
 		Pattern p = Pattern.compile("[\u4e00-\u9fa5]");
@@ -145,11 +148,24 @@ public class AdminService {
 		}
 		String strangerId=null;
 		if(photo!=null){
-			employee.setPhotoPath(photo);
-			strangerId=photo.substring(photo.lastIndexOf("/")+1,photo.lastIndexOf("."));
+			File file=new File(photo);
+			strangerId=file.getName();
+			
+			String newpath=EMPLOYEE_FACE+deviceId;
+			if (!(new File(newpath).isDirectory())) {
+				new File(newpath).mkdirs();
+			}
+			newpath=newpath+"/"+strangerId;
+			file.renameTo(new File(newpath));		
+			employee.setPhotoPath(newpath);
 		}
 
 		cloudDao.add(employee);
+		
+		if(visitorId!=null && !"".equals(visitorId)){
+			Visitor visitor=intelligenceDao.getVisitorById(visitorId);
+			cloudDao.delete(visitor);
+		}
 		SyncFuture<String> future=AddFuture.setFuture(deviceId);
 		CheckResponse response=new CheckResponse(deviceId, "103_2",future);
 		response.start();
@@ -176,7 +192,7 @@ public class AdminService {
 
 	public Boolean editEmployee(String employeeId, String name, String birth, String contact, 
 			String deviceId, String position, String jobId, String address, String email,
-			String idCard, String workPos,String sex) {
+			String idCard, String workPos,String sex,String path) {
 		Employee employee = intelligenceDao.getEmployeeById(employeeId);
 		employee.setEmployeeName(name);
 		employee.setBirth(birth);
@@ -188,6 +204,10 @@ public class AdminService {
 		employee.setIdCard(idCard);
 		employee.setSex(Integer.parseInt(sex));
 		employee.setWorkPos(workPos);
+		if(path!=null){
+			employee.setPhotoPath(path);
+		}
+		
 		cloudDao.update(employee);
 		SyncFuture<String> future=AddFuture.setFuture(deviceId);
 		CheckResponse response=new CheckResponse(deviceId, "104_2",future);
@@ -198,7 +218,7 @@ public class AdminService {
 
 	public Boolean editPassword(String username, String password) {
 		Admin admin = intelligenceDao.getAdminByName(username);
-		admin.setPassword(password);
+		admin.setPassword(PasswordUtil.generatePassword(password));
 		cloudDao.update(admin);
 		return true;
 	}
@@ -259,6 +279,12 @@ public class AdminService {
 
 	public List<Employee> getEmployeeByWhere(String word,String department,String deviceId) {
 		return intelligenceDao.getEmployeeByWhere(word, department,deviceId);
+	}
+	
+	public void updateEmployeeTemplatePhoto(String employeeId,String path){
+		Employee employee=intelligenceDao.getEmployeeById(employeeId);
+		employee.setTemplatePath(path);
+		cloudDao.update(employee);
 	}
 
 	public Boolean excuteCollection(String deviceId) {
@@ -408,7 +434,7 @@ public class AdminService {
 	public Boolean editAdmin(String id,String name,String password,String auth){
 		Admin admin=intelligenceDao.getAdminById(id);
 		admin.setUsername(name);
-		admin.setPassword(password);
+		admin.setPassword(PasswordUtil.generatePassword(password));
 		admin.setAuthority(Integer.parseInt(auth));
 		cloudDao.update(admin);
 		return true;
@@ -422,7 +448,7 @@ public class AdminService {
 		admin.setAuditAuth(1);
 		admin.setAuthority(0);
 		admin.setDeviceId(deviceId);
-		admin.setPassword(password);
+		admin.setPassword(PasswordUtil.generatePassword(password));
 		admin.setUsername(username);
 		cloudDao.add(admin);
 		
@@ -478,5 +504,40 @@ public class AdminService {
 			cloudDao.update(employee);
 		}
 	}
+	
+	public List<String> getPhotoByTemplate(String employeeId){
+		Employee employee=intelligenceDao.getEmployeeById(employeeId);
+		String path=null;
+		if(employee!=null){
+			path=employee.getTemplatePath();
+		}
+		File file=new File(path);
+		List<String> list=new ArrayList<>();
+		if(file.isDirectory()){
+			File[] all = file.listFiles();
+			if(all!=null){
+				for(File photo:all){
+					String photoPath=photo.getAbsolutePath();
+					list.add(photoPath);
+				}
+			}
+		}
+		return list;
+	}
+	
+	public Boolean resetPassword(String adminId){
+		Admin admin=intelligenceDao.getAdminById(adminId);
+		if(admin!=null){
+			admin.setPassword(PasswordUtil.generatePassword("123456"));
+			cloudDao.update(admin);
+			return true;
+		}
+		else{
+			return false;
+		}
+		
+	}
+	
+	
 
 }
