@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.is.constant.ResponseCode;
 import com.is.map.PhotoMap;
 import com.is.model.Admin;
+import com.is.model.CollectionPhoto;
 import com.is.model.Company;
 import com.is.model.Department;
 import com.is.model.Employee;
@@ -109,7 +110,7 @@ public class AdminService {
 
 	public String addEmployee(String name, String birth, String contact,
 			String deviceId,  String photo, String position, String jobId, String address, String email,
-			String idCard, String workPos,String department,String sex,String isduty,String visitorId) {
+			String idCard, String workPos,String department,String sex,String isduty,String cid) {
 		Employee employee = new Employee();
 		// 鍒ゆ柇鏄惁涓烘眽瀛�
 		Pattern p = Pattern.compile("[\u4e00-\u9fa5]");
@@ -162,9 +163,9 @@ public class AdminService {
 
 		cloudDao.add(employee);
 		
-		if(visitorId!=null && !"".equals(visitorId)){
-			Visitor visitor=intelligenceDao.getVisitorById(visitorId);
-			cloudDao.delete(visitor);
+		if (cid != null && !"".equals(cid)) {
+			CollectionPhoto collectionPhoto=intelligenceDao.getCollectionPhotoById(cid);
+			cloudDao.delete(collectionPhoto);
 		}
 		SyncFuture<String> future=AddFuture.setFuture(deviceId);
 		CheckResponse response=new CheckResponse(deviceId, "103_2",future);

@@ -17,6 +17,7 @@ import com.is.model.Employee;
 import com.is.model.Visitor;
 import com.is.system.dao.IntelligenceDao;
 import com.is.util.JavaSms;
+import com.is.util.Page;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -80,34 +81,17 @@ public class EmployeeService {
 			jsonArray.add(viJsonObject);
 		}
 		jsonObject.put("photo", jsonArray);
-		/*JSONArray jsonArray=new JSONArray();
-		String date=null;
-		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
-		if(visitors.size()>0){
-			date=sdf.format(visitors.get(0).getStartTime());
-		}
-		else {
-			return null;
-		}
-		List<Visitor> all=visitors;
-		List<String> time=new ArrayList<>();
-		while(true){
-			time.add(date);
-			Map<String, Object> map=group(all, date);
-			List<String> result=(List<String>) map.get("result");	
-			jsonArray.add(result);
-			List<Visitor> other=(List<Visitor>) map.get("other");
-			if(other.size()>0){
-				all=other;
-				date=sdf.format(other.get(0).getStartTime());
-			}
-			else {
-				break;
-			}
-		}
-		jsonObject.put("time", time);
-		jsonObject.put("photo", jsonArray);*/
 		return jsonObject;
+	}
+	
+	public JSONObject getCollectionPhotoList(String startTime,String endTime,String tag,String deviceId){
+		Page page=intelligenceDao.getCollectionPhotoList(startTime,endTime,tag,deviceId);
+		JSONObject jsonObject=new JSONObject();
+		jsonObject.put("totalPage", page.getPageTotal());
+		jsonObject.put("currentPage", Integer.parseInt(tag));
+		jsonObject.put("photo", page.getList());
+		return jsonObject;
+		
 	}
 	
 	public static Map<String, Object> group(List<Visitor> list,String tag){

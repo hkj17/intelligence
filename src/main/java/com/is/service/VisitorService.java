@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.is.model.CollectionPhoto;
 import com.is.model.Employee;
 import com.is.model.Visitor;
 import com.is.model.VisitorInfo;
@@ -96,7 +97,7 @@ public class VisitorService {
 	}
 
 	public String addVisitorInfo(String name, String company, String position, String telphone, String email,
-			String companyUrl, String deviceId, String importance, String birth, String path, String visitorId) {
+			String companyUrl, String deviceId, String importance, String birth, String path, String cid) {
 		VisitorInfo info = new VisitorInfo();
 		String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
 		info.setId(id);
@@ -123,9 +124,9 @@ public class VisitorService {
 		info.setPhotoPath(newpath);
 		cloudDao.add(info);
 
-		if (visitorId != null && !"".equals(visitorId)) {
-			Visitor visitor = intelligenceDao.getVisitorById(visitorId);
-			cloudDao.delete(visitor);
+		if (cid != null && !"".equals(cid)) {
+			CollectionPhoto photo=intelligenceDao.getCollectionPhotoById(cid);
+			cloudDao.delete(photo);
 		}
 		String strangerId = path == null ? null : path.substring(path.lastIndexOf("/") + 1, path.lastIndexOf("."));
 		SyncFuture<String> future = AddFuture.setFuture(deviceId);
@@ -264,6 +265,26 @@ public class VisitorService {
 		}
 		visitor.setDeviceId(deviceId);
 		cloudDao.add(visitor);
+	}
+	
+	
+	public void collectionPhoto(String deviceId,String time,String path,String strangerId){
+		CollectionPhoto photo=new CollectionPhoto();
+		String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
+		photo.setId(id);
+		photo.setDeviceId(deviceId);
+		photo.setPhoto(path);
+		photo.setStrangerId(strangerId);
+		photo.setTime(time);
+		cloudDao.add(photo);
+		
+	}
+	
+	public void deletePhoto(String cid){
+		CollectionPhoto photo=intelligenceDao.getCollectionPhotoById(cid);
+		if(photo!=null){
+			cloudDao.delete(photo);
+		}
 	}
 
 }

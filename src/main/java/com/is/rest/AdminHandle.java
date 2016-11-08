@@ -272,7 +272,7 @@ public class AdminHandle {
 				 requestMap.get("position"), requestMap.get("jobId"),  requestMap.get("address"),  
 				 requestMap.get("email"),  requestMap.get("idCard"),
 				 requestMap.get("workPos"),requestMap.get("departmentId"),
-				 requestMap.get("sex"),requestMap.get("isDuty"),requestMap.get("visitorId"));
+				 requestMap.get("sex"),requestMap.get("isDuty"),requestMap.get("cid"));
 
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, employeeId);
 	}

@@ -67,5 +67,16 @@ public class FunctionHandler {
 		JSONObject result=employeeService.getStrangerPhoto(requestMap.get("departmentId"),requestMap.get("name"),requestMap.get("startTime"),requestMap.get("endTime"),requestMap.get("tag"),deviceId);
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, result);
 	}
+	
+	@POST
+	@Path("/getCollectionPhoto")
+	//@LoginRequired
+	public Response getCollectionPhoto(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws IOException{
+		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		JSONObject result=employeeService.getCollectionPhotoList(requestMap.get("startTime"),requestMap.get("endTime"),requestMap.get("tag"),deviceId);
+		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, result);
+	}
+	
 
 }

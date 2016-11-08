@@ -8,6 +8,7 @@ import com.is.model.Appointment;
 import com.is.model.ClockAbnormal;
 import com.is.model.ClockAppeal;
 import com.is.model.ClockTime;
+import com.is.model.CollectionPhoto;
 import com.is.model.ClockRecord;
 import com.is.model.Company;
 import com.is.model.Department;
@@ -16,6 +17,9 @@ import com.is.model.Message;
 import com.is.model.Notification;
 import com.is.model.Visitor;
 import com.is.model.VisitorInfo;
+import com.is.util.Page;
+
+import net.sf.json.JSONObject;
 
 public interface IntelligenceDao {
 	
@@ -39,8 +43,12 @@ public interface IntelligenceDao {
 	
 	public Employee getEmployeeById(String id);
 	
+	public CollectionPhoto getCollectionPhotoById(String id);
+	
 	public List<Visitor> indexVisitorPath(String depaertmentId,String name,String startTime,
 			String endTime,String deviceId,int first);
+	
+	public Page getCollectionPhotoList(String startTime,String endTime,String tag,String deviceId);
 	
 	public int indexVisitorCount(String departmentId, String name, String startTime,String endTime,String deviceId);
 	

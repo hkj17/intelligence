@@ -199,6 +199,7 @@ public class ServiceDistribution implements ApplicationContextAware {
 
 		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
 		String photo = jsonObject.getString("photo");
+		String time = jsonObject.getString("time");
 		if(photo.startsWith("data")){
 			photo = photo.substring(photo.indexOf(",")+1);
 		}
@@ -210,6 +211,9 @@ public class ServiceDistribution implements ApplicationContextAware {
 		}
 		path=path+"/"+id+".jpg";
 		GenerateImage(photo, path);
+		
+		VisitorService visitorService = (VisitorService)getContext().getBean("visitorService");
+		visitorService.collectionPhoto(deviceId, time, path, id);
 		JSONObject response = new JSONObject();
 		response.put("type", 3);
 		response.put("code", 22);

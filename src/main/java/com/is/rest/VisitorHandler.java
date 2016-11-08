@@ -47,7 +47,7 @@ public class VisitorHandler {
 		String id=visitorService.addVisitorInfo(requestMap.get("name"), requestMap.get("company"), 
 				requestMap.get("position"), requestMap.get("telphone"), requestMap.get("email"), 
 				requestMap.get("companyUrl"),deviceId,requestMap.get("importance"),
-				requestMap.get("birth"),requestMap.get("path"),requestMap.get("visitorId"));
+				requestMap.get("birth"),requestMap.get("path"),requestMap.get("cid"));
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, id);
 		
 	}
@@ -175,11 +175,13 @@ public class VisitorHandler {
 	}
 	
 	@POST
-	@Path("/deleteVisitorPhoto")
+	@Path("/deleteCollectionPhoto")
 	//@LoginRequired
-	public Response deleteVisitorPhoto(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws ParseException{
+	public Response deleteCollectionPhoto(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws ParseException{
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		String path=requestMap.get("path");
+		String cid=requestMap.get("cid");
+		visitorService.deletePhoto(cid);
 		File file=new File(path);
 		if(file.exists()){
 			file.delete();

@@ -67,4 +67,6 @@ public class Hql {
 	public static final String GET_VISITOR_INFO_LIST="from VisitorInfo where deviceId=?";
 	
 	public static final String GET_VISITOR_INFO_BY_NAME="from VisitorInfo where deviceId=? and name=?";
+	
+	public static final String GET_COLLECTION_PHOTO_BY_ID="from CollectionPhoto where id=?";
 }
