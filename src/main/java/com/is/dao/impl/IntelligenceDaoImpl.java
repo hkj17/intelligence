@@ -579,6 +579,7 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 			i = i + 1;
 		}
 		if (endTime != null && !"".equals(endTime)) {
+			endTime=endTime+" 23:59:59";
 			sql += " and time<=?";
 			map.put(i, endTime);
 		}
