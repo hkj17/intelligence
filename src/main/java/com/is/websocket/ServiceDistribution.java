@@ -263,6 +263,7 @@ public class ServiceDistribution implements ApplicationContextAware {
 		jsonObject.put("type", 103);
 		jsonObject.put("code", 1);
 		jsonObject.put("employeeId", employeeId);
+		strangerId=strangerId.substring(0, strangerId.lastIndexOf("."));
 		jsonObject.put("strangerId", strangerId);
 		jsonObject.put("employeeName", employeeName);
 		jsonObject.put("birth", birth);

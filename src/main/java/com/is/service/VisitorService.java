@@ -275,7 +275,8 @@ public class VisitorService {
 		photo.setDeviceId(deviceId);
 		photo.setPhoto(path);
 		photo.setStrangerId(strangerId);
-		photo.setTime(time);
+		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		photo.setTime(sdf.format(new Date()));
 		cloudDao.add(photo);
 		
 	}
