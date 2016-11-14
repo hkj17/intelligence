@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import com.is.map.ChannelNameToDeviceMap;
 import com.is.map.DeviceService;
 import com.is.map.PhotoMap;
+import com.is.model.CollectionPhoto;
 import com.is.service.AdminService;
 import com.is.service.ClockService;
 import com.is.service.EmployeeService;
@@ -205,15 +206,19 @@ public class ServiceDistribution implements ApplicationContextAware {
 		}
 		String id = jsonObject.getString("strangerId");
 		String deviceId = ChannelNameToDeviceMap.getDeviceMap(ctx.name());
-		String path = FACE_PHOTO_PATH + deviceId+"/"+sdf.format(new Date());
-		if (!(new File(path).isDirectory())) {
-			new File(path).mkdirs();
-		}
-		path=path+"/"+id+".jpg";
-		GenerateImage(photo, path);
-		
 		VisitorService visitorService = (VisitorService)getContext().getBean("visitorService");
-		visitorService.collectionPhoto(deviceId, time, path, id);
+		CollectionPhoto collectionPhoto=visitorService.getCollectByStrangerId(id);
+		if(collectionPhoto==null){
+			String path = FACE_PHOTO_PATH + deviceId+"/"+sdf.format(new Date());
+			if (!(new File(path).isDirectory())) {
+				new File(path).mkdirs();
+			}
+			path=path+"/"+id+".jpg";
+			GenerateImage(photo, path);
+			
+			visitorService.collectionPhoto(deviceId, time, path, id);
+		}
+		
 		JSONObject response = new JSONObject();
 		response.put("type", 3);
 		response.put("code", 22);
@@ -306,7 +311,9 @@ public class ServiceDistribution implements ApplicationContextAware {
 		jsonObject.put("visitorName", visitorName);
 		jsonObject.put("company", company);
 		jsonObject.put("position", position);
-		jsonObject.put("birth", birth);
+		if(birth!=null){
+			jsonObject.put("birth", birth);
+		}
 		byte[] result = SocketService.responseByte(jsonObject, "103", "11");
 		if (null != channel) {
 			excuteWrite(result, channel);
@@ -448,7 +455,7 @@ public class ServiceDistribution implements ApplicationContextAware {
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.put("type", 109);
 		jsonObject.put("code", 11);
-		jsonObject.put("visitorId", visitorId);
+		jsonObject.put("VisitorId", visitorId);
 		byte[] result = SocketService.responseByte(jsonObject, "109", "11");
 		if (null != channel) {
 			excuteWrite(result, channel);

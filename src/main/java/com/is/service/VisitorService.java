@@ -43,6 +43,7 @@ public class VisitorService {
 	private CloudDao cloudDao;
 
 	public void rememPhoto(String path, InputStream uploadedInputStream) throws IOException {
+		//path="D:\\IotCloud\\111\\1.jpg";
 		// 1、创建一个DiskFileItemFactory工厂
 		DiskFileItemFactory factory = new DiskFileItemFactory();
 		// 2、创建一个文件上传解析器
@@ -199,7 +200,9 @@ public class VisitorService {
 		info.setEmail(email);
 		info.setCompanyUrl(companyUrl);
 		info.setImportance(Integer.parseInt(importance));
-		info.setBirth(birth);
+		if(birth!=null){
+			info.setBirth(birth);
+		}
 		info.setPhotoPath(path);
 		cloudDao.add(info);
 
@@ -288,6 +291,10 @@ public class VisitorService {
 		if(photo!=null){
 			cloudDao.delete(photo);
 		}
+	}
+	
+	public CollectionPhoto getCollectByStrangerId(String id){
+		return intelligenceDao.getCollectByStrangerId(id);
 	}
 
 }

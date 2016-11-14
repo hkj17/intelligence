@@ -117,4 +117,5 @@ public interface IntelligenceDao {
 	
 	public List<Visitor> getVisitorAll();
 	
+	public CollectionPhoto getCollectByStrangerId(String id);
 }

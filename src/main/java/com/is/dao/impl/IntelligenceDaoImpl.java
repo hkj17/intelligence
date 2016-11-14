@@ -604,4 +604,10 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 		return (CollectionPhoto) cloudDao.getByHql(Hql.GET_COLLECTION_PHOTO_BY_ID, id);
 	}
 
+	@Override
+	public CollectionPhoto getCollectByStrangerId(String id) {
+		// TODO Auto-generated method stub
+		return (CollectionPhoto) cloudDao.getByHql(Hql.GET_COLLECTION_BY_STRANGER_ID, id);
+	}
+
 }
