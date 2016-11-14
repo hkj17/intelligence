@@ -241,8 +241,10 @@ public class VisitorService {
 		visitor.setId(id);
 		if (infoId != null) {
 			VisitorInfo visitorInfo = intelligenceDao.getVisitorInfoById(infoId);
-			visitor.setVisitorInfo(visitorInfo);
-			visitor.setPhoto(visitorInfo.getPhotoPath());
+			if(visitorInfo!=null){
+				visitor.setVisitorInfo(visitorInfo);
+				visitor.setPhoto(visitorInfo.getPhotoPath());
+			}
 		}
 		if (path != null) {
 			visitor.setPhoto(path);
