@@ -16,7 +16,7 @@ function login() {
 	} else {
 		$.ajax({
 			        "type" : 'post',
-					"url" : "/intelligentStage-system-manage/rest/admin/login",
+					"url" : "/intelligentStage-system-manage/rest/admin/adminLogin",
 					"dataType" : "json",
 					"data" : {
 						"adminName" : username,

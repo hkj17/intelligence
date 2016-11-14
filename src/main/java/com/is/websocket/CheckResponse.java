@@ -35,10 +35,10 @@ public class CheckResponse extends Thread {
 			if (future == null) {
 				return;
 			}
-			String node = future.get(6, TimeUnit.SECONDS);
+			String node = future.get(12, TimeUnit.SECONDS);
 			if (!text.equals(node) || node == null) {
 				System.out.println("connection break!");
-				ctx.close();
+				//ctx.close();
 			}
 
 			System.out.println("node:" + node);
