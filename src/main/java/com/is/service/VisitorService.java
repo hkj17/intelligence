@@ -93,7 +93,7 @@ public class VisitorService {
 		SyncFuture<String> future = AddFuture.setFuture(deviceId);
 		CheckResponse response = new CheckResponse(deviceId, "103_12", future);
 		response.start();
-		ServiceDistribution.handleJson103_11(id, strangerId, name, company, position, birth, deviceId);
+		ServiceDistribution.handleJson103_11(id, strangerId, name, company, position, birth, deviceId,path);
 		return true;
 	}
 
@@ -133,7 +133,7 @@ public class VisitorService {
 		SyncFuture<String> future = AddFuture.setFuture(deviceId);
 		CheckResponse response = new CheckResponse(deviceId, "103_12", future);
 		response.start();
-		ServiceDistribution.handleJson103_11(id, strangerId, name, company, position, birth, deviceId);
+		ServiceDistribution.handleJson103_11(id, strangerId, name, company, position, birth, deviceId,null);
 		return id;
 	}
 
@@ -213,7 +213,7 @@ public class VisitorService {
 		SyncFuture<String> future = AddFuture.setFuture(deviceId);
 		CheckResponse response = new CheckResponse(deviceId, "103_12", future);
 		response.start();
-		ServiceDistribution.handleJson103_11(id, strangerId, name, company, position, birth, deviceId);
+		ServiceDistribution.handleJson103_11(id, strangerId, name, company, position, birth, deviceId,null);
 		return id;
 
 	}
@@ -257,7 +257,7 @@ public class VisitorService {
 			visitor.setEmployee(employee);
 		}
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		logger.info(time);
+		//logger.info(time);
 		try {
 			if (time != null) {
 				visitor.setStartTime(formatter.parse(time));
@@ -286,11 +286,16 @@ public class VisitorService {
 		
 	}
 	
-	public void deletePhoto(String cid){
+	public void deletePhoto(String cid,String deviceId){
 		CollectionPhoto photo=intelligenceDao.getCollectionPhotoById(cid);
+		String strangerId=photo.getStrangerId();
 		if(photo!=null){
 			cloudDao.delete(photo);
 		}
+		SyncFuture<String> future = AddFuture.setFuture(deviceId);
+		CheckResponse response = new CheckResponse(deviceId, "105_22", future);
+		response.start();
+		ServiceDistribution.handleJson105_21(strangerId, deviceId);
 	}
 	
 	public CollectionPhoto getCollectByStrangerId(String id){

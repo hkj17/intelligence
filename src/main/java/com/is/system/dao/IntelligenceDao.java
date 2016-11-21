@@ -15,6 +15,7 @@ import com.is.model.Department;
 import com.is.model.Employee;
 import com.is.model.Message;
 import com.is.model.Notification;
+import com.is.model.VersionUpdate;
 import com.is.model.Visitor;
 import com.is.model.VisitorInfo;
 import com.is.util.Page;
@@ -91,6 +92,8 @@ public interface IntelligenceDao {
 	public List<Employee> getEmployeeByWhere(String word,String department,String deviceId);
 	
 	public VisitorInfo getVisitorInfoById(String id);
+	
+	public List<Appointment> getAppointmentByUser(String userid);
 
 	public List<Department> getDepartmentByCompany(String company);
 	
@@ -118,4 +121,6 @@ public interface IntelligenceDao {
 	public List<Visitor> getVisitorAll();
 	
 	public CollectionPhoto getCollectByStrangerId(String id);
+	
+	public VersionUpdate autoUpdate();
 }

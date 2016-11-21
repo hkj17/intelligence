@@ -63,7 +63,7 @@ public class VisitorHandler {
 			throws IOException {
 		String deviceId=(String) request.getSession().getAttribute("deviceSn");
 		String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
-		String path=VISITOR_FACE+deviceId+"/"+id+".jpg";
+		String path="D:\\IotCloud\\"+id+".jpg";
 		visitorService.rememPhoto(path, uploadedInputStream);
 		boolean state=visitorService.addVisitorInfoByMobile(id, name, company, position, telphone, email, companyUrl, deviceId, importance, birth, path);
 		if(state){
@@ -179,9 +179,10 @@ public class VisitorHandler {
 	//@LoginRequired
 	public Response deleteCollectionPhoto(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws ParseException{
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		String deviceId=(String) request.getSession().getAttribute("deviceSn");
 		String path=requestMap.get("path");
 		String cid=requestMap.get("cid");
-		visitorService.deletePhoto(cid);
+		visitorService.deletePhoto(cid,deviceId);
 		File file=new File(path);
 		if(file.exists()){
 			file.delete();

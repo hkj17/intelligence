@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.is.model.Employee;
+import com.is.model.VersionUpdate;
 import com.is.model.Visitor;
 import com.is.system.dao.IntelligenceDao;
 import com.is.util.JavaSms;
@@ -111,6 +112,10 @@ public class EmployeeService {
 		map.put("result", result);
 		map.put("other", other);
 		return map;
+	}
+	
+	public VersionUpdate autoUpdate(){
+		return intelligenceDao.autoUpdate();
 	}
 
 }

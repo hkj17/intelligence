@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.is.constant.ResponseCode;
+import com.is.model.VersionUpdate;
 import com.is.service.EmployeeService;
 import com.is.util.BusinessHelper;
 import com.is.util.ResponseFactory;
@@ -46,10 +47,11 @@ public class FunctionHandler {
 	@Path("/autoUpdate")
 	public Response autoUpdate(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws IOException{
 		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		VersionUpdate update=employeeService.autoUpdate();
 		SyncFuture<String> future=AddFuture.setFuture(deviceId);
 		CheckResponse response=new CheckResponse(deviceId, "114_2",future);
 		response.start();
-		boolean state=ServiceDistribution.handleJson114_1(deviceId);
+		boolean state=ServiceDistribution.handleJson114_1(deviceId,update.getVersion(),update.getPath());
 		if (state) {
 			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
 		} else {

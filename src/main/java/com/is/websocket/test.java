@@ -16,6 +16,7 @@ import java.util.Arrays;
 
 import com.is.util.PasswordUtil;
 
+import net.sf.json.JSONObject;
 import sun.misc.BASE64Encoder;
 import sun.misc.BASE64Decoder;
 
@@ -86,7 +87,18 @@ public class test {
 		   }  
 	
 	public static void main(String[] args) throws UnsupportedEncodingException {
-		String aString=PasswordUtil.generatePassword("123456");
-		System.out.println(aString);
+		String aa="{'222':'222','photo':'123'}";
+		JSONObject log=JSONObject.fromObject(aa);
+		log.put("photo", "123");
+		log.put("222", "222");
+		
+		JSONObject cc=new JSONObject();
+		cc=JSONObject.fromObject(aa);
+		
+		if(cc.containsKey("photo")){
+			cc.remove("photo");
+		}
+		System.out.println(cc);
+		System.out.println(log);
 	}
 }

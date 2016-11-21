@@ -3,6 +3,7 @@ package com.is.service;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -50,5 +51,9 @@ public class AppointmentService {
 		response.start();
 		ServiceDistribution.handleJson106_1(deviceId, employeeId, startTime, visitorInfoId, content);
 		return true;
+	}
+	
+	public List<Appointment> getAppointmentByUser(String userid){
+		return intelligenceDao.getAppointmentByUser(userid);
 	}
 }

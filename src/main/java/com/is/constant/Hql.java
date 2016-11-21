@@ -71,4 +71,6 @@ public class Hql {
 	public static final String GET_COLLECTION_PHOTO_BY_ID="from CollectionPhoto where id=?";
 	 
 	public static final String GET_COLLECTION_BY_STRANGER_ID="from CollectionPhoto where strangerId=?";
+	
+	public static final String GET_APPOINTMENT_BY_USER="from Appointment where createBy=?";
 }

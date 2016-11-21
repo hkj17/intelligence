@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelId;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
 
@@ -16,14 +17,6 @@ public class HttpServerInboundHandler extends ChannelInboundHandlerAdapter {
 		ByteBuf result = (ByteBuf) msg;
 		byte[] result1 = new byte[result.readableBytes()];
 		result.readBytes(result1);
-		
-		String resultStr = new String(result1);
-		if(resultStr.length()<200){
-			logger.info("Client said:" + resultStr);
-		}
-		else {
-			logger.info("Client said:" + resultStr.substring(0,198));
-		}
 		result.release();
 		SocketService.handleSocketMsg(result1,ctx);
 

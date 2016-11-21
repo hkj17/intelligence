@@ -29,6 +29,7 @@ import com.is.model.Department;
 import com.is.model.Employee;
 import com.is.model.Message;
 import com.is.model.Notification;
+import com.is.model.VersionUpdate;
 import com.is.model.Visitor;
 import com.is.model.VisitorInfo;
 import com.is.system.dao.CloudDao;
@@ -263,7 +264,7 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 	@Override
 	public List<Visitor> indexVisitor(String depaertmentId, String name, String startTime, String endTime,
 			String deviceId) {
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 		String sql = "select a from Visitor a where a.deviceId='" + deviceId + "' ";
 		Map<Integer, Object> map = new HashMap<>();
@@ -281,6 +282,7 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 			i = i + 3;
 		}
 		if (startTime != null && !"".equals(startTime)) {
+			startTime=startTime+" 00:00:00";
 			sql += " and a.startTime>=?";
 			try {
 				map.put(i, sdf.parse(startTime));
@@ -291,6 +293,7 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 			i = i + 1;
 		}
 		if (endTime != null && !"".equals(endTime)) {
+			endTime=endTime+" 23:59:59";
 			sql += " and a.startTime<=?";
 			try {
 				map.put(i, sdf.parse(endTime));
@@ -425,7 +428,7 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 	@Override
 	public List<Admin> searchAdmin(String name, String auth, String deviceId) {
 		String sql = "select a.admin,a.employeeName from Employee a where a.admin.deviceId='" + deviceId + "'";
-		Map<Integer, String> map = new HashMap<>();
+		Map<Integer, Object> map = new HashMap<>();
 		int i = 0;
 		if (name != null && !"".equals(name)) {
 			sql = sql + " and a.admin.username like ?";
@@ -434,7 +437,7 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 		}
 		if (auth != null && !"".equals(auth)) {
 			sql += " and a.admin.authority=?";
-			map.put(i, auth);
+			map.put(i, Integer.parseInt(auth));
 		}
 
 		Query query = getSession().createQuery(sql);
@@ -608,6 +611,19 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 	public CollectionPhoto getCollectByStrangerId(String id) {
 		// TODO Auto-generated method stub
 		return (CollectionPhoto) cloudDao.getByHql(Hql.GET_COLLECTION_BY_STRANGER_ID, id);
+	}
+
+	@Override
+	public VersionUpdate autoUpdate() {
+		Query query = getSession().createSQLQuery("select * from version_update ORDER BY created_at DESC LIMIT 1");
+		VersionUpdate update =  (VersionUpdate) ((SQLQuery) query).addEntity(VersionUpdate.class).uniqueResult();
+		return update;
+	}
+
+	@Override
+	public List<Appointment> getAppointmentByUser(String userid) {
+		// TODO Auto-generated method stub
+		return cloudDao.findByHql(Hql.GET_APPOINTMENT_BY_USER, userid);
 	}
 
 }

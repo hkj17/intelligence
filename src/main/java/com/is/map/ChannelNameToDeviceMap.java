@@ -3,23 +3,25 @@ package com.is.map;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.netty.channel.ChannelId;
+
 public class ChannelNameToDeviceMap {
 
-	private static Map<String, String> deviceMap = new HashMap<>();
+	private static Map<ChannelId, String> deviceMap = new HashMap<>();
 
-	public static void addDeviceMap(String name, String deviceId) {
-		deviceMap.put(name, deviceId);
+	public static void addDeviceMap(ChannelId id, String deviceId) {
+		deviceMap.put(id, deviceId);
 	}
 	
-	public static String getDeviceMap(String name){
-        return deviceMap.get(name);
+	public static String getDeviceMap(ChannelId id){
+        return deviceMap.get(id);
     }
 	
-	public static void removeDeviceMap(String name){
-		deviceMap.remove(name);
+	public static void removeDeviceMap(ChannelId id){
+		deviceMap.remove(id);
     }
 	
-	public static Map<String, String> getAllMap(){
+	public static Map<ChannelId, String> getAllMap(){
 		return deviceMap;
 	}
 }

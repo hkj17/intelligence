@@ -40,8 +40,15 @@ public class SocketService {
 		JSONObject responseCode = new JSONObject();
 		String type = jsonObject.getString("type");
 		String code = jsonObject.getString("code");
-		
-		logger.info("record:"+type+","+code);
+		JSONObject log=new JSONObject();
+		log=JSONObject.fromObject(payload);;
+		if(log.containsKey("photo")){
+			log.remove("photo");
+		}
+		if(log.containsKey("templatePic")){
+			log.remove("templatePic");
+		}
+		logger.info(log);
 		String anType=null;
 		String anCode=null;
 	
@@ -154,6 +161,10 @@ public class SocketService {
 			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.name());
 			 future.setResponse("105_12");
 		}
+		else if (type.equals("105") && code.equals("22")) {
+			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.name());
+			 future.setResponse("105_22");
+		}
 		else if (type.equals("109") && code.equals("2")) {
 			ServiceDistribution.handleJson109_2(jsonObject,socketChannel);
 		}
@@ -191,6 +202,14 @@ public class SocketService {
 		
 		//json报文
 		System.arraycopy(json, 0, result, 36, len);
+		
+		if(jsonObject.containsKey("photo")){
+			jsonObject.remove("photo");
+		}
+		if(jsonObject.containsKey("templatePic")){
+			jsonObject.remove("templatePic");
+		}
+		logger.info(jsonObject);
 		return result;
 	}
 	

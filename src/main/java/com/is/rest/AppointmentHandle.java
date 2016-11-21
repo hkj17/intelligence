@@ -1,5 +1,6 @@
 package com.is.rest;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.is.constant.ResponseCode;
+import com.is.model.Appointment;
 import com.is.service.AppointmentService;
 import com.is.util.BusinessHelper;
 import com.is.util.ResponseFactory;
@@ -37,5 +39,14 @@ public class AppointmentHandle {
 		}else{
 			return ResponseFactory.response(Response.Status.OK, ResponseCode.REQUEST_FAIL, null);
 		}
+	}
+	
+	@POST
+	//@LoginRequired
+	@Path("/getAppointmentByUser")
+	public Response getAppointmentByUser(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		List<Appointment> list=appointmentService.getAppointmentByUser(requestMap.get("employeeId"));
+		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, list);
 	}
 }
