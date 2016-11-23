@@ -4,6 +4,7 @@ import com.is.map.DeviceService;
 import com.is.map.FutureMap;
 
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelId;
 
 public class AddFuture {
 	
@@ -13,7 +14,7 @@ public class AddFuture {
 		 if(ctx==null){
 			 return null;
 		 }
-		 String name=ctx.name();
+		 ChannelId name=ctx.channel().id();
 		 FutureMap.addFuture(name, future);
 		 System.out.println("start add!");
 		 return future;

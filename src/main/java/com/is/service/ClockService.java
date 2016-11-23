@@ -231,8 +231,8 @@ public class ClockService {
 		return intelligenceDao.getClockByEmployee(id);
 	}
 	
-	public List<ClockTime> getDetailClock(String employeeId){
-		return intelligenceDao.getDetailClock(employeeId);
+	public List<ClockTime> getDetailClock(String employeeId,String time){
+		return intelligenceDao.getDetailClock(employeeId,time);
 	}
 	
 	public List<ClockAbnormal> getHandClockList(String startTime,String endTime,String deviceId){

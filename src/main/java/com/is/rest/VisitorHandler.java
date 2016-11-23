@@ -63,7 +63,7 @@ public class VisitorHandler {
 			throws IOException {
 		String deviceId=(String) request.getSession().getAttribute("deviceSn");
 		String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
-		String path="D:\\IotCloud\\"+id+".jpg";
+		String path=VISITOR_FACE+deviceId+"/"+id+".jpg";
 		visitorService.rememPhoto(path, uploadedInputStream);
 		boolean state=visitorService.addVisitorInfoByMobile(id, name, company, position, telphone, email, companyUrl, deviceId, importance, birth, path);
 		if(state){

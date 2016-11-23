@@ -11,6 +11,7 @@ import com.is.map.DeviceService;
 import com.is.map.FutureMap;
 
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelId;
 
 public class CheckResponse extends Thread {
 
@@ -30,7 +31,7 @@ public class CheckResponse extends Thread {
 		if(ctx==null){
 			return;
 		}
-		String name = ctx.name();
+		ChannelId name = ctx.channel().id();
 		try {
 			if (future == null) {
 				return;

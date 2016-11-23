@@ -11,6 +11,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
+
 @Entity(name = "Appointment")
 @Table(name = "appointment")
 public class Appointment {
@@ -23,6 +26,7 @@ public class Appointment {
 	
 	@ManyToOne
 	@JoinColumn(name = "visitor_id")
+	@NotFound(action=NotFoundAction.IGNORE) 
 	private VisitorInfo info;
 	
 	@Column(name = "start_time")

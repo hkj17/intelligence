@@ -75,6 +75,15 @@ public class VisitorService {
 	
 	public Boolean addVisitorInfoByMobile(String id,String name, String company, String position, String telphone, String email,
 			String companyUrl, String deviceId, String importance, String birth, String path) {
+		String strangerId = path == null ? null : path.substring(path.lastIndexOf("/") + 1, path.lastIndexOf("."));
+		SyncFuture<String> future = AddFuture.setFuture(deviceId);
+		CheckResponse response = new CheckResponse(deviceId, "103_12", future);
+		response.start();
+		boolean state=ServiceDistribution.handleJson103_11(id, strangerId, name, company, position, birth, deviceId,path);
+		if(!state){
+			return state;
+		}
+		
 		VisitorInfo info = new VisitorInfo();
 		info.setId(id);
 		info.setDeviceId(deviceId);
@@ -85,15 +94,12 @@ public class VisitorService {
 		info.setEmail(email);
 		info.setCompanyUrl(companyUrl);
 		info.setImportance(Integer.parseInt(importance));
-		info.setBirth(birth);
+		if(birth!=null && !"".equals(birth)){
+			info.setBirth(birth);
+		}
 		info.setPhotoPath(path);
 		cloudDao.add(info);
 		
-		String strangerId = path == null ? null : path.substring(path.lastIndexOf("/") + 1, path.lastIndexOf("."));
-		SyncFuture<String> future = AddFuture.setFuture(deviceId);
-		CheckResponse response = new CheckResponse(deviceId, "103_12", future);
-		response.start();
-		ServiceDistribution.handleJson103_11(id, strangerId, name, company, position, birth, deviceId,path);
 		return true;
 	}
 
@@ -234,7 +240,7 @@ public class VisitorService {
 		VisitorInfo visitorInfo = intelligenceDao.getVisitorInfoById(id);
 		if (visitorInfo != null) {
 			visitorInfo.setTemplatePath(path);
-			cloudDao.add(visitorInfo);
+			cloudDao.update(visitorInfo);
 		}
 	}
 

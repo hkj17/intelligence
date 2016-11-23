@@ -49,4 +49,18 @@ public class AppointmentHandle {
 		List<Appointment> list=appointmentService.getAppointmentByUser(requestMap.get("employeeId"));
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, list);
 	}
+	
+	@POST
+	//@LoginRequired
+	@Path("/editAppointment")
+	public Response editAppointment(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		boolean state=appointmentService.editAppointment(requestMap.get("appId"), requestMap.get("startTime"), requestMap.get("endTime"), requestMap.get("content"),deviceId);
+		if(state){
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
+		}else{
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.REQUEST_FAIL, null);
+		}
+	}
 }

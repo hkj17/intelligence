@@ -511,11 +511,8 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 	}
 
 	@Override
-	public List<ClockTime> getDetailClock(String employeeId) {
+	public List<ClockTime> getDetailClock(String employeeId,String time) {
 		// TODO Auto-generated method stub
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		String time = sdf.format(new Date());
-
 		String sql = "SELECT a,b.employeeName,b.jobId,b.department.department from ClockTime a,Employee b where b.employeeId=a.employeeId and a.employeeId=? and a.clockTime like ?";
 		Query query = getSession().createQuery(sql);
 		query.setParameter(0, employeeId);

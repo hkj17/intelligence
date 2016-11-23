@@ -85,7 +85,7 @@ public interface IntelligenceDao {
 	
 	public List<ClockRecord> getClockByEmployee(String id);
 	
-	public List<ClockTime> getDetailClock(String employeeId);
+	public List<ClockTime> getDetailClock(String employeeId,String time);
 	
 	public List<ClockAbnormal> getHandClockList(String startTime,String endTime,String deviceId);
 	

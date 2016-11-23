@@ -6,6 +6,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.is.constant.ResponseCode;
+import com.is.map.DeviceService;
+import com.is.map.FutureMap;
 import com.is.map.PhotoMap;
 import com.is.model.Admin;
 import com.is.model.CollectionPhoto;
@@ -29,6 +32,7 @@ import com.is.websocket.CheckResponse;
 import com.is.websocket.ServiceDistribution;
 import com.is.websocket.SyncFuture;
 
+import io.netty.channel.ChannelHandlerContext;
 import net.sourceforge.pinyin4j.PinyinHelper;
 import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
 import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat;
@@ -196,7 +200,10 @@ public class AdminService {
 			String idCard, String workPos,String sex,String path) {
 		Employee employee = intelligenceDao.getEmployeeById(employeeId);
 		employee.setEmployeeName(name);
-		employee.setBirth(birth);
+		if(birth!=null && !"".equals(birth)){
+			employee.setBirth(birth);
+		}
+		
 		employee.setTelphone(contact);
 		employee.setPosition(position);
 		employee.setJobId(jobId);
@@ -289,17 +296,25 @@ public class AdminService {
 	}
 
 	public Boolean excuteCollection(String deviceId) {
-		SyncFuture<String> future=AddFuture.setFuture(deviceId);
-		CheckResponse response=new CheckResponse(deviceId, "101_2",future);
-		response.start();
+		ChannelHandlerContext ctx=DeviceService.getSocketMap(deviceId);
+		Future<String> sFuture=FutureMap.getFutureMap(ctx.channel().id());
+		if(sFuture!=null){
+			SyncFuture<String> future=AddFuture.setFuture(deviceId);
+			CheckResponse response=new CheckResponse(deviceId, "101_2",future);
+			response.start();
+		}
 		boolean state = ServiceDistribution.handleJson101_1(deviceId);
 		return state;
 	}
 
 	public String completeCollection(String deviceId) {
-		SyncFuture<String> future=AddFuture.setFuture(deviceId);
-		CheckResponse response=new CheckResponse(deviceId, "102_2",future);
-		response.start();
+		ChannelHandlerContext ctx=DeviceService.getSocketMap(deviceId);
+		Future<String> sFuture=FutureMap.getFutureMap(ctx.channel().id());
+		if(sFuture!=null){
+			SyncFuture<String> future=AddFuture.setFuture(deviceId);
+			CheckResponse response=new CheckResponse(deviceId, "102_2",future);
+			response.start();
+		}		
 		//String path="/cloudweb/server/tomcat_intel/webapps/employee_img/1.jpg";
 		String path = PhotoMap.getMap(deviceId);
 		//PhotoMap.removeMap(deviceId);

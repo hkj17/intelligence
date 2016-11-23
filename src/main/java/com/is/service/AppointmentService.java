@@ -30,6 +30,7 @@ public class AppointmentService {
 	
 	public Boolean addAppointment(String visitorInfoId,String startTime,String endTime,
 			String content,String deviceId,String employeeId){
+		startTime=startTime+":00";
 		Appointment appointment=new Appointment();
 		VisitorInfo info=intelligenceDao.getVisitorInfoById(visitorInfoId);
 		appointment.setInfo(info);
@@ -55,5 +56,11 @@ public class AppointmentService {
 	
 	public List<Appointment> getAppointmentByUser(String userid){
 		return intelligenceDao.getAppointmentByUser(userid);
+	}
+	
+	public Boolean editAppointment(String appid,String startTime,String endTime,
+			String content,String deviceId){
+				return true;
+		
 	}
 }
