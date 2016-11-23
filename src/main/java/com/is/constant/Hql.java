@@ -21,7 +21,7 @@ public class Hql {
 	
 	public static final String GET_NOTIFY_BY_ID="from Notification nof where nof.noteId=?";
 	
-	public static final String GET_APPOINT_BY_ID="from Appointment appo where appo.apId=?";
+	public static final String GET_APPOINT_BY_ID="from Appointment where id=?";
 	
 	public static final String GET_EMPLOYEE_BY_COMPANY="from Employee e where e.admin.authority=3 and e.company.companyId=?";
 	
@@ -73,4 +73,6 @@ public class Hql {
 	public static final String GET_COLLECTION_BY_STRANGER_ID="from CollectionPhoto where strangerId=?";
 	
 	public static final String GET_APPOINTMENT_BY_USER="from Appointment where createBy=?";
+	
+	public static final String GET_EMPLOYEE_BY_PHOTO_PATH="from Employee where photoPath=?";
 }

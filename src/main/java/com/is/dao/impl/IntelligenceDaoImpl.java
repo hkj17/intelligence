@@ -125,21 +125,30 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 
 	@Override
 	public List<Employee> getEmployeeByWhere(String word, String department, String deviceId) {
-		if (word != null) {
-			Query query = getSession().createQuery(
-					"select a from Employee a where a.department.id=? and (a.pingyin like ? or a.pingyin like ? or a.employeeName like ?) and a.deviceId=?");
-			query.setParameter(0, department);
-			query.setParameter(1, word + "%");
-			query.setParameter(2, "%" + "," + word + "%");
-			query.setParameter(3, "%" + "%" + word + "%");
-			query.setParameter(4, deviceId);
-			return query.list();
-		} else {
-			Query query = getSession().createQuery("select a from Employee a where a.department.id=? and a.deviceId=?");
-			query.setParameter(0, department);
-			query.setParameter(1, deviceId);
-			return query.list();
+		String sql="select a from Employee a where a.deviceId='"+deviceId+"'";
+		int i=0;
+		Map<Integer, String> map = new HashMap<>();
+		if (department != null && !"".equals(department)) {
+			if(department.equals("0")){
+				sql = sql + " and a.department=null";
+			}
+			else{
+				sql = sql + " and a.department.id=?";
+				map.put(i, department);
+				i = i + 1;
+			}
 		}
+		if (word != null && !"".equals(word)) {
+			sql += " and (a.pingyin like ? or a.pingyin like ? or a.employeeName like ?)";
+			map.put(i, word + "%");
+			map.put(i + 1, "%" + "," + word + "%");
+			map.put(i + 2, "%" + word + "%");
+		}
+		Query query = getSession().createQuery(sql);
+		for (int p = 0; p < map.size(); p++) {
+			query.setParameter(p, map.get(p));
+		}
+		return query.list();
 
 	}
 
@@ -621,6 +630,12 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 	public List<Appointment> getAppointmentByUser(String userid) {
 		// TODO Auto-generated method stub
 		return cloudDao.findByHql(Hql.GET_APPOINTMENT_BY_USER, userid);
+	}
+
+	@Override
+	public Employee getEmployeeByPhotoPath(String path) {
+		// TODO Auto-generated method stub
+		return (Employee) cloudDao.getByHql(Hql.GET_EMPLOYEE_BY_PHOTO_PATH, path);
 	}
 
 }

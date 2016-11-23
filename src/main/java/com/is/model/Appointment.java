@@ -30,10 +30,10 @@ public class Appointment {
 	private VisitorInfo info;
 	
 	@Column(name = "start_time")
-	private Date startTime;
+	private String startTime;
 	
 	@Column(name = "end_time")
-	private Date endTime;
+	private String endTime;
 	
 	@Column(name = "content")
 	private String content;
@@ -78,19 +78,19 @@ public class Appointment {
 		this.info = info;
 	}
 
-	public Date getStartTime() {
+	public String getStartTime() {
 		return startTime;
 	}
 
-	public void setStartTime(Date startTime) {
+	public void setStartTime(String startTime) {
 		this.startTime = startTime;
 	}
 
-	public Date getEndTime() {
+	public String getEndTime() {
 		return endTime;
 	}
 
-	public void setEndTime(Date endTime) {
+	public void setEndTime(String endTime) {
 		this.endTime = endTime;
 	}
 

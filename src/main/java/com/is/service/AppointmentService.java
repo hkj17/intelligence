@@ -34,14 +34,8 @@ public class AppointmentService {
 		Appointment appointment=new Appointment();
 		VisitorInfo info=intelligenceDao.getVisitorInfoById(visitorInfoId);
 		appointment.setInfo(info);
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		try {
-			appointment.setStartTime(formatter.parse(startTime));
-			appointment.setEndTime(formatter.parse(endTime));
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		appointment.setStartTime(startTime);
+		appointment.setEndTime(endTime);
 		appointment.setContent(content);
 		appointment.setCreateAt(new Date());
 		appointment.setCreateBy(employeeId);
@@ -60,7 +54,13 @@ public class AppointmentService {
 	
 	public Boolean editAppointment(String appid,String startTime,String endTime,
 			String content,String deviceId){
-				return true;
+		Appointment appointment=intelligenceDao.getAppointById(Integer.parseInt(appid));
+		appointment.setStartTime(startTime);
+		appointment.setEndTime(endTime);
+		appointment.setContent(content);
+		
+		cloudDao.update(appointment);
+		return true;
 		
 	}
 }

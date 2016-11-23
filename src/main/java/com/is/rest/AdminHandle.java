@@ -358,4 +358,28 @@ public class AdminHandle {
 				
 	}
 	
+	
+	@POST
+	//@LoginRequired
+	@Path("/checkPhoneNumber")
+	public Response checkPhoneNumber(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams){
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		boolean state=adminService.checkPhoneNumber(requestMap.get("phone"));
+		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, state);
+	}
+	
+	@POST
+	//@LoginRequired
+	@Path("/editAdminPassword")
+	public Response editAdminPassword(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams){
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		boolean state=adminService.editAdminPassword(requestMap.get("oldPassword"),requestMap.get("newPassword"),requestMap.get("adminId"));
+		if (state) {
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
+		} else {
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.REQUEST_FAIL, null);
+		}
+				
+	}
+	
 }

@@ -115,82 +115,106 @@ public class AdminService {
 	public String addEmployee(String name, String birth, String contact,
 			String deviceId,  String photo, String position, String jobId, String address, String email,
 			String idCard, String workPos,String department,String sex,String isduty,String cid) {
-		Employee employee = new Employee();
-		// 鍒ゆ柇鏄惁涓烘眽瀛�
-		Pattern p = Pattern.compile("[\u4e00-\u9fa5]");
-		Matcher m = p.matcher(name);
-		if (m.find()) {
-			String pingyin = converterToSpell(name);
-			employee.setPingyin(pingyin);
-		}
-
-		String employeeId = UUID.randomUUID().toString().trim().replaceAll("-", "");
-		employee.setEmployeeId(employeeId);
-		employee.setEmployeeName(name);
-		employee.setPosition(position);
-		employee.setJobId(jobId);
-		employee.setAddress(address);
-		employee.setDeviceId(deviceId);
-		employee.setEmail(email);
-		employee.setWorkPos(workPos);
-		if (null != department) {
-			Department depart = intelligenceDao.getDepartmentById(department);
-			employee.setDepartment(depart);
-		}
-
-		employee.setIdCard(idCard);
-		if (!"".equals(birth) && null != birth) {
-			employee.setBirth(birth);
-		}
-		employee.setTelphone(contact);
-		Company company=intelligenceDao.getCompanyByDeviceId(deviceId);
-		employee.setCompany(company);
-		if(sex!=null){
-			employee.setSex(Integer.parseInt(sex));
-		}
-		if(isduty!=null){
-			employee.setIsDuty(Integer.parseInt(isduty));
-		}
-		String strangerId=null;
-		if(photo!=null){
-			File file=new File(photo);
-			strangerId=file.getName();
+		try {
+			Admin admin=new Admin();
+			String adminId=UUID.randomUUID().toString().trim().replaceAll("-", "");
+			admin.setAdminId(adminId);
+			admin.setAuthority(3);
+			admin.setDeviceId(deviceId);
+			admin.setUsername(contact);
+			admin.setPassword(PasswordUtil.generatePassword("123456"));
+			cloudDao.add(admin);
 			
-			String newpath=EMPLOYEE_FACE+deviceId;
-			if (!(new File(newpath).isDirectory())) {
-				new File(newpath).mkdirs();
+			
+			Employee employee = new Employee();
+			// 鍒ゆ柇鏄惁涓烘眽瀛�
+			Pattern p = Pattern.compile("[\u4e00-\u9fa5]");
+			Matcher m = p.matcher(name);
+			if (m.find()) {
+				String pingyin = converterToSpell(name);
+				employee.setPingyin(pingyin);
 			}
-			newpath=newpath+"/"+strangerId;
-			file.renameTo(new File(newpath));		
-			employee.setPhotoPath(newpath);
-		}
 
-		cloudDao.add(employee);
-		
-		if (cid != null && !"".equals(cid)) {
-			CollectionPhoto collectionPhoto=intelligenceDao.getCollectionPhotoById(cid);
-			cloudDao.delete(collectionPhoto);
+			String employeeId = UUID.randomUUID().toString().trim().replaceAll("-", "");
+			employee.setEmployeeId(employeeId);
+			employee.setAdmin(admin);
+			employee.setEmployeeName(name);
+			employee.setPosition(position);
+			employee.setJobId(jobId);
+			employee.setAddress(address);
+			employee.setDeviceId(deviceId);
+			employee.setEmail(email);
+			employee.setWorkPos(workPos);
+			if (null != department) {
+				Department depart = intelligenceDao.getDepartmentById(department);
+				employee.setDepartment(depart);
+			}
+
+			employee.setIdCard(idCard);
+			if (!"".equals(birth) && null != birth) {
+				employee.setBirth(birth);
+			}
+			employee.setTelphone(contact);
+			Company company=intelligenceDao.getCompanyByDeviceId(deviceId);
+			employee.setCompany(company);
+			if(sex!=null){
+				employee.setSex(Integer.parseInt(sex));
+			}
+			if(isduty!=null){
+				employee.setIsDuty(Integer.parseInt(isduty));
+			}
+			String strangerId=null;
+			if(photo!=null){
+				File file=new File(photo);
+				strangerId=file.getName();
+				
+				String newpath=EMPLOYEE_FACE+deviceId;
+				if (!(new File(newpath).isDirectory())) {
+					new File(newpath).mkdirs();
+				}
+				newpath=newpath+"/"+strangerId;
+				file.renameTo(new File(newpath));		
+				employee.setPhotoPath(newpath);
+				
+				Employee photoem=intelligenceDao.getEmployeeByPhotoPath(newpath);
+				if(photoem!=null){
+					return null;
+				}
+			}
+
+			cloudDao.add(employee);
+			
+			if (cid != null && !"".equals(cid)) {
+				CollectionPhoto collectionPhoto=intelligenceDao.getCollectionPhotoById(cid);
+				cloudDao.delete(collectionPhoto);
+			}
+			SyncFuture<String> future=AddFuture.setFuture(deviceId);
+			CheckResponse response=new CheckResponse(deviceId, "103_2",future);
+			response.start();
+			ServiceDistribution.handleJson103_1(employeeId, strangerId, name, birth, deviceId);
+			return employeeId;
+		} catch (Exception e) {
+			// TODO: handle exception
+			return null;
 		}
-		SyncFuture<String> future=AddFuture.setFuture(deviceId);
-		CheckResponse response=new CheckResponse(deviceId, "103_2",future);
-		response.start();
-		ServiceDistribution.handleJson103_1(employeeId, strangerId, name, birth, deviceId);
-		return employeeId;
+		
 	}
 
 
 	@SuppressWarnings("unchecked")
 	public Boolean deleteUser(String deviceId,String id) {
 		Employee employee = intelligenceDao.getEmployeeById(id);
-		Admin admin = employee.getAdmin();
-		cloudDao.delete(employee);
-		if(admin!=null){
-			cloudDao.delete(admin);
-		}
 		SyncFuture<String> future=AddFuture.setFuture(deviceId);
 		CheckResponse response=new CheckResponse(deviceId, "105_2",future);
 		response.start();
 		boolean state=ServiceDistribution.handleJson105_1(deviceId, employee.getEmployeeId());
+		if(state){
+			Admin admin = employee.getAdmin();
+			cloudDao.delete(employee);
+			if(admin!=null){
+				cloudDao.delete(admin);
+			}
+		}
 		return state;
 
 	}
@@ -198,30 +222,37 @@ public class AdminService {
 	public Boolean editEmployee(String employeeId, String name, String birth, String contact, 
 			String deviceId, String position, String jobId, String address, String email,
 			String idCard, String workPos,String sex,String path) {
-		Employee employee = intelligenceDao.getEmployeeById(employeeId);
-		employee.setEmployeeName(name);
-		if(birth!=null && !"".equals(birth)){
-			employee.setBirth(birth);
+		try {
+			Employee employee = intelligenceDao.getEmployeeById(employeeId);
+			employee.setEmployeeName(name);
+			if(birth!=null && !"".equals(birth)){
+				employee.setBirth(birth);
+			}
+			
+			employee.setTelphone(contact);
+			employee.setPosition(position);
+			employee.setJobId(jobId);
+			employee.setAddress(address);
+			employee.setEmail(email);
+			employee.setIdCard(idCard);
+			employee.setSex(Integer.parseInt(sex));
+			employee.setWorkPos(workPos);
+			if(path!=null){
+				employee.setPhotoPath(path);
+			}
+			
+			cloudDao.update(employee);
+			SyncFuture<String> future=AddFuture.setFuture(deviceId);
+			CheckResponse response=new CheckResponse(deviceId, "104_2",future);
+			response.start();
+			boolean state = ServiceDistribution.handleJson104_1(deviceId, employeeId, name, birth);
+			return state;
+		} catch (Exception e) {
+			// TODO: handle exception
+			return false;
 		}
 		
-		employee.setTelphone(contact);
-		employee.setPosition(position);
-		employee.setJobId(jobId);
-		employee.setAddress(address);
-		employee.setEmail(email);
-		employee.setIdCard(idCard);
-		employee.setSex(Integer.parseInt(sex));
-		employee.setWorkPos(workPos);
-		if(path!=null){
-			employee.setPhotoPath(path);
-		}
 		
-		cloudDao.update(employee);
-		SyncFuture<String> future=AddFuture.setFuture(deviceId);
-		CheckResponse response=new CheckResponse(deviceId, "104_2",future);
-		response.start();
-		boolean state = ServiceDistribution.handleJson104_1(deviceId, employeeId, name, birth);
-		return state;
 	}
 
 	public Boolean editPassword(String username, String password) {
@@ -552,6 +583,26 @@ public class AdminService {
 			return false;
 		}
 		
+	}
+	
+	public Boolean checkPhoneNumber(String phone){
+		String employee=intelligenceDao.getEmployeeByMobile(phone);
+		if(employee==null){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+	
+	public Boolean editAdminPassword(String oldPassword,String newPassword,String adminId){
+		Admin admin=intelligenceDao.getAdminById(adminId);
+		boolean state=PasswordUtil.validatePassword(admin.getPassword(), oldPassword);
+		if(state){
+			admin.setPassword(PasswordUtil.generatePassword(newPassword));
+			cloudDao.update(admin);
+		}
+		return state;
 	}
 	
 	

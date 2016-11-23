@@ -123,4 +123,7 @@ public interface IntelligenceDao {
 	public CollectionPhoto getCollectByStrangerId(String id);
 	
 	public VersionUpdate autoUpdate();
+	
+	public Employee getEmployeeByPhotoPath(String path);
+	
 }

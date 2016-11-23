@@ -105,42 +105,50 @@ public class VisitorService {
 
 	public String addVisitorInfo(String name, String company, String position, String telphone, String email,
 			String companyUrl, String deviceId, String importance, String birth, String path, String cid) {
-		VisitorInfo info = new VisitorInfo();
-		String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
-		info.setId(id);
-		info.setDeviceId(deviceId);
-		info.setName(name);
-		info.setCompany(company);
-		info.setPosition(position);
-		info.setTelphone(telphone);
-		info.setEmail(email);
-		info.setCompanyUrl(companyUrl);
-		info.setImportance(Integer.parseInt(importance));
-		info.setBirth(birth);
+		try {
+			VisitorInfo info = new VisitorInfo();
+			String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
+			info.setId(id);
+			info.setDeviceId(deviceId);
+			info.setName(name);
+			info.setCompany(company);
+			info.setPosition(position);
+			info.setTelphone(telphone);
+			info.setEmail(email);
+			info.setCompanyUrl(companyUrl);
+			info.setImportance(Integer.parseInt(importance));
+			if(birth!=null && !"".equals(birth)){
+				info.setBirth(birth);
+			}
 
-		File file = new File(path);
-		String visitorPhoto = file.getName();
+			File file = new File(path);
+			String visitorPhoto = file.getName();
 
-		String newpath = VISITOR_FACE + deviceId;
-		if (!(new File(newpath).isDirectory())) {
-			new File(newpath).mkdirs();
-		}
-		newpath = newpath + "/" + visitorPhoto;
-		file.renameTo(new File(newpath));
+			String newpath = VISITOR_FACE + deviceId;
+			if (!(new File(newpath).isDirectory())) {
+				new File(newpath).mkdirs();
+			}
+			newpath = newpath + "/" + visitorPhoto;
+			file.renameTo(new File(newpath));
 
-		info.setPhotoPath(newpath);
-		cloudDao.add(info);
+			info.setPhotoPath(newpath);
+			cloudDao.add(info);
 
-		if (cid != null && !"".equals(cid)) {
-			CollectionPhoto photo=intelligenceDao.getCollectionPhotoById(cid);
-			cloudDao.delete(photo);
-		}
-		String strangerId = path == null ? null : path.substring(path.lastIndexOf("/") + 1, path.lastIndexOf("."));
-		SyncFuture<String> future = AddFuture.setFuture(deviceId);
-		CheckResponse response = new CheckResponse(deviceId, "103_12", future);
-		response.start();
-		ServiceDistribution.handleJson103_11(id, strangerId, name, company, position, birth, deviceId,null);
-		return id;
+			if (cid != null && !"".equals(cid)) {
+				CollectionPhoto photo=intelligenceDao.getCollectionPhotoById(cid);
+				cloudDao.delete(photo);
+			}
+			String strangerId = path == null ? null : path.substring(path.lastIndexOf("/") + 1, path.lastIndexOf("."));
+			SyncFuture<String> future = AddFuture.setFuture(deviceId);
+			CheckResponse response = new CheckResponse(deviceId, "103_12", future);
+			response.start();
+			ServiceDistribution.handleJson103_11(id, strangerId, name, company, position, birth, deviceId,null);
+			return id;
+		} catch (Exception e) {
+			// TODO: handle exception
+			return null;
+		}	
+		
 	}
 
 	public boolean updateVisitorInfo(String deviceId, String id, String name, String company, String position,
@@ -181,13 +189,14 @@ public class VisitorService {
 
 	public Boolean deleteVisitorInfo(String deviceId, String visitorId) {
 		VisitorInfo visitorInfo = intelligenceDao.getVisitorInfoById(visitorId);
-		if (visitorInfo != null) {
-			cloudDao.delete(visitorInfo);
-		}
 		SyncFuture<String> future = AddFuture.setFuture(deviceId);
 		CheckResponse response = new CheckResponse(deviceId, "105_12", future);
 		response.start();
 		boolean state = ServiceDistribution.handleJson105_11(deviceId, visitorId);
+		
+		if (visitorInfo != null && state) {
+			cloudDao.delete(visitorInfo);
+		}
 		return state;
 	}
 
@@ -295,13 +304,14 @@ public class VisitorService {
 	public void deletePhoto(String cid,String deviceId){
 		CollectionPhoto photo=intelligenceDao.getCollectionPhotoById(cid);
 		String strangerId=photo.getStrangerId();
-		if(photo!=null){
-			cloudDao.delete(photo);
-		}
 		SyncFuture<String> future = AddFuture.setFuture(deviceId);
 		CheckResponse response = new CheckResponse(deviceId, "105_22", future);
 		response.start();
-		ServiceDistribution.handleJson105_21(strangerId, deviceId);
+		boolean state=ServiceDistribution.handleJson105_21(strangerId, deviceId);
+		
+		if(photo!=null && state){
+			cloudDao.delete(photo);
+		}
 	}
 	
 	public CollectionPhoto getCollectByStrangerId(String id){
