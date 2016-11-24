@@ -60,7 +60,7 @@ public class NotificationService {
 	}
 	
 	public Boolean deleteAppoint(String id){
-		Appointment appointment=intelligenceDao.getAppointById(Integer.parseInt(id));
+		Appointment appointment=intelligenceDao.getAppointById(id);
 		cloudDao.delete(appointment);
 		return true;
 	}

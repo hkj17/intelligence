@@ -157,6 +157,18 @@ public class SocketService {
 				 future.setResponse("106_2");
 			 }
 		}
+		else if (type.equals("106") && code.equals("12")) {
+			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.channel().id());
+			 if(future!=null){
+				 future.setResponse("106_12");
+			 }
+		}
+		else if (type.equals("106") && code.equals("22")) {
+			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.channel().id());
+			 if(future!=null){
+				 future.setResponse("106_22");
+			 }
+		}
 		else if (type.equals("110") && code.equals("2")) {
 			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.channel().id());
 			 if(future!=null){
@@ -204,6 +216,12 @@ public class SocketService {
 			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.channel().id());
 			 if(future!=null){
 				 future.setResponse("114_2");
+			 }
+		}
+		else if (type.equals("115") && code.equals("2")) {
+			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.channel().id());
+			 if(future!=null){
+				 future.setResponse("115_2");
 			 }
 		}
 		else {

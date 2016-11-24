@@ -237,15 +237,21 @@ public class AdminService {
 			employee.setIdCard(idCard);
 			employee.setSex(Integer.parseInt(sex));
 			employee.setWorkPos(workPos);
+			String strangerId=null;
 			if(path!=null){
 				employee.setPhotoPath(path);
+				strangerId=path.substring(path.lastIndexOf("/") + 1, path.lastIndexOf("."));
+			}
+			else{
+				String opath=employee.getPhotoPath();
+				strangerId=opath == null ? null : opath.substring(opath.lastIndexOf("/") + 1, opath.lastIndexOf("."));
 			}
 			
 			cloudDao.update(employee);
 			SyncFuture<String> future=AddFuture.setFuture(deviceId);
 			CheckResponse response=new CheckResponse(deviceId, "104_2",future);
 			response.start();
-			boolean state = ServiceDistribution.handleJson104_1(deviceId, employeeId, name, birth);
+			boolean state = ServiceDistribution.handleJson104_1(deviceId, employeeId, name, birth,strangerId);
 			return state;
 		} catch (Exception e) {
 			// TODO: handle exception
@@ -489,36 +495,47 @@ public class AdminService {
 	
 	public Boolean adminManage(String deviceId,String username,String password,String company,
 			String address,String contact,String startTime,String endTime){
-		Admin admin=new Admin();
-		String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
-		admin.setAdminId(id);
-		admin.setAuditAuth(1);
-		admin.setAuthority(0);
-		admin.setDeviceId(deviceId);
-		admin.setPassword(PasswordUtil.generatePassword(password));
-		admin.setUsername(username);
-		cloudDao.add(admin);
-		
-		Company com=new Company();
-		com.setAddress(address);
-		com.setAdminId(id);
-		com.setCompanyName(company);
-		com.setContact(contact);
-		com.setDeviceId(deviceId);
-		com.setTimeWork(startTime);
-		com.setTimeRest(endTime);
-		cloudDao.add(com);
-		
-		Employee employee=new Employee();
-		String employeeId = UUID.randomUUID().toString().trim().replaceAll("-", "");
-		employee.setEmployeeId(employeeId);
-		employee.setAddress(address);
-		employee.setAdmin(admin);
-		employee.setCompany(com);
-		employee.setEmployeeName(username);
-		cloudDao.add(employee);
-		
-		return true;
+		try {
+			SyncFuture<String> future=AddFuture.setFuture(deviceId);
+			CheckResponse response=new CheckResponse(deviceId, "115_2",future);
+			response.start();
+			boolean state=ServiceDistribution.handleJson115_1(deviceId, company);
+			if(state){
+				Admin admin=new Admin();
+				String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
+				admin.setAdminId(id);
+				admin.setAuditAuth(1);
+				admin.setAuthority(0);
+				admin.setDeviceId(deviceId);
+				admin.setPassword(PasswordUtil.generatePassword(password));
+				admin.setUsername(username);
+				cloudDao.add(admin);
+				
+				Company com=new Company();
+				com.setAddress(address);
+				com.setAdminId(id);
+				com.setCompanyName(company);
+				com.setContact(contact);
+				com.setDeviceId(deviceId);
+				com.setTimeWork(startTime);
+				com.setTimeRest(endTime);
+				cloudDao.add(com);
+				
+				Employee employee=new Employee();
+				String employeeId = UUID.randomUUID().toString().trim().replaceAll("-", "");
+				employee.setEmployeeId(employeeId);
+				employee.setAddress(address);
+				employee.setAdmin(admin);
+				employee.setCompany(com);
+				employee.setEmployeeName(username);
+				cloudDao.add(employee);
+			}
+					
+			return state;
+		} catch (Exception e) {
+			// TODO: handle exception
+			return false;
+		}
 	}
 	
 	public Boolean deleteAdmin(String id){

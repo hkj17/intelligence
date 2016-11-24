@@ -63,4 +63,18 @@ public class AppointmentHandle {
 			return ResponseFactory.response(Response.Status.OK, ResponseCode.REQUEST_FAIL, null);
 		}
 	}
+	
+	@POST
+	//@LoginRequired
+	@Path("/deleteAppointment")
+	public Response deleteAppointment(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		boolean state=appointmentService.deleteAppointment(requestMap.get("appId"),deviceId);
+		if(state){
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
+		}else{
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.REQUEST_FAIL, null);
+		}
+	}
 }

@@ -55,7 +55,7 @@ public interface IntelligenceDao {
 	
 	public Notification getNotifyById(int id);
 	
-	public Appointment getAppointById(int id);
+	public Appointment getAppointById(String id);
 	
 	public List<Employee> getEmployeeByCompany(int id);
 	

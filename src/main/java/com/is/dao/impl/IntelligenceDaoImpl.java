@@ -182,7 +182,7 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 	}
 
 	@Override
-	public Appointment getAppointById(int id) {
+	public Appointment getAppointById(String id) {
 		return (Appointment) cloudDao.getByHql(Hql.GET_APPOINT_BY_ID, id);
 	}
 
