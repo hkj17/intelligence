@@ -221,7 +221,7 @@ public class AdminService {
 
 	public Boolean editEmployee(String employeeId, String name, String birth, String contact, 
 			String deviceId, String position, String jobId, String address, String email,
-			String idCard, String workPos,String sex,String path) {
+			String idCard, String workPos,String sex,String path,String departmentId) {
 		try {
 			Employee employee = intelligenceDao.getEmployeeById(employeeId);
 			employee.setEmployeeName(name);
@@ -232,6 +232,8 @@ public class AdminService {
 			employee.setTelphone(contact);
 			employee.setPosition(position);
 			employee.setJobId(jobId);
+			Department depart = intelligenceDao.getDepartmentById(departmentId);
+			employee.setDepartment(depart);
 			employee.setAddress(address);
 			employee.setEmail(email);
 			employee.setIdCard(idCard);
