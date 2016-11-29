@@ -48,7 +48,11 @@ public class VisitorHandler {
 				requestMap.get("position"), requestMap.get("telphone"), requestMap.get("email"), 
 				requestMap.get("companyUrl"),deviceId,requestMap.get("importance"),
 				requestMap.get("birth"),requestMap.get("path"),requestMap.get("cid"));
-		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, id);
+		if(id!=null){
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, id);
+		}else{
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.REQUEST_FAIL, null);
+		}
 		
 	}
 	

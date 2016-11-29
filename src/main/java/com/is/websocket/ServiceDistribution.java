@@ -11,6 +11,7 @@ import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -35,6 +36,8 @@ import sun.misc.BASE64Decoder;
 @SuppressWarnings("restriction")
 @Component("serviceDistribution")
 public class ServiceDistribution implements ApplicationContextAware {
+	private static Logger logger = Logger.getLogger(ServiceDistribution.class);
+	
 	private static ApplicationContext context;
 
 	@SuppressWarnings("static-access")
@@ -314,7 +317,7 @@ public class ServiceDistribution implements ApplicationContextAware {
 		jsonObject.put("employeeId", employeeId);
 		jsonObject.put("beginTime", startTime);
 		jsonObject.put("endTime", endTime);
-		jsonObject.put("id", id);
+		jsonObject.put("appointmentId", id);
 		jsonObject.put("visitorId", visitorId);
 		jsonObject.put("message", message);
 		byte[] result = SocketService.responseByte(jsonObject, "106", "1");
@@ -416,20 +419,20 @@ public class ServiceDistribution implements ApplicationContextAware {
 	
 	public static void handleJson110_2(JSONObject jsonObject,ChannelHandlerContext ctx){
 		String employeeId=jsonObject.getString("employeeId");
-		String photoId=jsonObject.getString("photoId");
+		String shootId=jsonObject.getString("shootId");
 		String photo=jsonObject.getString("photo");
-		String time=jsonObject.getString("time");
 		String deviceId = ChannelNameToDeviceMap.getDeviceMap(ctx.channel().id());
 		
 		String path = CLOCK_PHOTO_PATH + deviceId+"/"+employeeId;
 		if (!(new File(path).isDirectory())) {
 			new File(path).mkdirs();
 		}
-		path=path+"/"+photoId+".jpg";
+		path=path+"/"+shootId+".jpg";
 		GenerateImage(photo, path);
+		logger.info(path);
 		
 		ClockService clockService = (ClockService) ServiceDistribution.getContext().getBean("clockService");
-		clockService.insertAbonormalClockPhoto(employeeId, time, path,deviceId);
+		clockService.insertAbonormalClockPhoto(employeeId, path,deviceId);
 		
 	}
 	

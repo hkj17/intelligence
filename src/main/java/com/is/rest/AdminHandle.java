@@ -274,8 +274,11 @@ public class AdminHandle {
 				 requestMap.get("email"),  requestMap.get("idCard"),
 				 requestMap.get("workPos"),requestMap.get("departmentId"),
 				 requestMap.get("sex"),requestMap.get("isDuty"),requestMap.get("cid"));
-
-		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, employeeId);
+		if (employeeId!=null) {
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, employeeId);
+		} else {
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.REQUEST_FAIL, null);
+		}
 	}
 	
 	@POST

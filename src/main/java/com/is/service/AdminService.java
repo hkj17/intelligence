@@ -75,8 +75,8 @@ public class AdminService {
 		return true;
 
 	}
-	
-	public Admin getAdminByName(String name){
+
+	public Admin getAdminByName(String name) {
 		return intelligenceDao.getAdminByName(name);
 	}
 
@@ -112,20 +112,28 @@ public class AdminService {
 		return intelligenceDao.getCompanyList();
 	}
 
-	public String addEmployee(String name, String birth, String contact,
-			String deviceId,  String photo, String position, String jobId, String address, String email,
-			String idCard, String workPos,String department,String sex,String isduty,String cid) {
-		try {
-			Admin admin=new Admin();
-			String adminId=UUID.randomUUID().toString().trim().replaceAll("-", "");
+	public String addEmployee(String name, String birth, String contact, String deviceId, String photo, String position,
+			String jobId, String address, String email, String idCard, String workPos, String department, String sex,
+			String isduty, String cid) {
+		String employeeId = UUID.randomUUID().toString().trim().replaceAll("-", "");
+		String strangerId = null;
+		if (photo != null) {
+			strangerId = photo.substring(photo.lastIndexOf("/") + 1, photo.lastIndexOf("."));
+		}
+		SyncFuture<String> future = AddFuture.setFuture(deviceId);
+		CheckResponse response = new CheckResponse(deviceId, "103_2", future);
+		response.start();
+		boolean state=ServiceDistribution.handleJson103_1(employeeId, strangerId, name, birth, deviceId);
+		if(state){
+			Admin admin = new Admin();
+			String adminId = UUID.randomUUID().toString().trim().replaceAll("-", "");
 			admin.setAdminId(adminId);
 			admin.setAuthority(3);
 			admin.setDeviceId(deviceId);
 			admin.setUsername(contact);
 			admin.setPassword(PasswordUtil.generatePassword("123456"));
 			cloudDao.add(admin);
-			
-			
+
 			Employee employee = new Employee();
 			// 鍒ゆ柇鏄惁涓烘眽瀛�
 			Pattern p = Pattern.compile("[\u4e00-\u9fa5]");
@@ -135,7 +143,6 @@ public class AdminService {
 				employee.setPingyin(pingyin);
 			}
 
-			String employeeId = UUID.randomUUID().toString().trim().replaceAll("-", "");
 			employee.setEmployeeId(employeeId);
 			employee.setAdmin(admin);
 			employee.setEmployeeName(name);
@@ -155,63 +162,57 @@ public class AdminService {
 				employee.setBirth(birth);
 			}
 			employee.setTelphone(contact);
-			Company company=intelligenceDao.getCompanyByDeviceId(deviceId);
+			Company company = intelligenceDao.getCompanyByDeviceId(deviceId);
 			employee.setCompany(company);
-			if(sex!=null){
+			if (sex != null) {
 				employee.setSex(Integer.parseInt(sex));
 			}
-			if(isduty!=null){
+			if (isduty != null) {
 				employee.setIsDuty(Integer.parseInt(isduty));
 			}
-			String strangerId=null;
-			if(photo!=null){
-				File file=new File(photo);
-				strangerId=file.getName();
-				
-				String newpath=EMPLOYEE_FACE+deviceId;
+			if (photo != null) {
+				File file = new File(photo);
+
+				String newpath = EMPLOYEE_FACE + deviceId;
 				if (!(new File(newpath).isDirectory())) {
 					new File(newpath).mkdirs();
 				}
-				newpath=newpath+"/"+strangerId;
-				file.renameTo(new File(newpath));		
+				newpath = newpath + "/" + file.getName();
+				file.renameTo(new File(newpath));
 				employee.setPhotoPath(newpath);
-				
-				Employee photoem=intelligenceDao.getEmployeeByPhotoPath(newpath);
-				if(photoem!=null){
+
+				Employee photoem = intelligenceDao.getEmployeeByPhotoPath(newpath);
+				if (photoem != null) {
 					return null;
 				}
 			}
 
 			cloudDao.add(employee);
-			
+
 			if (cid != null && !"".equals(cid)) {
-				CollectionPhoto collectionPhoto=intelligenceDao.getCollectionPhotoById(cid);
+				CollectionPhoto collectionPhoto = intelligenceDao.getCollectionPhotoById(cid);
 				cloudDao.delete(collectionPhoto);
 			}
-			SyncFuture<String> future=AddFuture.setFuture(deviceId);
-			CheckResponse response=new CheckResponse(deviceId, "103_2",future);
-			response.start();
-			ServiceDistribution.handleJson103_1(employeeId, strangerId, name, birth, deviceId);
 			return employeeId;
-		} catch (Exception e) {
-			// TODO: handle exception
+		}
+		else{
 			return null;
 		}
 		
+
 	}
 
-
 	@SuppressWarnings("unchecked")
-	public Boolean deleteUser(String deviceId,String id) {
+	public Boolean deleteUser(String deviceId, String id) {
 		Employee employee = intelligenceDao.getEmployeeById(id);
-		SyncFuture<String> future=AddFuture.setFuture(deviceId);
-		CheckResponse response=new CheckResponse(deviceId, "105_2",future);
+		SyncFuture<String> future = AddFuture.setFuture(deviceId);
+		CheckResponse response = new CheckResponse(deviceId, "105_2", future);
 		response.start();
-		boolean state=ServiceDistribution.handleJson105_1(deviceId, employee.getEmployeeId());
-		if(state){
+		boolean state = ServiceDistribution.handleJson105_1(deviceId, employee.getEmployeeId());
+		if (state) {
 			Admin admin = employee.getAdmin();
 			cloudDao.delete(employee);
-			if(admin!=null){
+			if (admin != null) {
 				cloudDao.delete(admin);
 			}
 		}
@@ -219,48 +220,49 @@ public class AdminService {
 
 	}
 
-	public Boolean editEmployee(String employeeId, String name, String birth, String contact, 
-			String deviceId, String position, String jobId, String address, String email,
-			String idCard, String workPos,String sex,String path,String departmentId) {
+	public Boolean editEmployee(String employeeId, String name, String birth, String contact, String deviceId,
+			String position, String jobId, String address, String email, String idCard, String workPos, String sex,
+			String path, String departmentId) {
 		try {
 			Employee employee = intelligenceDao.getEmployeeById(employeeId);
-			employee.setEmployeeName(name);
-			if(birth!=null && !"".equals(birth)){
-				employee.setBirth(birth);
-			}
-			
-			employee.setTelphone(contact);
-			employee.setPosition(position);
-			employee.setJobId(jobId);
-			Department depart = intelligenceDao.getDepartmentById(departmentId);
-			employee.setDepartment(depart);
-			employee.setAddress(address);
-			employee.setEmail(email);
-			employee.setIdCard(idCard);
-			employee.setSex(Integer.parseInt(sex));
-			employee.setWorkPos(workPos);
-			String strangerId=null;
-			if(path!=null){
+			String strangerId = null;
+			if (path != null) {
 				employee.setPhotoPath(path);
-				strangerId=path.substring(path.lastIndexOf("/") + 1, path.lastIndexOf("."));
+				strangerId = path.substring(path.lastIndexOf("/") + 1, path.lastIndexOf("."));
+			} else {
+				String opath = employee.getPhotoPath();
+				strangerId = opath == null ? null : opath.substring(opath.lastIndexOf("/") + 1, opath.lastIndexOf("."));
 			}
-			else{
-				String opath=employee.getPhotoPath();
-				strangerId=opath == null ? null : opath.substring(opath.lastIndexOf("/") + 1, opath.lastIndexOf("."));
-			}
-			
-			cloudDao.update(employee);
-			SyncFuture<String> future=AddFuture.setFuture(deviceId);
-			CheckResponse response=new CheckResponse(deviceId, "104_2",future);
+
+			SyncFuture<String> future = AddFuture.setFuture(deviceId);
+			CheckResponse response = new CheckResponse(deviceId, "104_2", future);
 			response.start();
-			boolean state = ServiceDistribution.handleJson104_1(deviceId, employeeId, name, birth,strangerId);
+			boolean state = ServiceDistribution.handleJson104_1(deviceId, employeeId, name, birth, strangerId);
+			if (state) {
+				employee.setEmployeeName(name);
+				if (birth != null && !"".equals(birth)) {
+					employee.setBirth(birth);
+				}
+
+				employee.setTelphone(contact);
+				employee.setPosition(position);
+				employee.setJobId(jobId);
+				Department depart = intelligenceDao.getDepartmentById(departmentId);
+				employee.setDepartment(depart);
+				employee.setAddress(address);
+				employee.setEmail(email);
+				employee.setIdCard(idCard);
+				employee.setSex(Integer.parseInt(sex));
+				employee.setWorkPos(workPos);
+
+				cloudDao.update(employee);
+			}
 			return state;
 		} catch (Exception e) {
 			// TODO: handle exception
 			return false;
 		}
-		
-		
+
 	}
 
 	public Boolean editPassword(String username, String password) {
@@ -274,72 +276,62 @@ public class AdminService {
 		return intelligenceDao.getEmployeeById(id);
 	}
 
-	public List<Employee> getEmployeeByName(String name,String deviceId) {
-		return intelligenceDao.getEmployeeByName(name,deviceId);
+	public List<Employee> getEmployeeByName(String name, String deviceId) {
+		return intelligenceDao.getEmployeeByName(name, deviceId);
 	}
 
-	/*public Boolean updateEmployee() {
-		List<Employee> list = intelligenceDao.getEmployeeList();
-		for (Employee employee : list) {
-			if (employee.getEmployeeId().length() <= 5) {
-				Message message = new Message();
-				message.setEmployeeId(employee.getEmployeeId());
-				message.setMessage("璇风瓑寰�");
-				message.setTime(new Date());
-				cloudDao.add(message);
+	/*
+	 * public Boolean updateEmployee() { List<Employee> list =
+	 * intelligenceDao.getEmployeeList(); for (Employee employee : list) { if
+	 * (employee.getEmployeeId().length() <= 5) { Message message = new
+	 * Message(); message.setEmployeeId(employee.getEmployeeId());
+	 * message.setMessage("璇风瓑寰�"); message.setTime(new Date());
+	 * cloudDao.add(message);
+	 * 
+	 * Message message2 = new Message();
+	 * message2.setEmployeeId(employee.getEmployeeId());
+	 * message2.setMessage("璇风暀瑷�"); message2.setTime(new Date());
+	 * cloudDao.add(message2);
+	 * 
+	 * Message message3 = new Message();
+	 * message3.setEmployeeId(employee.getEmployeeId());
+	 * message3.setMessage("闂ㄥ彛鏈夊揩閫�"); message3.setTime(new Date());
+	 * cloudDao.add(message3);
+	 * 
+	 * Message message4 = new Message();
+	 * message4.setEmployeeId(employee.getEmployeeId());
+	 * message4.setMessage("鎮ㄧ殑澶栧崠鍒颁簡"); message4.setTime(new Date());
+	 * cloudDao.add(message4);
+	 * 
+	 * Message message5 = new Message();
+	 * message5.setEmployeeId(employee.getEmployeeId());
+	 * message5.setMessage("鍙告満姝ｅ湪妤间笅"); message5.setTime(new Date());
+	 * cloudDao.add(message5);
+	 * 
+	 * Message message6 = new Message();
+	 * message6.setEmployeeId(employee.getEmployeeId());
+	 * message6.setMessage("鎮ㄧ殑澶чゼ绯婂暒锛�"); message6.setTime(new Date());
+	 * cloudDao.add(message6); } } return true;
+	 * 
+	 * }
+	 */
 
-				Message message2 = new Message();
-				message2.setEmployeeId(employee.getEmployeeId());
-				message2.setMessage("璇风暀瑷�");
-				message2.setTime(new Date());
-				cloudDao.add(message2);
-
-				Message message3 = new Message();
-				message3.setEmployeeId(employee.getEmployeeId());
-				message3.setMessage("闂ㄥ彛鏈夊揩閫�");
-				message3.setTime(new Date());
-				cloudDao.add(message3);
-
-				Message message4 = new Message();
-				message4.setEmployeeId(employee.getEmployeeId());
-				message4.setMessage("鎮ㄧ殑澶栧崠鍒颁簡");
-				message4.setTime(new Date());
-				cloudDao.add(message4);
-
-				Message message5 = new Message();
-				message5.setEmployeeId(employee.getEmployeeId());
-				message5.setMessage("鍙告満姝ｅ湪妤间笅");
-				message5.setTime(new Date());
-				cloudDao.add(message5);
-
-				Message message6 = new Message();
-				message6.setEmployeeId(employee.getEmployeeId());
-				message6.setMessage("鎮ㄧ殑澶чゼ绯婂暒锛�");
-				message6.setTime(new Date());
-				cloudDao.add(message6);
-			}
-		}
-		return true;
-
-	}*/
-
-
-	public List<Employee> getEmployeeByWhere(String word,String department,String deviceId) {
-		return intelligenceDao.getEmployeeByWhere(word, department,deviceId);
+	public List<Employee> getEmployeeByWhere(String word, String department, String deviceId) {
+		return intelligenceDao.getEmployeeByWhere(word, department, deviceId);
 	}
-	
-	public void updateEmployeeTemplatePhoto(String employeeId,String path){
-		Employee employee=intelligenceDao.getEmployeeById(employeeId);
+
+	public void updateEmployeeTemplatePhoto(String employeeId, String path) {
+		Employee employee = intelligenceDao.getEmployeeById(employeeId);
 		employee.setTemplatePath(path);
 		cloudDao.update(employee);
 	}
 
 	public Boolean excuteCollection(String deviceId) {
-		ChannelHandlerContext ctx=DeviceService.getSocketMap(deviceId);
-		Future<String> sFuture=FutureMap.getFutureMap(ctx.channel().id());
-		if(sFuture!=null){
-			SyncFuture<String> future=AddFuture.setFuture(deviceId);
-			CheckResponse response=new CheckResponse(deviceId, "101_2",future);
+		ChannelHandlerContext ctx = DeviceService.getSocketMap(deviceId);
+		Future<String> sFuture = FutureMap.getFutureMap(ctx.channel().id());
+		if (sFuture != null) {
+			SyncFuture<String> future = AddFuture.setFuture(deviceId);
+			CheckResponse response = new CheckResponse(deviceId, "101_2", future);
 			response.start();
 		}
 		boolean state = ServiceDistribution.handleJson101_1(deviceId);
@@ -347,16 +339,17 @@ public class AdminService {
 	}
 
 	public String completeCollection(String deviceId) {
-		ChannelHandlerContext ctx=DeviceService.getSocketMap(deviceId);
-		Future<String> sFuture=FutureMap.getFutureMap(ctx.channel().id());
-		if(sFuture!=null){
-			SyncFuture<String> future=AddFuture.setFuture(deviceId);
-			CheckResponse response=new CheckResponse(deviceId, "102_2",future);
+		ChannelHandlerContext ctx = DeviceService.getSocketMap(deviceId);
+		Future<String> sFuture = FutureMap.getFutureMap(ctx.channel().id());
+		if (sFuture != null) {
+			SyncFuture<String> future = AddFuture.setFuture(deviceId);
+			CheckResponse response = new CheckResponse(deviceId, "102_2", future);
 			response.start();
-		}		
-		//String path="/cloudweb/server/tomcat_intel/webapps/employee_img/1.jpg";
+		}
+		// String
+		// path="/cloudweb/server/tomcat_intel/webapps/employee_img/1.jpg";
 		String path = PhotoMap.getMap(deviceId);
-		//PhotoMap.removeMap(deviceId);
+		// PhotoMap.removeMap(deviceId);
 		ServiceDistribution.handleJson102_1(deviceId);
 		return path;
 	}
@@ -481,29 +474,28 @@ public class AdminService {
 		return mapList;
 	}
 
-	
-	public List<Admin> searchAdmin(String name,String auth,String deviceId){
-		return intelligenceDao.searchAdmin(name, auth,deviceId);
+	public List<Admin> searchAdmin(String name, String auth, String deviceId) {
+		return intelligenceDao.searchAdmin(name, auth, deviceId);
 	}
-	
-	public Boolean editAdmin(String id,String name,String password,String auth){
-		Admin admin=intelligenceDao.getAdminById(id);
+
+	public Boolean editAdmin(String id, String name, String password, String auth) {
+		Admin admin = intelligenceDao.getAdminById(id);
 		admin.setUsername(name);
 		admin.setPassword(PasswordUtil.generatePassword(password));
 		admin.setAuthority(Integer.parseInt(auth));
 		cloudDao.update(admin);
 		return true;
 	}
-	
-	public Boolean adminManage(String deviceId,String username,String password,String company,
-			String address,String contact,String startTime,String endTime){
+
+	public Boolean adminManage(String deviceId, String username, String password, String company, String address,
+			String contact, String startTime, String endTime) {
 		try {
-			SyncFuture<String> future=AddFuture.setFuture(deviceId);
-			CheckResponse response=new CheckResponse(deviceId, "115_2",future);
+			SyncFuture<String> future = AddFuture.setFuture(deviceId);
+			CheckResponse response = new CheckResponse(deviceId, "115_2", future);
 			response.start();
-			boolean state=ServiceDistribution.handleJson115_1(deviceId, company);
-			if(state){
-				Admin admin=new Admin();
+			boolean state = ServiceDistribution.handleJson115_1(deviceId, company);
+			if (state) {
+				Admin admin = new Admin();
 				String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
 				admin.setAdminId(id);
 				admin.setAuditAuth(1);
@@ -512,8 +504,8 @@ public class AdminService {
 				admin.setPassword(PasswordUtil.generatePassword(password));
 				admin.setUsername(username);
 				cloudDao.add(admin);
-				
-				Company com=new Company();
+
+				Company com = new Company();
 				com.setAddress(address);
 				com.setAdminId(id);
 				com.setCompanyName(company);
@@ -522,8 +514,8 @@ public class AdminService {
 				com.setTimeWork(startTime);
 				com.setTimeRest(endTime);
 				cloudDao.add(com);
-				
-				Employee employee=new Employee();
+
+				Employee employee = new Employee();
 				String employeeId = UUID.randomUUID().toString().trim().replaceAll("-", "");
 				employee.setEmployeeId(employeeId);
 				employee.setAddress(address);
@@ -532,98 +524,93 @@ public class AdminService {
 				employee.setEmployeeName(username);
 				cloudDao.add(employee);
 			}
-					
+
 			return state;
 		} catch (Exception e) {
 			// TODO: handle exception
 			return false;
 		}
 	}
-	
-	public Boolean deleteAdmin(String id){
-		Admin admin=intelligenceDao.getAdminById(id);
-		Employee employee=intelligenceDao.getEmployeeByAdmin(id);
-		if(null!=employee){
+
+	public Boolean deleteAdmin(String id) {
+		Admin admin = intelligenceDao.getAdminById(id);
+		Employee employee = intelligenceDao.getEmployeeByAdmin(id);
+		if (null != employee) {
 			employee.setAdmin(null);
 			cloudDao.update(employee);
 		}
-		if(null!=admin){
+		if (null != admin) {
 			cloudDao.delete(admin);
 		}
-		
-		
+
 		return true;
 	}
-	
-	public Employee getEmployeeByAdminId(String adminId){
+
+	public Employee getEmployeeByAdminId(String adminId) {
 		return intelligenceDao.getEmployeeByAdmin(adminId);
 	}
-	
-	public List<Employee> getAuditPersonList(String deviceId){
+
+	public List<Employee> getAuditPersonList(String deviceId) {
 		return intelligenceDao.getAuditPersonList(deviceId);
 	}
-	
-	public void updateTemplatePath(String employeeId,String path){
-		Employee employee=intelligenceDao.getEmployeeById(employeeId);
-		if(employee!=null){
+
+	public void updateTemplatePath(String employeeId, String path) {
+		Employee employee = intelligenceDao.getEmployeeById(employeeId);
+		if (employee != null) {
 			employee.setTemplatePath(path);
 			cloudDao.update(employee);
 		}
 	}
-	
-	public List<String> getPhotoByTemplate(String employeeId){
-		Employee employee=intelligenceDao.getEmployeeById(employeeId);
-		String path=null;
-		if(employee!=null){
-			path=employee.getTemplatePath();
+
+	public List<String> getPhotoByTemplate(String employeeId) {
+		Employee employee = intelligenceDao.getEmployeeById(employeeId);
+		String path = null;
+		if (employee != null) {
+			path = employee.getTemplatePath();
 		}
-		File file=new File(path);
-		List<String> list=new ArrayList<>();
-		if(file.isDirectory()){
+		File file = new File(path);
+		List<String> list = new ArrayList<>();
+		if (file.isDirectory()) {
 			File[] all = file.listFiles();
-			if(all!=null){
-				for(File photo:all){
-					String photoPath=photo.getAbsolutePath();
+			if (all != null) {
+				for (File photo : all) {
+					String photoPath = photo.getAbsolutePath();
 					list.add(photoPath);
 				}
 			}
 		}
 		return list;
 	}
-	
-	public Boolean resetPassword(String adminId){
-		Admin admin=intelligenceDao.getAdminById(adminId);
-		if(admin!=null){
+
+	public Boolean resetPassword(String adminId) {
+		Admin admin = intelligenceDao.getAdminById(adminId);
+		if (admin != null) {
 			admin.setPassword(PasswordUtil.generatePassword("123456"));
 			cloudDao.update(admin);
 			return true;
-		}
-		else{
+		} else {
 			return false;
 		}
-		
+
 	}
-	
-	public Boolean checkPhoneNumber(String phone){
-		String employee=intelligenceDao.getEmployeeByMobile(phone);
-		if(employee==null){
+
+	public Boolean checkPhoneNumber(String phone) {
+		String employee = intelligenceDao.getEmployeeByMobile(phone);
+		if (employee == null) {
 			return true;
-		}
-		else{
+		} else {
 			return false;
 		}
 	}
-	
-	public Boolean editAdminPassword(String oldPassword,String newPassword,String adminId){
-		Admin admin=intelligenceDao.getAdminById(adminId);
-		boolean state=PasswordUtil.validatePassword(admin.getPassword(), oldPassword);
-		if(state){
+
+	public Boolean editAdminPassword(String oldPassword, String newPassword, String adminId) {
+		Admin admin = intelligenceDao.getAdminById(adminId);
+		boolean state = PasswordUtil.validatePassword(admin.getPassword(), oldPassword);
+		if (state) {
 			admin.setPassword(PasswordUtil.generatePassword(newPassword));
 			cloudDao.update(admin);
 		}
 		return state;
 	}
-	
-	
 
 }

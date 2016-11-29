@@ -43,7 +43,7 @@ public class VisitorService {
 	private CloudDao cloudDao;
 
 	public void rememPhoto(String path, InputStream uploadedInputStream) throws IOException {
-		//path="D:\\IotCloud\\111\\1.jpg";
+		// path="D:\\IotCloud\\111\\1.jpg";
 		// 1、创建一个DiskFileItemFactory工厂
 		DiskFileItemFactory factory = new DiskFileItemFactory();
 		// 2、创建一个文件上传解析器
@@ -72,18 +72,19 @@ public class VisitorService {
 			out.close();
 		}
 	}
-	
-	public Boolean addVisitorInfoByMobile(String id,String name, String company, String position, String telphone, String email,
-			String companyUrl, String deviceId, String importance, String birth, String path) {
+
+	public Boolean addVisitorInfoByMobile(String id, String name, String company, String position, String telphone,
+			String email, String companyUrl, String deviceId, String importance, String birth, String path) {
 		String strangerId = path == null ? null : path.substring(path.lastIndexOf("/") + 1, path.lastIndexOf("."));
 		SyncFuture<String> future = AddFuture.setFuture(deviceId);
 		CheckResponse response = new CheckResponse(deviceId, "103_12", future);
 		response.start();
-		boolean state=ServiceDistribution.handleJson103_11(id, strangerId, name, company, position, birth, deviceId,path);
-		if(!state){
+		boolean state = ServiceDistribution.handleJson103_11(id, strangerId, name, company, position, birth, deviceId,
+				path);
+		if (!state) {
 			return state;
 		}
-		
+
 		VisitorInfo info = new VisitorInfo();
 		info.setId(id);
 		info.setDeviceId(deviceId);
@@ -94,20 +95,25 @@ public class VisitorService {
 		info.setEmail(email);
 		info.setCompanyUrl(companyUrl);
 		info.setImportance(Integer.parseInt(importance));
-		if(birth!=null && !"".equals(birth)){
+		if (birth != null && !"".equals(birth)) {
 			info.setBirth(birth);
 		}
 		info.setPhotoPath(path);
 		cloudDao.add(info);
-		
+
 		return true;
 	}
 
 	public String addVisitorInfo(String name, String company, String position, String telphone, String email,
 			String companyUrl, String deviceId, String importance, String birth, String path, String cid) {
-		try {
+		String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
+		String strangerId = path == null ? null : path.substring(path.lastIndexOf("/") + 1, path.lastIndexOf("."));
+		SyncFuture<String> future = AddFuture.setFuture(deviceId);
+		CheckResponse response = new CheckResponse(deviceId, "103_12", future);
+		response.start();
+		boolean state=ServiceDistribution.handleJson103_11(id, strangerId, name, company, position, birth, deviceId,null);
+		if(state){
 			VisitorInfo info = new VisitorInfo();
-			String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
 			info.setId(id);
 			info.setDeviceId(deviceId);
 			info.setName(name);
@@ -117,7 +123,7 @@ public class VisitorService {
 			info.setEmail(email);
 			info.setCompanyUrl(companyUrl);
 			info.setImportance(Integer.parseInt(importance));
-			if(birth!=null && !"".equals(birth)){
+			if (birth != null && !"".equals(birth)) {
 				info.setBirth(birth);
 			}
 
@@ -135,38 +141,37 @@ public class VisitorService {
 			cloudDao.add(info);
 
 			if (cid != null && !"".equals(cid)) {
-				CollectionPhoto photo=intelligenceDao.getCollectionPhotoById(cid);
+				CollectionPhoto photo = intelligenceDao.getCollectionPhotoById(cid);
 				cloudDao.delete(photo);
 			}
-			String strangerId = path == null ? null : path.substring(path.lastIndexOf("/") + 1, path.lastIndexOf("."));
-			SyncFuture<String> future = AddFuture.setFuture(deviceId);
-			CheckResponse response = new CheckResponse(deviceId, "103_12", future);
-			response.start();
-			ServiceDistribution.handleJson103_11(id, strangerId, name, company, position, birth, deviceId,null);
 			return id;
-		} catch (Exception e) {
-			// TODO: handle exception
+		}
+		else{
 			return null;
-		}	
-		
+		}
+
 	}
 
 	public boolean updateVisitorInfo(String deviceId, String id, String name, String company, String position,
 			String telphone, String email, String importance, String birth) {
-		VisitorInfo visitorInfo = intelligenceDao.getVisitorInfoById(id);
-		visitorInfo.setName(name);
-		visitorInfo.setCompany(company);
-		visitorInfo.setPosition(position);
-		visitorInfo.setTelphone(telphone);
-		visitorInfo.setEmail(email);
-		visitorInfo.setImportance(Integer.parseInt(importance));
-		visitorInfo.setBirth(birth);
-		cloudDao.update(visitorInfo);
 		SyncFuture<String> future = AddFuture.setFuture(deviceId);
 		CheckResponse response = new CheckResponse(deviceId, "104_12", future);
 		response.start();
-		ServiceDistribution.handleJson104_11(deviceId, id, name, company, position, telphone, email, importance, birth);
-		return true;
+		boolean state = ServiceDistribution.handleJson104_11(deviceId, id, name, company, position, telphone, email,
+				importance, birth);
+
+		if (state) {
+			VisitorInfo visitorInfo = intelligenceDao.getVisitorInfoById(id);
+			visitorInfo.setName(name);
+			visitorInfo.setCompany(company);
+			visitorInfo.setPosition(position);
+			visitorInfo.setTelphone(telphone);
+			visitorInfo.setEmail(email);
+			visitorInfo.setImportance(Integer.parseInt(importance));
+			visitorInfo.setBirth(birth);
+			cloudDao.update(visitorInfo);
+		}
+		return state;
 
 	}
 
@@ -193,7 +198,7 @@ public class VisitorService {
 		CheckResponse response = new CheckResponse(deviceId, "105_12", future);
 		response.start();
 		boolean state = ServiceDistribution.handleJson105_11(deviceId, visitorId);
-		
+
 		if (visitorInfo != null && state) {
 			cloudDao.delete(visitorInfo);
 		}
@@ -215,7 +220,7 @@ public class VisitorService {
 		info.setEmail(email);
 		info.setCompanyUrl(companyUrl);
 		info.setImportance(Integer.parseInt(importance));
-		if(birth!=null){
+		if (birth != null) {
 			info.setBirth(birth);
 		}
 		info.setPhotoPath(path);
@@ -228,7 +233,7 @@ public class VisitorService {
 		SyncFuture<String> future = AddFuture.setFuture(deviceId);
 		CheckResponse response = new CheckResponse(deviceId, "103_12", future);
 		response.start();
-		ServiceDistribution.handleJson103_11(id, strangerId, name, company, position, birth, deviceId,null);
+		ServiceDistribution.handleJson103_11(id, strangerId, name, company, position, birth, deviceId, null);
 		return id;
 
 	}
@@ -240,8 +245,8 @@ public class VisitorService {
 		}
 		return true;
 	}
-	
-	public List<VisitorInfo> getVisitorInfoByWhere(String deviceId,String name){
+
+	public List<VisitorInfo> getVisitorInfoByWhere(String deviceId, String name) {
 		return intelligenceDao.getVisitorInfoByWhere(deviceId, name);
 	}
 
@@ -259,7 +264,7 @@ public class VisitorService {
 		visitor.setId(id);
 		if (infoId != null) {
 			VisitorInfo visitorInfo = intelligenceDao.getVisitorInfoById(infoId);
-			if(visitorInfo!=null){
+			if (visitorInfo != null) {
 				visitor.setVisitorInfo(visitorInfo);
 				visitor.setPhoto(visitorInfo.getPhotoPath());
 			}
@@ -272,7 +277,7 @@ public class VisitorService {
 			visitor.setEmployee(employee);
 		}
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		//logger.info(time);
+		// logger.info(time);
 		try {
 			if (time != null) {
 				visitor.setStartTime(formatter.parse(time));
@@ -286,35 +291,34 @@ public class VisitorService {
 		visitor.setDeviceId(deviceId);
 		cloudDao.add(visitor);
 	}
-	
-	
-	public void collectionPhoto(String deviceId,String time,String path,String strangerId){
-		CollectionPhoto photo=new CollectionPhoto();
+
+	public void collectionPhoto(String deviceId, String time, String path, String strangerId) {
+		CollectionPhoto photo = new CollectionPhoto();
 		String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
 		photo.setId(id);
 		photo.setDeviceId(deviceId);
 		photo.setPhoto(path);
 		photo.setStrangerId(strangerId);
-		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		photo.setTime(sdf.format(new Date()));
 		cloudDao.add(photo);
-		
+
 	}
-	
-	public void deletePhoto(String cid,String deviceId){
-		CollectionPhoto photo=intelligenceDao.getCollectionPhotoById(cid);
-		String strangerId=photo.getStrangerId();
+
+	public void deletePhoto(String cid, String deviceId) {
+		CollectionPhoto photo = intelligenceDao.getCollectionPhotoById(cid);
+		String strangerId = photo.getStrangerId();
 		SyncFuture<String> future = AddFuture.setFuture(deviceId);
 		CheckResponse response = new CheckResponse(deviceId, "105_22", future);
 		response.start();
-		boolean state=ServiceDistribution.handleJson105_21(strangerId, deviceId);
-		
-		if(photo!=null && state){
+		boolean state = ServiceDistribution.handleJson105_21(strangerId, deviceId);
+
+		if (photo != null && state) {
 			cloudDao.delete(photo);
 		}
 	}
-	
-	public CollectionPhoto getCollectByStrangerId(String id){
+
+	public CollectionPhoto getCollectByStrangerId(String id) {
 		return intelligenceDao.getCollectByStrangerId(id);
 	}
 

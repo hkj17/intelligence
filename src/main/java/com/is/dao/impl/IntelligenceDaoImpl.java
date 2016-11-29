@@ -440,7 +440,7 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 		Map<Integer, Object> map = new HashMap<>();
 		int i = 0;
 		if (name != null && !"".equals(name)) {
-			sql = sql + " and a.admin.username like ?";
+			sql = sql + " and a.employeeName like ?";
 			map.put(i, '%' + name + '%');
 			i = i + 1;
 		}

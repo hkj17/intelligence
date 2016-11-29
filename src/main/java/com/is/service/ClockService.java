@@ -178,18 +178,20 @@ public class ClockService {
 	}
 
 	public Boolean addClockAbnormal(String deviceId,String employeeId, String time) {
-		ClockAbnormal abnormal=new ClockAbnormal();
-		String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
-		abnormal.setId(id);
-		abnormal.setDeviceId(deviceId);
-		abnormal.setClockTime(time);
-		abnormal.setEmployeeId(employeeId);
-		cloudDao.add(abnormal);
-		
 		SyncFuture<String> future=AddFuture.setFuture(deviceId);
 		CheckResponse response=new CheckResponse(deviceId, "110_2",future);
 		response.start();
 		boolean state=ServiceDistribution.handleJson110_1(deviceId, employeeId, time);
+		if(state){
+			ClockAbnormal abnormal=new ClockAbnormal();
+			String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
+			abnormal.setId(id);
+			abnormal.setDeviceId(deviceId);
+			abnormal.setClockTime(time);
+			abnormal.setEmployeeId(employeeId);
+			cloudDao.add(abnormal);
+		}
+		
 		return state;
 	}
 	
@@ -216,12 +218,13 @@ public class ClockService {
 		return intelligenceDao.getClockPhoto();
 	}
 	
-	public void insertAbonormalClockPhoto(String employeeId,String time,String path,String deviceId){
+	public void insertAbonormalClockPhoto(String employeeId,String path,String deviceId){
 		ClockAbnormal clockAbnormal=new ClockAbnormal();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
 		clockAbnormal.setId(id);
 		clockAbnormal.setEmployeeId(employeeId);
-		clockAbnormal.setClockTime(time);
+		clockAbnormal.setClockTime(sdf.format(new Date()));
 		clockAbnormal.setPhotoPath(path);
 		clockAbnormal.setDeviceId(deviceId);
 		cloudDao.add(clockAbnormal);
