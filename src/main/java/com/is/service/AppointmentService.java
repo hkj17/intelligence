@@ -91,7 +91,7 @@ public class AppointmentService {
 				SyncFuture<String> future=AddFuture.setFuture(deviceId);
 				CheckResponse response=new CheckResponse(deviceId, "106_22",future);
 				response.start();
-				boolean state=ServiceDistribution.handleJson106_21(deviceId, appId);
+				boolean state=ServiceDistribution.handleJson106_21(deviceId, appId,appointment.getCreateBy(),appointment.getInfo().getId());
 				if(state){
 					cloudDao.delete(appointment);
 				}

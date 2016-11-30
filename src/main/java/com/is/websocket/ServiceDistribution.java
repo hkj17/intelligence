@@ -294,7 +294,6 @@ public class ServiceDistribution implements ApplicationContextAware {
 		jsonObject.put("type", 103);
 		jsonObject.put("code", 1);
 		jsonObject.put("employeeId", employeeId);
-		strangerId=strangerId.substring(0, strangerId.lastIndexOf("."));
 		jsonObject.put("strangerId", strangerId);
 		jsonObject.put("employeeName", employeeName);
 		jsonObject.put("birth", birth);
@@ -352,12 +351,14 @@ public class ServiceDistribution implements ApplicationContextAware {
 		}
 	}
 	
-	public static Boolean handleJson106_21(String deviceId,String id){
+	public static Boolean handleJson106_21(String deviceId,String id,String employeeId,String visitorId){
 		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.put("type", 106);
 		jsonObject.put("code", 21);
 		jsonObject.put("id", id);
+		jsonObject.put("employeeId", employeeId);
+		jsonObject.put("visitorId", visitorId);
 		byte[] result = SocketService.responseByte(jsonObject, "106", "21");
 		if (null != channel) {
 			excuteWrite(result, channel);
