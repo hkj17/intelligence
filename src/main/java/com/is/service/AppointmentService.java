@@ -45,7 +45,7 @@ public class AppointmentService {
 			appointment.setCreateBy(employeeId);
 			cloudDao.add(appointment);
 			
-			SyncFuture<String> future=AddFuture.setFuture(deviceId);
+			SyncFuture<String> future=AddFuture.setFuture(deviceId,"106_2");
 			CheckResponse response=new CheckResponse(deviceId, "106_2",future);
 			response.start();
 			ServiceDistribution.handleJson106_1(deviceId, employeeId, startTime,endTime, id,visitorInfoId, content);
@@ -71,7 +71,7 @@ public class AppointmentService {
 			
 			cloudDao.update(appointment);
 			
-			SyncFuture<String> future=AddFuture.setFuture(deviceId);
+			SyncFuture<String> future=AddFuture.setFuture(deviceId,"106_12");
 			CheckResponse response=new CheckResponse(deviceId, "106_12",future);
 			response.start();
 			ServiceDistribution.handleJson106_11(deviceId, appointment.getCreateBy(), startTime,endTime, appid,appointment.getInfo().getId(), content);
@@ -88,7 +88,7 @@ public class AppointmentService {
 		try {
 			Appointment appointment=intelligenceDao.getAppointById(appId);
 			if(appointment!=null){
-				SyncFuture<String> future=AddFuture.setFuture(deviceId);
+				SyncFuture<String> future=AddFuture.setFuture(deviceId,"106_22");
 				CheckResponse response=new CheckResponse(deviceId, "106_22",future);
 				response.start();
 				boolean state=ServiceDistribution.handleJson106_21(deviceId, appId,appointment.getCreateBy(),appointment.getInfo().getId());

@@ -53,7 +53,7 @@ public class CheckResponse extends Thread {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
-			FutureMap.removeFutureMap(name);
+			FutureMap.removeFutureMap(name.asLongText()+text);
 		}
 	}
 	

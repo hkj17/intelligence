@@ -89,7 +89,6 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 		String sql = "select clock,b.employeeName,b.jobId,b.department.department from ClockRecord clock,Employee b where clock.employeeId=b.employeeId and b.deviceId='"
 				+ deviceId + "'";
 		Map<Integer, String> map = new HashMap<>();
-		endClock = endClock + " 23:59:59";
 		int i = 0;
 		if (user != null && !"".equals(user)) {
 			sql = sql + " and (b.pingyin like ? or b.pingyin like ? or b.employeeName like ?)";
@@ -99,6 +98,7 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 			i = i + 3;
 		}
 		if (startClock != null && !"".equals(startClock)) {
+			startClock = startClock + " 00:00:00";
 			sql += " and clock.startClock>=?";
 			map.put(i, startClock);
 			i = i + 1;
@@ -109,12 +109,14 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 			i = i + 1;
 		}
 		if (endClock != null && !"".equals(endClock)) {
-			sql += " and clock.endClock<=?";
+			endClock = endClock + " 23:59:59";
+			sql += " and clock.startClock<=?";
 			map.put(i, endClock);
 		}
 		if ("1".equals(rule)) {
 			sql += " and clock.state!=0";
 		}
+		sql+=" order by clock.startClock";
 
 		Query query = getSession().createQuery(sql);
 		for (int p = 0; p < map.size(); p++) {
@@ -522,7 +524,7 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 	@Override
 	public List<ClockTime> getDetailClock(String employeeId,String time) {
 		// TODO Auto-generated method stub
-		String sql = "SELECT a,b.employeeName,b.jobId,b.department.department from ClockTime a,Employee b where b.employeeId=a.employeeId and a.employeeId=? and a.clockTime like ?";
+		String sql = "SELECT a,b.employeeName,b.jobId,b.department.department from ClockTime a,Employee b where b.employeeId=a.employeeId and a.employeeId=? and a.clockTime like ? order by a.clockTime";
 		Query query = getSession().createQuery(sql);
 		query.setParameter(0, employeeId);
 		query.setParameter(1, '%' + time + '%');
@@ -543,11 +545,13 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 		Map<Integer, String> map = new HashMap<>();
 		int i = 0;
 		if (startTime != null && !"".equals(startTime)) {
+			startTime=startTime+" 00:00:00";
 			sql += " and a.clockTime>=?";
 			map.put(i, startTime);
 			i = i + 1;
 		}
 		if (endTime != null && !"".equals(endTime)) {
+			endTime=endTime+" 23:59:59";
 			sql += " and a.clockTime<=?";
 			map.put(i, endTime);
 		}

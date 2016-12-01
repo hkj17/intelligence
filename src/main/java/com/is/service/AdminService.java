@@ -6,7 +6,10 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,6 +36,7 @@ import com.is.websocket.ServiceDistribution;
 import com.is.websocket.SyncFuture;
 
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelId;
 import net.sourceforge.pinyin4j.PinyinHelper;
 import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
 import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat;
@@ -114,17 +118,23 @@ public class AdminService {
 
 	public String addEmployee(String name, String birth, String contact, String deviceId, String photo, String position,
 			String jobId, String address, String email, String idCard, String workPos, String department, String sex,
-			String isduty, String cid) {
+			String isduty, String cid) throws InterruptedException, ExecutionException, TimeoutException {
 		String employeeId = UUID.randomUUID().toString().trim().replaceAll("-", "");
 		String strangerId = null;
 		if (photo != null) {
 			strangerId = photo.substring(photo.lastIndexOf("/") + 1, photo.lastIndexOf("."));
 		}
-		SyncFuture<String> future = AddFuture.setFuture(deviceId);
-		CheckResponse response = new CheckResponse(deviceId, "103_2", future);
-		response.start();
-		boolean state=ServiceDistribution.handleJson103_1(employeeId, strangerId, name, birth, deviceId);
-		if(state){
+
+		SyncFuture<String> future = new SyncFuture<>();
+		ChannelHandlerContext ctx = DeviceService.getSocketMap(deviceId);
+		if (ctx == null) {
+			return null;
+		}
+		FutureMap.addFuture(ctx.channel().id().asLongText() + "103_2", future);
+		ServiceDistribution.handleJson103_1(employeeId, strangerId, name, birth, deviceId);
+		String result = future.get(6, TimeUnit.SECONDS);
+		FutureMap.removeFutureMap(ctx.channel().id().asLongText() + "103_2");
+		if (result != null) {
 			Admin admin = new Admin();
 			String adminId = UUID.randomUUID().toString().trim().replaceAll("-", "");
 			admin.setAdminId(adminId);
@@ -194,29 +204,35 @@ public class AdminService {
 				cloudDao.delete(collectionPhoto);
 			}
 			return employeeId;
-		}
-		else{
+		} else {
 			return null;
 		}
-		
 
 	}
 
 	@SuppressWarnings("unchecked")
-	public Boolean deleteUser(String deviceId, String id) {
+	public Boolean deleteUser(String deviceId, String id) throws InterruptedException, ExecutionException, TimeoutException {
 		Employee employee = intelligenceDao.getEmployeeById(id);
-		SyncFuture<String> future = AddFuture.setFuture(deviceId);
-		CheckResponse response = new CheckResponse(deviceId, "105_2", future);
-		response.start();
-		boolean state = ServiceDistribution.handleJson105_1(deviceId, employee.getEmployeeId());
-		if (state) {
+		SyncFuture<String> future = new SyncFuture<>();
+		ChannelHandlerContext ctx = DeviceService.getSocketMap(deviceId);
+		if (ctx == null) {
+			return null;
+		}
+		FutureMap.addFuture(ctx.channel().id().asLongText() + "105_2", future);
+		ServiceDistribution.handleJson105_1(deviceId, employee.getEmployeeId());
+		String result = future.get(6, TimeUnit.SECONDS);
+		FutureMap.removeFutureMap(ctx.channel().id().asLongText() + "105_2");
+		if (result!=null) {
 			Admin admin = employee.getAdmin();
 			cloudDao.delete(employee);
 			if (admin != null) {
 				cloudDao.delete(admin);
 			}
+			return true;
 		}
-		return state;
+		else{
+			return false;
+		}
 
 	}
 
@@ -234,11 +250,16 @@ public class AdminService {
 				strangerId = opath == null ? null : opath.substring(opath.lastIndexOf("/") + 1, opath.lastIndexOf("."));
 			}
 
-			SyncFuture<String> future = AddFuture.setFuture(deviceId);
-			CheckResponse response = new CheckResponse(deviceId, "104_2", future);
-			response.start();
-			boolean state = ServiceDistribution.handleJson104_1(deviceId, employeeId, name, birth, strangerId);
-			if (state) {
+			SyncFuture<String> future = new SyncFuture<>();
+			ChannelHandlerContext ctx = DeviceService.getSocketMap(deviceId);
+			if (ctx == null) {
+				return null;
+			}
+			FutureMap.addFuture(ctx.channel().id().asLongText() + "104_2", future);
+			ServiceDistribution.handleJson104_1(deviceId, employeeId, name, birth, strangerId);
+			String result = future.get(6, TimeUnit.SECONDS);
+			FutureMap.removeFutureMap(ctx.channel().id().asLongText() + "104_2");
+			if (result != null) {
 				employee.setEmployeeName(name);
 				if (birth != null && !"".equals(birth)) {
 					employee.setBirth(birth);
@@ -256,8 +277,10 @@ public class AdminService {
 				employee.setWorkPos(workPos);
 
 				cloudDao.update(employee);
+				return true;
+			} else {
+				return false;
 			}
-			return state;
 		} catch (Exception e) {
 			// TODO: handle exception
 			return false;
@@ -328,9 +351,9 @@ public class AdminService {
 
 	public Boolean excuteCollection(String deviceId) {
 		ChannelHandlerContext ctx = DeviceService.getSocketMap(deviceId);
-		Future<String> sFuture = FutureMap.getFutureMap(ctx.channel().id());
+		Future<String> sFuture = FutureMap.getFutureMap(ctx.channel().id().asLongText() + "101_2");
 		if (sFuture != null) {
-			SyncFuture<String> future = AddFuture.setFuture(deviceId);
+			SyncFuture<String> future = AddFuture.setFuture(deviceId, "101_2");
 			CheckResponse response = new CheckResponse(deviceId, "101_2", future);
 			response.start();
 		}
@@ -340,9 +363,9 @@ public class AdminService {
 
 	public String completeCollection(String deviceId) {
 		ChannelHandlerContext ctx = DeviceService.getSocketMap(deviceId);
-		Future<String> sFuture = FutureMap.getFutureMap(ctx.channel().id());
+		Future<String> sFuture = FutureMap.getFutureMap(ctx.channel().id().asLongText() + "101_2");
 		if (sFuture != null) {
-			SyncFuture<String> future = AddFuture.setFuture(deviceId);
+			SyncFuture<String> future = AddFuture.setFuture(deviceId, "102_2");
 			CheckResponse response = new CheckResponse(deviceId, "102_2", future);
 			response.start();
 		}
@@ -490,7 +513,7 @@ public class AdminService {
 	public Boolean adminManage(String deviceId, String username, String password, String company, String address,
 			String contact, String startTime, String endTime) {
 		try {
-			SyncFuture<String> future = AddFuture.setFuture(deviceId);
+			SyncFuture<String> future = AddFuture.setFuture(deviceId, "115_2");
 			CheckResponse response = new CheckResponse(deviceId, "115_2", future);
 			response.start();
 			boolean state = ServiceDistribution.handleJson115_1(deviceId, company);

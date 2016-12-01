@@ -17,6 +17,7 @@ import com.is.constant.ResponseCode;
 import com.is.model.Appointment;
 import com.is.service.AppointmentService;
 import com.is.util.BusinessHelper;
+import com.is.util.LoginRequired;
 import com.is.util.ResponseFactory;
 
 @Component("appointmentHandle")
@@ -28,7 +29,7 @@ public class AppointmentHandle {
 	
 	
 	@POST
-	//@LoginRequired
+	@LoginRequired
 	@Path("/addAppointment")
 	public Response addAppointment(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
@@ -42,7 +43,7 @@ public class AppointmentHandle {
 	}
 	
 	@POST
-	//@LoginRequired
+	@LoginRequired
 	@Path("/getAppointmentByUser")
 	public Response getAppointmentByUser(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
@@ -51,7 +52,7 @@ public class AppointmentHandle {
 	}
 	
 	@POST
-	//@LoginRequired
+	@LoginRequired
 	@Path("/editAppointment")
 	public Response editAppointment(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
@@ -65,7 +66,7 @@ public class AppointmentHandle {
 	}
 	
 	@POST
-	//@LoginRequired
+	@LoginRequired
 	@Path("/deleteAppointment")
 	public Response deleteAppointment(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);

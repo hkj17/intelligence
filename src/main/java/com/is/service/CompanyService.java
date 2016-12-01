@@ -3,6 +3,8 @@ package com.is.service;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -76,7 +78,12 @@ public class CompanyService {
 		Company company=intelligenceDao.getCompanyById(Integer.parseInt(id));
 		String employeeId=intelligenceDao.getEmployeeIdByCompany(Integer.parseInt(id));
 		cloudDao.delete(company);
-		adminService.deleteUser(device,employeeId);
+		try {
+			adminService.deleteUser(device,employeeId);
+		} catch (InterruptedException | ExecutionException | TimeoutException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return true;
 	}
 	

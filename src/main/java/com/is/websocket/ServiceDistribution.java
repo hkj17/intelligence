@@ -625,6 +625,55 @@ public class ServiceDistribution implements ApplicationContextAware {
 		
 	}
 	
+	public static Boolean handleJson112_1(String deviceId){
+		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("type", 112);
+		jsonObject.put("code", 1);
+		byte[] result = SocketService.responseByte(jsonObject, "112", "1");
+		if (null != channel) {
+			excuteWrite(result, channel);
+			return true;
+		} 
+		else {
+			return false;
+		}
+		
+	}
+	
+	public static Boolean handleJson112_11(String deviceId,String voice){
+		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("type", 112);
+		jsonObject.put("code", 11);
+		jsonObject.put("volume", voice);
+		byte[] result = SocketService.responseByte(jsonObject, "112", "11");
+		if (null != channel) {
+			excuteWrite(result, channel);
+			return true;
+		} 
+		else {
+			return false;
+		}
+		
+	}
+	
+	public static Boolean handleJson113_1(String deviceId){
+		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("type", 113);
+		jsonObject.put("code", 1);
+		byte[] result = SocketService.responseByte(jsonObject, "113", "1");
+		if (null != channel) {
+			excuteWrite(result, channel);
+			return true;
+		} 
+		else {
+			return false;
+		}
+		
+	}
+	
 	public static boolean handleJson115_1(String deviceId,String company) {
 		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
 		JSONObject jsonObject = new JSONObject();

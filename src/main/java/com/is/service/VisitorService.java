@@ -76,7 +76,7 @@ public class VisitorService {
 	public Boolean addVisitorInfoByMobile(String id, String name, String company, String position, String telphone,
 			String email, String companyUrl, String deviceId, String importance, String birth, String path) {
 		String strangerId = path == null ? null : path.substring(path.lastIndexOf("/") + 1, path.lastIndexOf("."));
-		SyncFuture<String> future = AddFuture.setFuture(deviceId);
+		SyncFuture<String> future = AddFuture.setFuture(deviceId,"103_12");
 		CheckResponse response = new CheckResponse(deviceId, "103_12", future);
 		response.start();
 		boolean state = ServiceDistribution.handleJson103_11(id, strangerId, name, company, position, birth, deviceId,
@@ -108,7 +108,7 @@ public class VisitorService {
 			String companyUrl, String deviceId, String importance, String birth, String path, String cid) {
 		String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
 		String strangerId = path == null ? null : path.substring(path.lastIndexOf("/") + 1, path.lastIndexOf("."));
-		SyncFuture<String> future = AddFuture.setFuture(deviceId);
+		SyncFuture<String> future = AddFuture.setFuture(deviceId,"103_12");
 		CheckResponse response = new CheckResponse(deviceId, "103_12", future);
 		response.start();
 		boolean state=ServiceDistribution.handleJson103_11(id, strangerId, name, company, position, birth, deviceId,null);
@@ -154,7 +154,7 @@ public class VisitorService {
 
 	public boolean updateVisitorInfo(String deviceId, String id, String name, String company, String position,
 			String telphone, String email, String importance, String birth) {
-		SyncFuture<String> future = AddFuture.setFuture(deviceId);
+		SyncFuture<String> future = AddFuture.setFuture(deviceId,"104_12");
 		CheckResponse response = new CheckResponse(deviceId, "104_12", future);
 		response.start();
 		boolean state = ServiceDistribution.handleJson104_11(deviceId, id, name, company, position, telphone, email,
@@ -194,7 +194,7 @@ public class VisitorService {
 
 	public Boolean deleteVisitorInfo(String deviceId, String visitorId) {
 		VisitorInfo visitorInfo = intelligenceDao.getVisitorInfoById(visitorId);
-		SyncFuture<String> future = AddFuture.setFuture(deviceId);
+		SyncFuture<String> future = AddFuture.setFuture(deviceId,"105_12");
 		CheckResponse response = new CheckResponse(deviceId, "105_12", future);
 		response.start();
 		boolean state = ServiceDistribution.handleJson105_11(deviceId, visitorId);
@@ -230,7 +230,7 @@ public class VisitorService {
 		cloudDao.update(visitor);
 
 		String strangerId = path == null ? null : path.substring(path.lastIndexOf("/") + 1, path.lastIndexOf("."));
-		SyncFuture<String> future = AddFuture.setFuture(deviceId);
+		SyncFuture<String> future = AddFuture.setFuture(deviceId,"103_12");
 		CheckResponse response = new CheckResponse(deviceId, "103_12", future);
 		response.start();
 		ServiceDistribution.handleJson103_11(id, strangerId, name, company, position, birth, deviceId, null);
@@ -308,7 +308,7 @@ public class VisitorService {
 	public void deletePhoto(String cid, String deviceId) {
 		CollectionPhoto photo = intelligenceDao.getCollectionPhotoById(cid);
 		String strangerId = photo.getStrangerId();
-		SyncFuture<String> future = AddFuture.setFuture(deviceId);
+		SyncFuture<String> future = AddFuture.setFuture(deviceId,"105_22");
 		CheckResponse response = new CheckResponse(deviceId, "105_22", future);
 		response.start();
 		boolean state = ServiceDistribution.handleJson105_21(strangerId, deviceId);

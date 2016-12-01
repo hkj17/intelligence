@@ -39,7 +39,7 @@ public class VisitorHandler {
 	
 	
 	@POST
-	//@LoginRequired
+	@LoginRequired
 	@Path("/addVisitorInfo") 
 	public Response addVisitorInfo(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
@@ -58,6 +58,7 @@ public class VisitorHandler {
 	
 	@POST
 	@Path("/addVisitorInfoByMobile")
+	@LoginRequired
 	@Consumes("multipart/form-data")
 	public Response addVisitorInfoByMobile(@FormDataParam("name") String name,@FormDataParam("company") String company,
 			@FormDataParam("position") String position, @FormDataParam("telphone") String telphone, 
@@ -78,7 +79,7 @@ public class VisitorHandler {
 	}
 	
 	@POST
-	//@LoginRequired
+	@LoginRequired
 	@Path("/indexVisitor")
 	public Response indexVisitor(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws ParseException{
 		String deviceId=(String) request.getSession().getAttribute("deviceSn");
@@ -90,7 +91,7 @@ public class VisitorHandler {
 	
 	@POST
 	@Path("/getVisitorById")
-	//@LoginRequired
+	@LoginRequired
 	public Response getVisitorById(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws ParseException{
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		VisitorInfo info=visitorService.getVisitorById(requestMap.get("visitorId"));
@@ -100,7 +101,7 @@ public class VisitorHandler {
 	
 	@POST
 	@Path("/addVisitorLeaveTime")
-	//@LoginRequired
+	@LoginRequired
 	public Response addVisitorLeaveTime(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws ParseException{
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		boolean state=visitorService.addVisitorLeaveTime(requestMap.get("time"), requestMap.get("id"));
@@ -114,7 +115,7 @@ public class VisitorHandler {
 	
 	@POST
 	@Path("/updateVisitorInfo")
-	//@LoginRequired
+	@LoginRequired
 	public Response updateVisitorInfo(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws ParseException{
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		String deviceId=(String) request.getSession().getAttribute("deviceSn");
@@ -130,7 +131,7 @@ public class VisitorHandler {
 	
 	@POST
 	@Path("/deleteVisitorInfo")
-	//@LoginRequired
+	@LoginRequired
 	public Response deleteVisitorInfo(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws ParseException{
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		String deviceId=(String) request.getSession().getAttribute("deviceSn");
@@ -144,7 +145,7 @@ public class VisitorHandler {
 	
 	@POST
 	@Path("/deleteVisitorRecord")
-	//@LoginRequired
+	@LoginRequired
 	public Response deleteVisitorRecord(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws ParseException{
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		boolean state=visitorService.deleteVisitorRecord(requestMap.get("id"));
@@ -157,7 +158,7 @@ public class VisitorHandler {
 	
 	@POST
 	@Path("/getVisitorInfoList")
-	//@LoginRequired
+	@LoginRequired
 	public Response getVisitorInfoList(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws ParseException{
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		String deviceId=(String) request.getSession().getAttribute("deviceSn");
@@ -168,7 +169,7 @@ public class VisitorHandler {
 	
 	@POST
 	@Path("/updateVisitorInfoByRecord")
-	//@LoginRequired
+	@LoginRequired
 	public Response updateVisitorInfoByRecord(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws ParseException{
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		String deviceId=(String) request.getSession().getAttribute("deviceSn");
@@ -180,7 +181,7 @@ public class VisitorHandler {
 	
 	@POST
 	@Path("/deleteCollectionPhoto")
-	//@LoginRequired
+	@LoginRequired
 	public Response deleteCollectionPhoto(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws ParseException{
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		String deviceId=(String) request.getSession().getAttribute("deviceSn");

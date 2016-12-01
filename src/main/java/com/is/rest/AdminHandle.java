@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -33,6 +35,7 @@ import com.is.model.Company;
 import com.is.model.Employee;
 import com.is.service.AdminService;
 import com.is.util.BusinessHelper;
+import com.is.util.LoginRequired;
 import com.is.util.ResponseFactory;
 
 @Component("adminHandler")
@@ -44,7 +47,7 @@ public class AdminHandle {
 
 
 	@POST
-	//@LoginRequired
+	@LoginRequired
 	@Path("/AccountAssignment")
 	public Response AccountAssignment(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
@@ -124,7 +127,7 @@ public class AdminHandle {
 	}
 
 	@POST
-	//@LoginRequired
+	@LoginRequired
 	@Path("/editPassword")
 	public Response editPassword(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
@@ -139,7 +142,7 @@ public class AdminHandle {
 
 	@GET
 	@Path("/getUserList")
-	//@LoginRequired
+	@LoginRequired
 	public Response getUserList(@Context HttpServletRequest request) {
 		String deviceId=(String) request.getSession().getAttribute("deviceSn");
 		List<Employee> userlist = adminService.getEmployeeList(deviceId);
@@ -148,7 +151,7 @@ public class AdminHandle {
 
 	@GET
 	@Path("/getCompanyList")
-	//@LoginRequired
+	@LoginRequired
 	public Response getCompanyList(@Context HttpServletRequest request) {
 		List<Company> companyList = adminService.getCompanyList();
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, companyList);
@@ -156,8 +159,8 @@ public class AdminHandle {
 
 	@POST
 	@Path("/deleteUser")
-	//@LoginRequired
-	public Response deleteUser(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
+	@LoginRequired
+	public Response deleteUser(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) throws InterruptedException, ExecutionException, TimeoutException {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		String deviceId=(String) request.getSession().getAttribute("deviceSn");
 		boolean state = adminService.deleteUser(deviceId,requestMap.get(EMPLOYEE_ID));
@@ -170,7 +173,7 @@ public class AdminHandle {
 
 	@POST
 	@Path("/editEmployee")
-	//@LoginRequired
+	@LoginRequired
 	public Response editEmployee(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		String deviceId=(String) request.getSession().getAttribute("deviceSn");
@@ -188,7 +191,7 @@ public class AdminHandle {
 
 	@POST
 	@Path("/getEmployeeInfo")
-	//@LoginRequired
+	@LoginRequired
 	public Response getEmployeeInfo(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		Employee employee = adminService.getEmployeeById(requestMap.get(EMPLOYEE_ID));
@@ -197,7 +200,7 @@ public class AdminHandle {
 
 	@POST
 	@Path("/getEmployeeByName")
-	//@LoginRequired
+	@LoginRequired
 	public Response getEmployeeByName(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		String deviceId=(String) request.getSession().getAttribute("deviceSn");
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
@@ -215,7 +218,7 @@ public class AdminHandle {
 
 	@GET
 	@Path("/addEmployeeGetPhotoList")
-	//@LoginRequired
+	@LoginRequired
 	public Response addEmployeeGetPhotoList(@Context HttpServletRequest request,
 			MultivaluedMap<String, String> formParams) {
 		List<Map<String, String>> list = new ArrayList<>();
@@ -230,7 +233,7 @@ public class AdminHandle {
 
 
 	@POST
-	//@LoginRequired
+	@LoginRequired
 	@Path("/getEmployeeByWhere")
 	public Response getEmployeeByWhere(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
@@ -241,7 +244,7 @@ public class AdminHandle {
 	}
 
 	@POST
-	//@LoginRequired
+	@LoginRequired
 	@Path("/excuteCollection")
 	public Response excuteCollection(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		String deviceId=(String) request.getSession().getAttribute("deviceSn");
@@ -254,7 +257,7 @@ public class AdminHandle {
 	}
 
 	@POST
-	//@LoginRequired
+	@LoginRequired
 	@Path("/completeCollection")
 	public Response completeCollection(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		String deviceId=(String) request.getSession().getAttribute("deviceSn");
@@ -263,9 +266,9 @@ public class AdminHandle {
 	}
 
 	@POST
-	//@LoginRequired
+	@LoginRequired
 	@Path("/addEmployee")
-	public Response addEmployeeInfo(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams)  {
+	public Response addEmployeeInfo(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) throws InterruptedException, ExecutionException, TimeoutException  {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		String deviceId=(String) request.getSession().getAttribute("deviceSn");
 		String employeeId = adminService.addEmployee(requestMap.get("name"), 
@@ -282,7 +285,7 @@ public class AdminHandle {
 	}
 	
 	@POST
-	//@LoginRequired
+	@LoginRequired
 	@Path("/searchAdmin")
 	public Response searchAdmin(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams)  {
 		String deviceId=(String) request.getSession().getAttribute("deviceSn");
@@ -292,7 +295,7 @@ public class AdminHandle {
 	}
 	
 	@POST
-	//@LoginRequired
+	@LoginRequired
 	@Path("/editAdmin")
 	public Response editAdmin(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams){
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
@@ -305,7 +308,7 @@ public class AdminHandle {
 	}
 	
 	@POST
-	//@LoginRequired
+	@LoginRequired
 	@Path("/deleteAdmin")
 	public Response deleteAdmin(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams){
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
@@ -318,7 +321,7 @@ public class AdminHandle {
 	}
 	
 	@POST
-	//@LoginRequired
+	@LoginRequired
 	@Path("/getAuditPerson")
 	public Response getAuditPerson(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams){
 		String deviceId=(String) request.getSession().getAttribute("deviceSn");
@@ -327,6 +330,7 @@ public class AdminHandle {
 	}
 	
 	@POST
+	@LoginRequired
 	@Path("/adminManage")
 	public Response adminManage(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams){
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
@@ -341,6 +345,7 @@ public class AdminHandle {
 	
 	
 	@POST
+	@LoginRequired
 	@Path("/getPhotoByTemplate")
 	public Response getPhotoByTemplate(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams){
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
@@ -349,7 +354,7 @@ public class AdminHandle {
 	}
 	
 	@POST
-	//@LoginRequired
+	@LoginRequired
 	@Path("/resetPassword")
 	public Response resetPassword(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams){
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
@@ -364,7 +369,7 @@ public class AdminHandle {
 	
 	
 	@POST
-	//@LoginRequired
+	@LoginRequired
 	@Path("/checkPhoneNumber")
 	public Response checkPhoneNumber(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams){
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
@@ -373,7 +378,7 @@ public class AdminHandle {
 	}
 	
 	@POST
-	//@LoginRequired
+	@LoginRequired
 	@Path("/editAdminPassword")
 	public Response editAdminPassword(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams){
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);

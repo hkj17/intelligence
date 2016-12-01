@@ -6,11 +6,18 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import javax.xml.crypto.Data;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.is.map.DeviceService;
+import com.is.map.FutureMap;
 import com.is.model.ClockAbnormal;
 import com.is.model.ClockAppeal;
 import com.is.model.ClockTime;
@@ -23,6 +30,8 @@ import com.is.websocket.AddFuture;
 import com.is.websocket.CheckResponse;
 import com.is.websocket.ServiceDistribution;
 import com.is.websocket.SyncFuture;
+
+import io.netty.channel.ChannelHandlerContext;
 
 /**
  * @author lishuhuan
@@ -137,11 +146,10 @@ public class ClockService {
 	
 	public Boolean checkHandClock(String clockId,String result,String deviceId){
 		ClockAbnormal abnormal=intelligenceDao.getHandClockById(clockId);
-		abnormal.setHandleResult(Integer.parseInt(result));
-		cloudDao.update(abnormal);
 		if(result.equals("1")){
 			addClocknormal(deviceId,abnormal.getEmployeeId(), abnormal.getClockTime());
 		}
+		cloudDao.delete(abnormal);
 		return true;
 	}
 	
@@ -177,22 +185,22 @@ public class ClockService {
 		return true;
 	}
 
-	public Boolean addClockAbnormal(String deviceId,String employeeId, String time) {
-		SyncFuture<String> future=AddFuture.setFuture(deviceId);
-		CheckResponse response=new CheckResponse(deviceId, "110_2",future);
-		response.start();
-		boolean state=ServiceDistribution.handleJson110_1(deviceId, employeeId, time);
-		if(state){
-			ClockAbnormal abnormal=new ClockAbnormal();
-			String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
-			abnormal.setId(id);
-			abnormal.setDeviceId(deviceId);
-			abnormal.setClockTime(time);
-			abnormal.setEmployeeId(employeeId);
-			cloudDao.add(abnormal);
+	public Boolean addClockAbnormal(String deviceId,String employeeId, String time) throws InterruptedException, ExecutionException, TimeoutException {
+		SyncFuture<String> future = new SyncFuture<>();
+		ChannelHandlerContext ctx = DeviceService.getSocketMap(deviceId);
+		if (ctx == null) {
+			return null;
 		}
-		
-		return state;
+		FutureMap.addFuture(ctx.channel().id().asLongText() + "110_2", future);
+		ServiceDistribution.handleJson110_1(deviceId, employeeId, time);
+		String result = future.get(6, TimeUnit.SECONDS);
+		FutureMap.removeFutureMap(ctx.channel().id().asLongText() + "110_2");
+		if(result!=null){
+			return true;
+		}
+		else{
+			return false;
+		}
 	}
 	
 	public Boolean addClocknormal(String deviceId,String id, String time) {
@@ -203,7 +211,23 @@ public class ClockService {
 		} else {
 			int crId = clockRecord.getCrId();
 			String morningClock = clockRecord.getStartClock();
-			updateClock(String.valueOf(crId), id, morningClock, time);
+			String nightClock=clockRecord.getEndClock();
+			if(nightClock==null){
+				updateClock(String.valueOf(crId), id, morningClock, time);
+			}
+			else{
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+				try {
+					Date timenew=sdf.parse(time);
+					Date timeold=sdf.parse(nightClock);
+					if(timenew.getTime()>timeold.getTime()){
+						updateClock(String.valueOf(crId), id, morningClock, time);
+					}
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 		}
 		ClockTime clockTime=new ClockTime();
 		clockTime.setClockTime(time);
