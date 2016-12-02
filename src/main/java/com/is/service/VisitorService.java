@@ -12,6 +12,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
@@ -20,6 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.is.map.DeviceService;
+import com.is.map.FutureMap;
 import com.is.model.CollectionPhoto;
 import com.is.model.Employee;
 import com.is.model.Visitor;
@@ -30,6 +35,8 @@ import com.is.websocket.AddFuture;
 import com.is.websocket.CheckResponse;
 import com.is.websocket.ServiceDistribution;
 import com.is.websocket.SyncFuture;
+
+import io.netty.channel.ChannelHandlerContext;
 
 @Transactional
 @Component("visitorService")
@@ -74,45 +81,57 @@ public class VisitorService {
 	}
 
 	public Boolean addVisitorInfoByMobile(String id, String name, String company, String position, String telphone,
-			String email, String companyUrl, String deviceId, String importance, String birth, String path) {
+			String email, String companyUrl, String deviceId, String importance, String birth, String path) throws InterruptedException, ExecutionException, TimeoutException {
 		String strangerId = path == null ? null : path.substring(path.lastIndexOf("/") + 1, path.lastIndexOf("."));
-		SyncFuture<String> future = AddFuture.setFuture(deviceId,"103_12");
-		CheckResponse response = new CheckResponse(deviceId, "103_12", future);
-		response.start();
-		boolean state = ServiceDistribution.handleJson103_11(id, strangerId, name, company, position, birth, deviceId,
+		SyncFuture<String> future = new SyncFuture<>();
+		ChannelHandlerContext ctx = DeviceService.getSocketMap(deviceId);
+		if (ctx == null) {
+			return null;
+		}
+		FutureMap.addFuture(ctx.channel().id().asLongText() + "103_12", future);
+		ServiceDistribution.handleJson103_11(id, strangerId, name, company, position, birth, deviceId,
 				path);
-		if (!state) {
-			return state;
+		String result = future.get(6, TimeUnit.SECONDS);
+		FutureMap.removeFutureMap(ctx.channel().id().asLongText() + "103_12");
+		if (result==null) {
+			return false;
+		}
+		else{
+			VisitorInfo info = new VisitorInfo();
+			info.setId(id);
+			info.setDeviceId(deviceId);
+			info.setName(name);
+			info.setCompany(company);
+			info.setPosition(position);
+			info.setTelphone(telphone);
+			info.setEmail(email);
+			info.setCompanyUrl(companyUrl);
+			info.setImportance(Integer.parseInt(importance));
+			if (birth != null && !"".equals(birth)) {
+				info.setBirth(birth);
+			}
+			info.setPhotoPath(path);
+			cloudDao.add(info);
+
+			return true;
 		}
 
-		VisitorInfo info = new VisitorInfo();
-		info.setId(id);
-		info.setDeviceId(deviceId);
-		info.setName(name);
-		info.setCompany(company);
-		info.setPosition(position);
-		info.setTelphone(telphone);
-		info.setEmail(email);
-		info.setCompanyUrl(companyUrl);
-		info.setImportance(Integer.parseInt(importance));
-		if (birth != null && !"".equals(birth)) {
-			info.setBirth(birth);
-		}
-		info.setPhotoPath(path);
-		cloudDao.add(info);
-
-		return true;
 	}
 
 	public String addVisitorInfo(String name, String company, String position, String telphone, String email,
-			String companyUrl, String deviceId, String importance, String birth, String path, String cid) {
+			String companyUrl, String deviceId, String importance, String birth, String path, String cid) throws InterruptedException, ExecutionException, TimeoutException {
 		String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
 		String strangerId = path == null ? null : path.substring(path.lastIndexOf("/") + 1, path.lastIndexOf("."));
-		SyncFuture<String> future = AddFuture.setFuture(deviceId,"103_12");
-		CheckResponse response = new CheckResponse(deviceId, "103_12", future);
-		response.start();
-		boolean state=ServiceDistribution.handleJson103_11(id, strangerId, name, company, position, birth, deviceId,null);
-		if(state){
+		SyncFuture<String> future = new SyncFuture<>();
+		ChannelHandlerContext ctx = DeviceService.getSocketMap(deviceId);
+		if (ctx == null) {
+			return null;
+		}
+		FutureMap.addFuture(ctx.channel().id().asLongText() + "103_12", future);
+		ServiceDistribution.handleJson103_11(id, strangerId, name, company, position, birth, deviceId,null);
+		String result = future.get(6, TimeUnit.SECONDS);
+		FutureMap.removeFutureMap(ctx.channel().id().asLongText() + "103_12");
+		if(result!=null){
 			VisitorInfo info = new VisitorInfo();
 			info.setId(id);
 			info.setDeviceId(deviceId);
@@ -153,14 +172,19 @@ public class VisitorService {
 	}
 
 	public boolean updateVisitorInfo(String deviceId, String id, String name, String company, String position,
-			String telphone, String email, String importance, String birth) {
-		SyncFuture<String> future = AddFuture.setFuture(deviceId,"104_12");
-		CheckResponse response = new CheckResponse(deviceId, "104_12", future);
-		response.start();
-		boolean state = ServiceDistribution.handleJson104_11(deviceId, id, name, company, position, telphone, email,
+			String telphone, String email, String importance, String birth) throws InterruptedException, ExecutionException, TimeoutException {
+		SyncFuture<String> future = new SyncFuture<>();
+		ChannelHandlerContext ctx = DeviceService.getSocketMap(deviceId);
+		if (ctx == null) {
+			return false;
+		}
+		FutureMap.addFuture(ctx.channel().id().asLongText() + "104_12", future);
+		ServiceDistribution.handleJson104_11(deviceId, id, name, company, position, telphone, email,
 				importance, birth);
+		String result = future.get(6, TimeUnit.SECONDS);
+		FutureMap.removeFutureMap(ctx.channel().id().asLongText() + "104_12");
 
-		if (state) {
+		if (result!=null) {
 			VisitorInfo visitorInfo = intelligenceDao.getVisitorInfoById(id);
 			visitorInfo.setName(name);
 			visitorInfo.setCompany(company);
@@ -170,8 +194,11 @@ public class VisitorService {
 			visitorInfo.setImportance(Integer.parseInt(importance));
 			visitorInfo.setBirth(birth);
 			cloudDao.update(visitorInfo);
+			return true;
 		}
-		return state;
+		else{
+			return false;
+		}
 
 	}
 
@@ -192,49 +219,65 @@ public class VisitorService {
 		return true;
 	}
 
-	public Boolean deleteVisitorInfo(String deviceId, String visitorId) {
+	public Boolean deleteVisitorInfo(String deviceId, String visitorId) throws InterruptedException, ExecutionException, TimeoutException {
 		VisitorInfo visitorInfo = intelligenceDao.getVisitorInfoById(visitorId);
-		SyncFuture<String> future = AddFuture.setFuture(deviceId,"105_12");
-		CheckResponse response = new CheckResponse(deviceId, "105_12", future);
-		response.start();
-		boolean state = ServiceDistribution.handleJson105_11(deviceId, visitorId);
+		SyncFuture<String> future = new SyncFuture<>();
+		ChannelHandlerContext ctx = DeviceService.getSocketMap(deviceId);
+		if (ctx == null) {
+			return false;
+		}
+		FutureMap.addFuture(ctx.channel().id().asLongText() + "105_12", future);
+		ServiceDistribution.handleJson105_11(deviceId, visitorId);
+		String result = future.get(6, TimeUnit.SECONDS);
+		FutureMap.removeFutureMap(ctx.channel().id().asLongText() + "105_12");
 
-		if (visitorInfo != null && state) {
+		if (visitorInfo != null && result!=null) {
 			cloudDao.delete(visitorInfo);
 		}
-		return state;
+		return true;
 	}
 
 	public String updateVisitorInfoByRecord(String name, String company, String position, String telphone, String email,
-			String companyUrl, String deviceId, String importance, String birth, String visitorId) {
+			String companyUrl, String deviceId, String importance, String birth, String visitorId) throws InterruptedException, ExecutionException, TimeoutException {
 		Visitor visitor = intelligenceDao.getVisitorById(visitorId);
 		String path = visitor.getPhoto();
-		VisitorInfo info = new VisitorInfo();
 		String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
-		info.setId(id);
-		info.setDeviceId(deviceId);
-		info.setName(name);
-		info.setCompany(company);
-		info.setPosition(position);
-		info.setTelphone(telphone);
-		info.setEmail(email);
-		info.setCompanyUrl(companyUrl);
-		info.setImportance(Integer.parseInt(importance));
-		if (birth != null) {
-			info.setBirth(birth);
-		}
-		info.setPhotoPath(path);
-		cloudDao.add(info);
-
-		visitor.setVisitorInfo(info);
-		cloudDao.update(visitor);
-
 		String strangerId = path == null ? null : path.substring(path.lastIndexOf("/") + 1, path.lastIndexOf("."));
-		SyncFuture<String> future = AddFuture.setFuture(deviceId,"103_12");
-		CheckResponse response = new CheckResponse(deviceId, "103_12", future);
-		response.start();
+		SyncFuture<String> future = new SyncFuture<>();
+		ChannelHandlerContext ctx = DeviceService.getSocketMap(deviceId);
+		if (ctx == null) {
+			return null;
+		}
+		FutureMap.addFuture(ctx.channel().id().asLongText() + "103_12", future);
 		ServiceDistribution.handleJson103_11(id, strangerId, name, company, position, birth, deviceId, null);
-		return id;
+		String result = future.get(6, TimeUnit.SECONDS);
+		FutureMap.removeFutureMap(ctx.channel().id().asLongText() + "103_12");
+		
+		if(result!=null){
+			VisitorInfo info = new VisitorInfo();
+			info.setId(id);
+			info.setDeviceId(deviceId);
+			info.setName(name);
+			info.setCompany(company);
+			info.setPosition(position);
+			info.setTelphone(telphone);
+			info.setEmail(email);
+			info.setCompanyUrl(companyUrl);
+			info.setImportance(Integer.parseInt(importance));
+			if (birth != null) {
+				info.setBirth(birth);
+			}
+			info.setPhotoPath(path);
+			cloudDao.add(info);
+
+			visitor.setVisitorInfo(info);
+			cloudDao.update(visitor);
+
+			return id;
+		}
+		else{
+			return null;
+		}
 
 	}
 

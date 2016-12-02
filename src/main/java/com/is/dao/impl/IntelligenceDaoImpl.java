@@ -2,7 +2,6 @@ package com.is.dao.impl;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -21,9 +20,9 @@ import com.is.model.Admin;
 import com.is.model.Appointment;
 import com.is.model.ClockAbnormal;
 import com.is.model.ClockAppeal;
+import com.is.model.ClockRecord;
 import com.is.model.ClockTime;
 import com.is.model.CollectionPhoto;
-import com.is.model.ClockRecord;
 import com.is.model.Company;
 import com.is.model.Department;
 import com.is.model.Employee;
@@ -254,12 +253,13 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 
 	@Override
 	public List<ClockRecord> getClockByEmployee(String id) {
-		Calendar now = Calendar.getInstance();
-		now.set(Calendar.DATE, now.get(Calendar.DATE) - 10);
-		Date startTime = now.getTime();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		String start = sdf.format(startTime);
-		return cloudDao.findByHql(Hql.GET_CLOCK_BY_EMPLOYEE, id, start);
+		String start = sdf.format(new Date())+" 00:00:00";
+		String time=start.replace(start.substring(8, 10), "01");
+		Query query = getSession().createSQLQuery(
+				"SELECT a.*,b.employee_name,b.job_id,b.department_id from clockrecord a,employee b where b.employee_id=a.employee_id and a.employee_id='"+id+"' and a.start_clock>='"+time+"'");
+		List<ClockRecord> list = ((SQLQuery) query).addEntity(ClockRecord.class).list();
+		return list;
 	}
 
 	@Override

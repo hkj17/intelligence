@@ -10,6 +10,8 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
@@ -37,6 +39,8 @@ import sun.misc.BASE64Decoder;
 @Component("serviceDistribution")
 public class ServiceDistribution implements ApplicationContextAware {
 	private static Logger logger = Logger.getLogger(ServiceDistribution.class);
+	
+	private static Map<String, Long> messageMap=new HashMap<>();
 	
 	private static ApplicationContext context;
 
@@ -87,9 +91,29 @@ public class ServiceDistribution implements ApplicationContextAware {
 	public static JSONObject handleJson3_11(JSONObject jsonObject, ChannelHandlerContext socketChannel) {
 		String visitorId=jsonObject.getString("visitorId");
 		String time=jsonObject.getString("time");
-		VisitorService visitorService = (VisitorService) ServiceDistribution.getContext().getBean("visitorService");
-		String deviceId=ChannelNameToDeviceMap.getDeviceMap(socketChannel.channel().id());
-		visitorService.insertVisitor(deviceId, visitorId, time,null,null);
+		String employeeId=jsonObject.getString("employeeId");
+		if(employeeId!=null && !"".equals(employeeId)){
+			VisitorService visitorService = (VisitorService) ServiceDistribution.getContext().getBean("visitorService");
+			String deviceId=ChannelNameToDeviceMap.getDeviceMap(socketChannel.channel().id());
+			visitorService.insertVisitor(deviceId, visitorId, time,employeeId,null);
+			
+			
+			Long maptime=messageMap.get(visitorId);
+			if(maptime==null){
+				EmployeeService employeeService= (EmployeeService)getContext().getBean("employeeService");
+				employeeService.sendMsg(employeeId,"1644158");
+				messageMap.put(visitorId, new Date().getTime());
+			}
+			else {
+				long now=new Date().getTime();
+				long cha=(now-maptime)/1000/60;
+				if(cha>60){
+					EmployeeService employeeService= (EmployeeService)getContext().getBean("employeeService");
+					employeeService.sendMsg(employeeId,"1644158");
+					messageMap.put(visitorId, new Date().getTime());
+				}
+			}
+		}
 		
 		JSONObject responseCode = new JSONObject();
 		responseCode.put("type", 3);
@@ -107,7 +131,7 @@ public class ServiceDistribution implements ApplicationContextAware {
 		String deviceId=ChannelNameToDeviceMap.getDeviceMap(socketChannel.channel().id());
 		visitorService.insertVisitor(deviceId, visitorId, time,employeeId,null);
 		EmployeeService employeeService= (EmployeeService)getContext().getBean("employeeService");
-		employeeService.sendMsg(employeeId);
+		employeeService.sendMsg(employeeId,"1525674");
 		
 		JSONObject responseCode = new JSONObject();
 		responseCode.put("type", 5);
@@ -192,7 +216,7 @@ public class ServiceDistribution implements ApplicationContextAware {
 		VisitorService visitorService = (VisitorService)getContext().getBean("visitorService");
 		visitorService.insertVisitor(deviceId, null, time,employeeId,path);
 		EmployeeService employeeService= (EmployeeService)getContext().getBean("employeeService");
-		employeeService.sendMsg(employeeId);
+		employeeService.sendMsg(employeeId,"1525674");
 		
 		JSONObject responseCode = new JSONObject();
 		responseCode.put("type", 4);
@@ -338,7 +362,7 @@ public class ServiceDistribution implements ApplicationContextAware {
 		jsonObject.put("employeeId", employeeId);
 		jsonObject.put("beginTime", startTime);
 		jsonObject.put("endTime", endTime);
-		jsonObject.put("id", id);
+		jsonObject.put("appointmentId", id);
 		jsonObject.put("visitorId", visitorId);
 		jsonObject.put("message", message);
 		byte[] result = SocketService.responseByte(jsonObject, "106", "11");
@@ -356,7 +380,7 @@ public class ServiceDistribution implements ApplicationContextAware {
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.put("type", 106);
 		jsonObject.put("code", 21);
-		jsonObject.put("id", id);
+		jsonObject.put("appointmentId", id);
 		jsonObject.put("employeeId", employeeId);
 		jsonObject.put("visitorId", visitorId);
 		byte[] result = SocketService.responseByte(jsonObject, "106", "21");
@@ -646,7 +670,9 @@ public class ServiceDistribution implements ApplicationContextAware {
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.put("type", 112);
 		jsonObject.put("code", 11);
-		jsonObject.put("volume", voice);
+		if(voice!=null && !"".equals(voice)){
+			jsonObject.put("volume", Integer.parseInt(voice));
+		}
 		byte[] result = SocketService.responseByte(jsonObject, "112", "11");
 		if (null != channel) {
 			excuteWrite(result, channel);

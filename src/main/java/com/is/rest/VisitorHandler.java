@@ -7,6 +7,8 @@ import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -41,7 +43,7 @@ public class VisitorHandler {
 	@POST
 	@LoginRequired
 	@Path("/addVisitorInfo") 
-	public Response addVisitorInfo(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) {
+	public Response addVisitorInfo(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws InterruptedException, ExecutionException, TimeoutException {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		String deviceId=(String) request.getSession().getAttribute("deviceSn");
 		String id=visitorService.addVisitorInfo(requestMap.get("name"), requestMap.get("company"), 
@@ -65,7 +67,7 @@ public class VisitorHandler {
 			@FormDataParam("email") String email, @FormDataParam("companyUrl") String companyUrl, 
 			@FormDataParam("birth") String birth, @FormDataParam("importance") String importance, 
 			@FormDataParam("photo") InputStream uploadedInputStream,@FormDataParam("photo") FormDataContentDisposition fileDetail, @Context HttpServletRequest request)
-			throws IOException {
+			throws IOException, InterruptedException, ExecutionException, TimeoutException {
 		String deviceId=(String) request.getSession().getAttribute("deviceSn");
 		String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
 		String path=VISITOR_FACE+deviceId+"/"+id+".jpg";
@@ -116,7 +118,7 @@ public class VisitorHandler {
 	@POST
 	@Path("/updateVisitorInfo")
 	@LoginRequired
-	public Response updateVisitorInfo(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws ParseException{
+	public Response updateVisitorInfo(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws ParseException, InterruptedException, ExecutionException, TimeoutException{
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		String deviceId=(String) request.getSession().getAttribute("deviceSn");
 		boolean state=visitorService.updateVisitorInfo(deviceId,requestMap.get("visitorId"),requestMap.get("name"), requestMap.get("company"), 
@@ -132,7 +134,7 @@ public class VisitorHandler {
 	@POST
 	@Path("/deleteVisitorInfo")
 	@LoginRequired
-	public Response deleteVisitorInfo(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws ParseException{
+	public Response deleteVisitorInfo(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws ParseException, InterruptedException, ExecutionException, TimeoutException{
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		String deviceId=(String) request.getSession().getAttribute("deviceSn");
 		boolean state=visitorService.deleteVisitorInfo(deviceId, requestMap.get("visitorId"));
@@ -170,7 +172,7 @@ public class VisitorHandler {
 	@POST
 	@Path("/updateVisitorInfoByRecord")
 	@LoginRequired
-	public Response updateVisitorInfoByRecord(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws ParseException{
+	public Response updateVisitorInfoByRecord(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws ParseException, InterruptedException, ExecutionException, TimeoutException{
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		String deviceId=(String) request.getSession().getAttribute("deviceSn");
 		String id=visitorService.updateVisitorInfoByRecord(requestMap.get("name"), requestMap.get("company"), 

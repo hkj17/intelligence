@@ -47,7 +47,7 @@ public class FunctionHandler {
 	@Path("/sendMsg")
 	public Response sendMsg(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws IOException{
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
-		String result=employeeService.sendMsg(requestMap.get(EMPLOYEE_ID));
+		String result=employeeService.sendMsg(requestMap.get(EMPLOYEE_ID),"1525674");
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, result);
 	}
 	

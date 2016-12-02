@@ -40,7 +40,7 @@ public class EmployeeService {
 		return intelligenceDao.getEmployeeByMobile(mobile);
 	}
 
-	public String sendMsg(String employeeId) {
+	public String sendMsg(String employeeId,String tqlId) {
 		String result = null;
 		Employee employee = intelligenceDao.getEmployeeById(employeeId);
 		if (null == employee.getEmployeeName()) {
@@ -50,7 +50,7 @@ public class EmployeeService {
 		try {
 			tpl_value = URLEncoder.encode("#name#", ENCODING) + "="
 					+ URLEncoder.encode(employee.getEmployeeName(), ENCODING);
-			result = JavaSms.tplSendSms(tpl_value, employee.getTelphone());
+			result = JavaSms.tplSendSms(tpl_value, employee.getTelphone(),tqlId);
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

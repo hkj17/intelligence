@@ -27,9 +27,8 @@ public class JavaSms {
   //修改为您的apikey.apikey可在官网（http://www.yuanpian.com)登录后获取
     private static String apikey = "6a830c1f4de2dd5e0afdc8e7d6040bdd";
     
-    private static String tql_id="1525674";
 
-	public static String tplSendSms(String tpl_value, String mobile) throws IOException {
+	public static String tplSendSms(String tpl_value, String mobile,String tql_id) throws IOException {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("apikey", apikey);
 		params.put("tpl_id", tql_id);

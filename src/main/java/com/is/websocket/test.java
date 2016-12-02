@@ -12,8 +12,12 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 
+import com.is.kafka.KafkaProducer;
+import com.is.kafka.KafkaProperties;
 import com.is.util.PasswordUtil;
 
 import net.sf.json.JSONObject;
@@ -87,18 +91,7 @@ public class test {
 		   }  
 	
 	public static void main(String[] args) throws UnsupportedEncodingException {
-		String aa="{'222':'222','photo':'123'}";
-		JSONObject log=JSONObject.fromObject(aa);
-		log.put("photo", "123");
-		log.put("222", "222");
-		
-		JSONObject cc=new JSONObject();
-		cc=JSONObject.fromObject(aa);
-		
-		if(cc.containsKey("photo")){
-			cc.remove("photo");
-		}
-		System.out.println(cc);
-		System.out.println(log);
+		 KafkaProducer producerThread = new KafkaProducer(KafkaProperties.topic,"123");
+	     producerThread.start();
 	}
 }
