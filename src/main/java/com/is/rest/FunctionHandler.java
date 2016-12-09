@@ -1,8 +1,12 @@
 package com.is.rest;
 
 import static com.is.constant.ParameterKeys.EMPLOYEE_ID;
+import static com.is.constant.ParameterKeys.ADVERTISE_PHOTO;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -136,6 +140,31 @@ public class FunctionHandler {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		JSONObject result=employeeService.getCollectionPhotoList(requestMap.get("startTime"),requestMap.get("endTime"),requestMap.get("tag"),deviceId);
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, result);
+	}
+	
+	@POST
+	@Path("/getAdvertisementPhoto")
+	@LoginRequired
+	public Response getAdvertisementPhoto(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws IOException{
+		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		File file=new File(ADVERTISE_PHOTO+deviceId);
+		List<String> list = new ArrayList<>();
+		if(file.isDirectory()){
+			File[] all = file.listFiles();
+			if (all != null) {
+				for (File photo : all) {
+					String photoPath = photo.getAbsolutePath();
+					list.add(photoPath);
+				}
+				return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, list);
+			}
+			else {
+				return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
+			}
+		}
+		else{
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
+		}
 	}
 	
 

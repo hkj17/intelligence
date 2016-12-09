@@ -14,8 +14,11 @@ import static com.is.constant.ParameterKeys.USER_PSW;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
@@ -26,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.is.constant.ResponseCode;
+import com.is.model.Company;
 import com.is.model.Department;
 import com.is.service.CompanyService;
 import com.is.util.BusinessHelper;
@@ -45,7 +49,11 @@ public class CompanyHandle {
 	@Path("/addCompany")
 	public Response addCompany(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams){
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
-		boolean state=companyService.addCompany(requestMap.get(COMPANY_NAME), requestMap.get(ADDRESS), requestMap.get(START_TIME), requestMap.get(END_TIME), requestMap.get(USER_NAME), requestMap.get(USER_PSW), requestMap.get(NAME), requestMap.get(CONTACT));
+		boolean state=companyService.addCompany(requestMap.get(COMPANY_NAME), 
+				requestMap.get(ADDRESS), requestMap.get("morningStartTime"), requestMap.get("morningEndTime"),
+				requestMap.get("nightStartTime"), requestMap.get("nightEndTime"),
+				requestMap.get(USER_NAME), requestMap.get(USER_PSW), requestMap.get(NAME), 
+				requestMap.get(CONTACT));
 		if(state){
 			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
 		}else{
@@ -56,9 +64,12 @@ public class CompanyHandle {
 	@POST
 	@LoginRequired
 	@Path("/editCompany")
-	public Response editCompany(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams){
+	public Response editCompany(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws InterruptedException, ExecutionException, TimeoutException{
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
-		boolean state=companyService.editCompany(requestMap.get(COMPANY_ID), requestMap.get(COMPANY_NAME), requestMap.get(ADDRESS), requestMap.get(START_TIME), requestMap.get(END_TIME));
+		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		boolean state=companyService.editCompany( requestMap.get(COMPANY_NAME),
+				requestMap.get(ADDRESS),requestMap.get("telphone"),  requestMap.get("morningStartTime"), requestMap.get("morningEndTime"),
+				requestMap.get("nightStartTime"), requestMap.get("nightEndTime"),deviceId);
 		if(state){
 			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
 		}else{
@@ -78,6 +89,15 @@ public class CompanyHandle {
 		}else{
 			return ResponseFactory.response(Response.Status.OK, ResponseCode.REQUEST_FAIL, null);
 		}
+	}
+	
+	@GET
+	@Path("/companyInfo")
+	@LoginRequired
+	public Response getCompanyInfo(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams){
+		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		Company company=companyService.getCompanyInfo(deviceId);
+		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, company);
 	}
 	
 	@POST

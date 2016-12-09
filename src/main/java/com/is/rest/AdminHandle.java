@@ -181,7 +181,7 @@ public class AdminHandle {
 				requestMap.get(BIRTH), requestMap.get(CONTACT),  deviceId,
 				requestMap.get("positon"), requestMap.get("jobId"), requestMap.get("address"),
 				requestMap.get("email"), requestMap.get("idCard"), requestMap.get("workPos"),
-				requestMap.get("sex"),requestMap.get("path"),requestMap.get("departmentId"));
+				requestMap.get("sex"),requestMap.get("path"),requestMap.get("departmentId"),requestMap.get("adminName"));
 		if (state) {
 			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
 		} else {
@@ -334,8 +334,7 @@ public class AdminHandle {
 	@Path("/adminManage")
 	public Response adminManage(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams){
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
-		boolean state=adminService.adminManage(requestMap.get("deviceSn"), requestMap.get("username"),requestMap.get("password"), requestMap.get("company"),
-				requestMap.get("address"), requestMap.get("contact"),requestMap.get("startTime"), requestMap.get("endTime"));
+		boolean state=adminService.adminManage(requestMap.get("deviceSn"), requestMap.get("username"),requestMap.get("password"));
 		if (state) {
 			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
 		} else {

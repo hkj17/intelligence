@@ -4,12 +4,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.is.map.DeviceService;
+import com.is.map.FutureMap;
 import com.is.model.Admin;
 import com.is.model.Company;
 import com.is.model.Department;
@@ -17,6 +20,12 @@ import com.is.model.Employee;
 import com.is.system.dao.CloudDao;
 import com.is.system.dao.IntelligenceDao;
 import com.is.util.PasswordUtil;
+import com.is.websocket.AddFuture;
+import com.is.websocket.CheckResponse;
+import com.is.websocket.ServiceDistribution;
+import com.is.websocket.SyncFuture;
+
+import io.netty.channel.ChannelHandlerContext;
 
 /** 
  * @author lishuhuan 
@@ -37,7 +46,9 @@ public class CompanyService {
 	private AdminService adminService;
 	
 	
-	public Boolean addCompany(String companyName,String address,String startTime,String endTime,String adminName,String password,String name,String contact){
+	public Boolean addCompany(String companyName,String address,
+			String morningTimeStart,String morningTimeEnd,String nightTimeStart,String nightTimeEnd,
+			String adminName,String password,String name,String contact){
 		Admin admin=new Admin();
 		String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
 		admin.setAdminId(id);
@@ -49,8 +60,10 @@ public class CompanyService {
 		company.setAdminId(id);
 		company.setCompanyName(companyName);
 		company.setContact(contact);
-		company.setTimeRest(startTime);
-		company.setTimeWork(endTime);
+		company.setMorningTimeStart(morningTimeStart);
+		company.setMorningTimeEnd(morningTimeEnd);
+		company.setNightTimeStart(nightTimeStart);
+		company.setNightTimeEnd(nightTimeEnd);
 		Employee employee=new Employee();
 		employee.setAdmin(admin);
 		employee.setCompany(company);
@@ -62,16 +75,41 @@ public class CompanyService {
 		return true;
 	}
 	
-	public Boolean editCompany(String id,String name,String address,String startTime,String endTime){
-		Company company=new Company();
-		company.setAdminId(id);
-		company.setAddress(address);
-		company.setCompanyId(Integer.parseInt(id));
-		company.setCompanyName(name);
-		company.setTimeRest(endTime);
-		company.setTimeWork(startTime);
-		cloudDao.update(company);
-		return true;
+	public Company getCompanyInfo(String deviceId){
+		return intelligenceDao.getCompanyByDeviceId(deviceId);
+	}
+	
+	public Boolean editCompany(String name,String address,String phone,String morningTimeStart,String morningTimeEnd,String nightTimeStart,String nightTimeEnd,String deviceId) throws InterruptedException, ExecutionException, TimeoutException{
+			Company company=intelligenceDao.getCompanyByDeviceId(deviceId);
+			if(company==null){
+				Company companyNew=new Company();
+				companyNew.setDeviceId(deviceId);
+				companyNew.setAddress(address);
+				companyNew.setCompanyName(name);
+				companyNew.setContact(phone);
+				companyNew.setMorningTimeStart(morningTimeStart);
+				companyNew.setMorningTimeEnd(morningTimeEnd);
+				companyNew.setNightTimeStart(nightTimeStart);
+				companyNew.setNightTimeEnd(nightTimeEnd);
+				cloudDao.add(companyNew);
+			}
+			else{
+				company.setAddress(address);
+				company.setCompanyName(name);
+				company.setContact(phone);
+				company.setMorningTimeStart(morningTimeStart);
+				company.setMorningTimeEnd(morningTimeEnd);
+				company.setNightTimeStart(nightTimeStart);
+				company.setNightTimeEnd(nightTimeEnd);
+				cloudDao.update(company);
+			}
+			
+			SyncFuture<String> future=AddFuture.setFuture(deviceId,"115_2");
+			CheckResponse response=new CheckResponse(deviceId, "115_2",future);
+			response.start();
+			ServiceDistribution.handleJson115_1(deviceId, name, address, phone, morningTimeStart,morningTimeEnd,nightTimeStart,nightTimeEnd);
+			return true;
+		
 	}
 	
 	public Boolean deleteCompany(String device,String id){

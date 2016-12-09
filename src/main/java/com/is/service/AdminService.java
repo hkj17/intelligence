@@ -211,7 +211,8 @@ public class AdminService {
 	}
 
 	@SuppressWarnings("unchecked")
-	public Boolean deleteUser(String deviceId, String id) throws InterruptedException, ExecutionException, TimeoutException {
+	public Boolean deleteUser(String deviceId, String id)
+			throws InterruptedException, ExecutionException, TimeoutException {
 		Employee employee = intelligenceDao.getEmployeeById(id);
 		SyncFuture<String> future = new SyncFuture<>();
 		ChannelHandlerContext ctx = DeviceService.getSocketMap(deviceId);
@@ -222,15 +223,14 @@ public class AdminService {
 		ServiceDistribution.handleJson105_1(deviceId, employee.getEmployeeId());
 		String result = future.get(6, TimeUnit.SECONDS);
 		FutureMap.removeFutureMap(ctx.channel().id().asLongText() + "105_2");
-		if (result!=null) {
+		if (result != null) {
 			Admin admin = employee.getAdmin();
 			cloudDao.delete(employee);
 			if (admin != null) {
 				cloudDao.delete(admin);
 			}
 			return true;
-		}
-		else{
+		} else {
 			return false;
 		}
 
@@ -238,7 +238,7 @@ public class AdminService {
 
 	public Boolean editEmployee(String employeeId, String name, String birth, String contact, String deviceId,
 			String position, String jobId, String address, String email, String idCard, String workPos, String sex,
-			String path, String departmentId) {
+			String path, String departmentId, String adminName) {
 		try {
 			Employee employee = intelligenceDao.getEmployeeById(employeeId);
 			String strangerId = null;
@@ -263,6 +263,13 @@ public class AdminService {
 				employee.setEmployeeName(name);
 				if (birth != null && !"".equals(birth)) {
 					employee.setBirth(birth);
+				}
+
+				if (adminName != null && !"".equals(adminName)) {
+					Admin admin = employee.getAdmin();
+					admin.setUsername(adminName);
+					cloudDao.update(admin);
+					employee.setAdmin(admin);
 				}
 
 				employee.setTelphone(contact);
@@ -504,51 +511,42 @@ public class AdminService {
 	public Boolean editAdmin(String id, String name, String password, String auth) {
 		Admin admin = intelligenceDao.getAdminById(id);
 		admin.setUsername(name);
-		admin.setPassword(PasswordUtil.generatePassword(password));
-		admin.setAuthority(Integer.parseInt(auth));
+		if (password != null && !"".equals(password)) {
+			admin.setPassword(PasswordUtil.generatePassword(password));
+		}
+		if (auth != null && !"".equals(auth)) {
+			admin.setAuthority(Integer.parseInt(auth));
+		}
 		cloudDao.update(admin);
 		return true;
 	}
 
-	public Boolean adminManage(String deviceId, String username, String password, String company, String address,
-			String contact, String startTime, String endTime) {
+	public Boolean adminManage(String deviceId, String username, String password) {
 		try {
-			SyncFuture<String> future = AddFuture.setFuture(deviceId, "115_2");
-			CheckResponse response = new CheckResponse(deviceId, "115_2", future);
-			response.start();
-			boolean state = ServiceDistribution.handleJson115_1(deviceId, company);
-			if (state) {
-				Admin admin = new Admin();
-				String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
-				admin.setAdminId(id);
-				admin.setAuditAuth(1);
-				admin.setAuthority(0);
-				admin.setDeviceId(deviceId);
-				admin.setPassword(PasswordUtil.generatePassword(password));
-				admin.setUsername(username);
-				cloudDao.add(admin);
+			/*
+			 * SyncFuture<String> future = AddFuture.setFuture(deviceId,
+			 * "115_2"); CheckResponse response = new CheckResponse(deviceId,
+			 * "115_2", future); response.start(); boolean state =
+			 * ServiceDistribution.handleJson115_1(deviceId, company);
+			 */
+			Admin admin = new Admin();
+			String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
+			admin.setAdminId(id);
+			admin.setAuditAuth(1);
+			admin.setAuthority(0);
+			admin.setDeviceId(deviceId);
+			admin.setPassword(PasswordUtil.generatePassword(password));
+			admin.setUsername(username);
+			cloudDao.add(admin);
 
-				Company com = new Company();
-				com.setAddress(address);
-				com.setAdminId(id);
-				com.setCompanyName(company);
-				com.setContact(contact);
-				com.setDeviceId(deviceId);
-				com.setTimeWork(startTime);
-				com.setTimeRest(endTime);
-				cloudDao.add(com);
+			Employee employee = new Employee();
+			String employeeId = UUID.randomUUID().toString().trim().replaceAll("-", "");
+			employee.setEmployeeId(employeeId);
+			employee.setAdmin(admin);
+			employee.setEmployeeName(username);
+			cloudDao.add(employee);
+			return true;
 
-				Employee employee = new Employee();
-				String employeeId = UUID.randomUUID().toString().trim().replaceAll("-", "");
-				employee.setEmployeeId(employeeId);
-				employee.setAddress(address);
-				employee.setAdmin(admin);
-				employee.setCompany(com);
-				employee.setEmployeeName(username);
-				cloudDao.add(employee);
-			}
-
-			return state;
 		} catch (Exception e) {
 			// TODO: handle exception
 			return false;

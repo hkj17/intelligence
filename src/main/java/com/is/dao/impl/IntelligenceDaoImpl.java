@@ -256,10 +256,9 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		String start = sdf.format(new Date())+" 00:00:00";
 		String time=start.replace(start.substring(8, 10), "01");
-		Query query = getSession().createSQLQuery(
-				"SELECT a.*,b.employee_name,b.job_id,b.department_id from clockrecord a,employee b where b.employee_id=a.employee_id and a.employee_id='"+id+"' and a.start_clock>='"+time+"'");
-		List<ClockRecord> list = ((SQLQuery) query).addEntity(ClockRecord.class).list();
-		return list;
+		Query query = getSession().createQuery(
+				"SELECT a,b.employeeName,b.jobId,b.department.department from ClockRecord a,Employee b where b.employeeId=a.employeeId and a.employeeId='"+id+"' and a.startClock>='"+time+"'");
+		return query.list();
 	}
 
 	@Override

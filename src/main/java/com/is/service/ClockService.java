@@ -49,7 +49,7 @@ public class ClockService {
 
 	public List<ClockRecord> getClockList() throws ParseException {
 		List<ClockRecord> clockList = intelligenceDao.getClockList();
-		List<ClockRecord> newClock = new ArrayList<>();
+		/*List<ClockRecord> newClock = new ArrayList<>();
 		for (int i = 0; i < clockList.size(); i++) {
 			ClockRecord clockRecord = clockList.get(i);
 			if (clockRecord.getState() == null || "".equals(clockRecord.getState())) {
@@ -95,14 +95,14 @@ public class ClockService {
 			} else {
 				newClock.add(clockRecord);
 			}
-		}
+		}*/
 
-		return newClock;
+		return clockList;
 	}
 
 	public List<ClockRecord> getClockByWhere(String department, String user, String stratClock, String endClock,
-			String rule,String deviceId) {
-		return intelligenceDao.getClockByWhere(department, user, stratClock, endClock, rule,deviceId);
+			String rule, String deviceId) {
+		return intelligenceDao.getClockByWhere(department, user, stratClock, endClock, rule, deviceId);
 	}
 
 	public List<Employee> getEmployeeByCompany(String companyId) {
@@ -121,9 +121,10 @@ public class ClockService {
 		cloudDao.add(clockRecord);
 		return true;
 	}
-	
-	public Boolean clockTimeAppeal(String deviceId,String employeeId,String firstClock,String lastClock,String appealReason,String appealContent,String auditPersonId,String appealTime){
-		ClockAppeal clockAppeal=new ClockAppeal();
+
+	public Boolean clockTimeAppeal(String deviceId, String employeeId, String firstClock, String lastClock,
+			String appealReason, String appealContent, String auditPersonId, String appealTime) {
+		ClockAppeal clockAppeal = new ClockAppeal();
 		String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
 		clockAppeal.setId(id);
 		clockAppeal.setEmployeeId(employeeId);
@@ -137,28 +138,33 @@ public class ClockService {
 		cloudDao.add(clockAppeal);
 		return true;
 	}
-	
-	public Boolean deleteClockTimeAppeal(String appealId){
-		ClockAppeal clockAppeal=intelligenceDao.getClockAppealById(appealId);
+
+	public Boolean deleteClockTimeAppeal(String appealId) {
+		ClockAppeal clockAppeal = intelligenceDao.getClockAppealById(appealId);
 		cloudDao.delete(clockAppeal);
 		return true;
 	}
-	
-	public Boolean checkHandClock(String clockId,String result,String deviceId){
-		ClockAbnormal abnormal=intelligenceDao.getHandClockById(clockId);
-		if(result.equals("1")){
-			addClocknormal(deviceId,abnormal.getEmployeeId(), abnormal.getClockTime());
+
+	public Boolean checkHandClock(String clockId, String result, String deviceId) {
+		ClockAbnormal abnormal = intelligenceDao.getHandClockById(clockId);
+		if (result.equals("1")) {
+			try {
+				addClocknormal(deviceId, abnormal.getEmployeeId(), abnormal.getClockTime());
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		cloudDao.delete(abnormal);
 		return true;
 	}
-	
-	public List<ClockAppeal> getClockTimeAppeal(String employeeId){
+
+	public List<ClockAppeal> getClockTimeAppeal(String employeeId) {
 		return intelligenceDao.getClockTimeAppealByEmployee(employeeId);
-		
+
 	}
-	
-	public List<ClockAppeal> getClockAuditList(String auditId){
+
+	public List<ClockAppeal> getClockAuditList(String auditId) {
 		return intelligenceDao.getClockAuditList(auditId);
 	}
 
@@ -185,7 +191,8 @@ public class ClockService {
 		return true;
 	}
 
-	public Boolean addClockAbnormal(String deviceId,String employeeId, String time) throws InterruptedException, ExecutionException, TimeoutException {
+	public Boolean addClockAbnormal(String deviceId, String employeeId, String time)
+			throws InterruptedException, ExecutionException, TimeoutException {
 		SyncFuture<String> future = new SyncFuture<>();
 		ChannelHandlerContext ctx = DeviceService.getSocketMap(deviceId);
 		if (ctx == null) {
@@ -195,55 +202,56 @@ public class ClockService {
 		ServiceDistribution.handleJson110_1(deviceId, employeeId, time);
 		String result = future.get(6, TimeUnit.SECONDS);
 		FutureMap.removeFutureMap(ctx.channel().id().asLongText() + "110_2");
-		if(result!=null){
+		if (result != null) {
 			return true;
-		}
-		else{
+		} else {
 			return false;
 		}
 	}
-	
-	public Boolean addClocknormal(String deviceId,String id, String time) {
-		System.out.println(time);
+
+	public Boolean addClocknormal(String deviceId, String id, String time) throws ParseException {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		ClockRecord clockRecord = getClockByMc(id, time.substring(0, 10));
 		if (null == clockRecord) {
 			addClock(id, time, null);
+		} else if (sdf.parse(clockRecord.getStartClock()).getTime()>sdf.parse(time).getTime()) {
+			if(clockRecord.getEndClock()==null){
+				updateClock(String.valueOf(clockRecord.getCrId()), id, time, clockRecord.getStartClock());
+			}
+			else{
+				updateClock(String.valueOf(clockRecord.getCrId()), id, time, clockRecord.getEndClock());
+			}
 		} else {
 			int crId = clockRecord.getCrId();
 			String morningClock = clockRecord.getStartClock();
-			String nightClock=clockRecord.getEndClock();
-			if(nightClock==null){
+			String nightClock = clockRecord.getEndClock();
+			if (nightClock == null) {
 				updateClock(String.valueOf(crId), id, morningClock, time);
-			}
-			else{
-				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-				try {
-					Date timenew=sdf.parse(time);
-					Date timeold=sdf.parse(nightClock);
-					if(timenew.getTime()>timeold.getTime()){
-						updateClock(String.valueOf(crId), id, morningClock, time);
-					}
-				} catch (ParseException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+			} else {
+
+				Date timenew = sdf.parse(time);
+				Date timeold = sdf.parse(nightClock);
+				if (timenew.getTime() > timeold.getTime()) {
+					updateClock(String.valueOf(crId), id, morningClock, time);
 				}
+
 			}
 		}
-		ClockTime clockTime=new ClockTime();
+		ClockTime clockTime = new ClockTime();
 		clockTime.setClockTime(time);
 		clockTime.setDeviceId(deviceId);
 		clockTime.setEmployeeId(id);
 		cloudDao.add(clockTime);
 		return true;
-		
+
 	}
 
 	public List<ClockTime> getClockPhoto() {
 		return intelligenceDao.getClockPhoto();
 	}
-	
-	public void insertAbonormalClockPhoto(String employeeId,String path,String deviceId){
-		ClockAbnormal clockAbnormal=new ClockAbnormal();
+
+	public void insertAbonormalClockPhoto(String employeeId, String path, String deviceId) {
+		ClockAbnormal clockAbnormal = new ClockAbnormal();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
 		clockAbnormal.setId(id);
@@ -257,12 +265,12 @@ public class ClockService {
 	public List<ClockRecord> getClockByEmployee(String id) {
 		return intelligenceDao.getClockByEmployee(id);
 	}
-	
-	public List<ClockTime> getDetailClock(String employeeId,String time){
-		return intelligenceDao.getDetailClock(employeeId,time);
+
+	public List<ClockTime> getDetailClock(String employeeId, String time) {
+		return intelligenceDao.getDetailClock(employeeId, time);
 	}
-	
-	public List<ClockAbnormal> getHandClockList(String startTime,String endTime,String deviceId){
-		return intelligenceDao.getHandClockList(startTime, endTime,deviceId);
+
+	public List<ClockAbnormal> getHandClockList(String startTime, String endTime, String deviceId) {
+		return intelligenceDao.getHandClockList(startTime, endTime, deviceId);
 	}
 }

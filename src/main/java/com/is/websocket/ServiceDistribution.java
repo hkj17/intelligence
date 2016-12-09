@@ -8,6 +8,7 @@ import static com.is.constant.ParameterKeys.VISITOR_TEMPLATE;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -23,8 +24,10 @@ import com.is.map.ChannelNameToDeviceMap;
 import com.is.map.DeviceService;
 import com.is.map.PhotoMap;
 import com.is.model.CollectionPhoto;
+import com.is.model.Company;
 import com.is.service.AdminService;
 import com.is.service.ClockService;
+import com.is.service.CompanyService;
 import com.is.service.EmployeeService;
 import com.is.service.VisitorService;
 import com.is.util.Base64Utils;
@@ -66,10 +69,20 @@ public class ServiceDistribution implements ApplicationContextAware {
 		DeviceService.addSocketMap(devcieSn, socketChannel);
 		ChannelNameToDeviceMap.addDeviceMap(socketChannel.channel().id(), devcieSn);
 		
+		CompanyService companyService = (CompanyService) ServiceDistribution.getContext().getBean("companyService");
+		Company company=companyService.getCompanyInfo(devcieSn);
 		JSONObject responseCode = new JSONObject();
 		responseCode.put("type", 1);
 		responseCode.put("code", 2);
 		responseCode.put("deviceSn", devcieSn);
+		
+		responseCode.put("company", company.getCompanyName());
+		responseCode.put("address", company.getAddress());
+		responseCode.put("phone", company.getContact());
+		responseCode.put("Sign_in_time_A", company.getMorningTimeStart());
+		responseCode.put("Sign_in_time_B", company.getMorningTimeEnd());
+		responseCode.put("Sign_out_time_A", company.getNightTimeStart());
+		responseCode.put("Sign_out_time_B", company.getNightTimeEnd());
 		return responseCode;
 	}
 	
@@ -78,7 +91,12 @@ public class ServiceDistribution implements ApplicationContextAware {
 		String time=jsonObject.getString("time");
 		ClockService clockService = (ClockService) ServiceDistribution.getContext().getBean("clockService");
 		String deviceId=ChannelNameToDeviceMap.getDeviceMap(socketChannel.channel().id());
-		clockService.addClocknormal(deviceId, employeeId, time);
+		try {
+			clockService.addClocknormal(deviceId, employeeId, time);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		JSONObject responseCode = new JSONObject();
 		responseCode.put("type", 3);
@@ -700,12 +718,18 @@ public class ServiceDistribution implements ApplicationContextAware {
 		
 	}
 	
-	public static boolean handleJson115_1(String deviceId,String company) {
+	public static boolean handleJson115_1(String deviceId,String name, String address, String phone, String morningTimeStart, String morningTimeEnd, String nightTimeStart, String nightTimeEnd) {
 		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.put("type", 115);
 		jsonObject.put("code", 1);
-		jsonObject.put("company", company);
+		jsonObject.put("company", name);
+		jsonObject.put("address", address);
+		jsonObject.put("phone", phone);
+		jsonObject.put("Sign_in_time_A", morningTimeStart);
+		jsonObject.put("Sign_in_time_B", morningTimeEnd);
+		jsonObject.put("Sign_out_time_A", nightTimeStart);
+		jsonObject.put("Sign_out_time_B", nightTimeEnd);
 		byte[] result = SocketService.responseByte(jsonObject, "115", "1");
 		if (null != channel) {
 			excuteWrite(result, channel);

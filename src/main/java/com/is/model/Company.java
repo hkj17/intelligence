@@ -33,11 +33,17 @@ public class Company {
 	@Column(name = "admin_id")
 	private String adminId;
 	
-	@Column(name = "time_work")
-	private String timeWork;
+	@Column(name = "morning_time_start")
+	private String morningTimeStart;
 	
-	@Column(name = "time_rest")
-	private String timeRest;
+	@Column(name = "morning_time_end")
+	private String morningTimeEnd;
+	
+	@Column(name = "night_time_start")
+	private String nightTimeStart;
+	
+	@Column(name = "night_time_end")
+	private String nightTimeEnd;
 	
 	
 	public void setDeviceId(String deviceId) {
@@ -80,21 +86,39 @@ public class Company {
 	public void setAdminId(String adminId) {
 		this.adminId = adminId;
 	}
+
+	public String getMorningTimeStart() {
+		return morningTimeStart;
+	}
+
+	public void setMorningTimeStart(String morningTimeStart) {
+		this.morningTimeStart = morningTimeStart;
+	}
+
+	public String getMorningTimeEnd() {
+		return morningTimeEnd;
+	}
+
+	public void setMorningTimeEnd(String morningTimeEnd) {
+		this.morningTimeEnd = morningTimeEnd;
+	}
+
+	public String getNightTimeStart() {
+		return nightTimeStart;
+	}
+
+	public void setNightTimeStart(String nightTimeStart) {
+		this.nightTimeStart = nightTimeStart;
+	}
+
+	public String getNightTimeEnd() {
+		return nightTimeEnd;
+	}
+
+	public void setNightTimeEnd(String nightTimeEnd) {
+		this.nightTimeEnd = nightTimeEnd;
+	}
 	
-	
-	
-	public String getTimeWork() {
-		return timeWork;
-	}
-	public void setTimeWork(String timeWork) {
-		this.timeWork = timeWork;
-	}
-	public String getTimeRest() {
-		return timeRest;
-	}
-	public void setTimeRest(String timeRest) {
-		this.timeRest = timeRest;
-	}
 	
 	
 

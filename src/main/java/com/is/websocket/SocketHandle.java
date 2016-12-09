@@ -21,7 +21,7 @@ public class SocketHandle implements ApplicationListener<ContextRefreshedEvent>{
 	
 
 	private static final String IP = "120.26.60.164";
-	//private static final String IP = "127.0.0.1";
+	//private static final String IP = "192.168.223.31";
 
 	//protected static final int BIZGROUPSIZE = Runtime.getRuntime().availableProcessors() * 2; // 榛樿
 

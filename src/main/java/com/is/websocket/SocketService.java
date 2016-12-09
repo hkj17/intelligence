@@ -221,7 +221,7 @@ public class SocketService {
 		else if (type.equals("112") && code.equals("2")) {
 			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.channel().id().asLongText()+"112_2");
 			 if(future!=null){
-				 String voice=jsonObject.getString("voice");
+				 String voice=jsonObject.getString("volume");
 				 future.setResponse(voice);
 			 }
 		}
