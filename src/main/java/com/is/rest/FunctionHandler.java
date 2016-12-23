@@ -5,20 +5,26 @@ import static com.is.constant.ParameterKeys.ADVERTISE_PHOTO;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +33,7 @@ import com.is.map.DeviceService;
 import com.is.map.FutureMap;
 import com.is.model.VersionUpdate;
 import com.is.service.EmployeeService;
+import com.is.service.VisitorService;
 import com.is.util.BusinessHelper;
 import com.is.util.LoginRequired;
 import com.is.util.ResponseFactory;
@@ -46,6 +53,9 @@ public class FunctionHandler {
 	
 	@Autowired
 	private EmployeeService employeeService;
+	
+	@Autowired
+	private VisitorService visitorService;
 	
 	@POST
 	@Path("/sendMsg")
@@ -142,10 +152,10 @@ public class FunctionHandler {
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, result);
 	}
 	
-	@POST
+	@GET
 	@Path("/getAdvertisementPhoto")
 	@LoginRequired
-	public Response getAdvertisementPhoto(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws IOException{
+	public Response getAdvertisementPhoto(@Context HttpServletRequest request){
 		String deviceId=(String) request.getSession().getAttribute("deviceSn");
 		File file=new File(ADVERTISE_PHOTO+deviceId);
 		List<String> list = new ArrayList<>();
@@ -163,7 +173,70 @@ public class FunctionHandler {
 			}
 		}
 		else{
+			file.mkdir();
 			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
+		}
+	}
+	
+	@POST
+	@Path("/deleteAdvertisementPhoto")
+	@LoginRequired
+	public Response deleteAdvertisementPhoto(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws IOException, InterruptedException, ExecutionException, TimeoutException{
+		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		String path=requestMap.get("path");
+		
+		SyncFuture<String> future = new SyncFuture<>();
+		ChannelHandlerContext ctx = DeviceService.getSocketMap(deviceId);
+		if (ctx == null) {
+			return null;
+		}
+		FutureMap.addFuture(ctx.channel().id().asLongText() + "111_22", future);
+		ServiceDistribution.handleJson111_21(deviceId,path);
+		String result = future.get(6, TimeUnit.SECONDS);
+		FutureMap.removeFutureMap(ctx.channel().id().asLongText() + "111_22");
+		if(result!=null){
+			File file=new File(path);
+			if(file.exists()){
+				file.delete();
+				return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
+			}
+			else{
+				return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, "can't find this photo!");
+			}
+		}
+		else{
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, "device is offline");
+		}
+		
+	}
+	
+	@POST
+	@Path("/insertAdvertisementPhoto")
+	@LoginRequired
+	@Consumes("multipart/form-data")
+	public Response insertAdvertisementPhoto(@Context HttpServletRequest request,@FormDataParam("photo") InputStream uploadedInputStream,
+			@FormDataParam("photo") FormDataContentDisposition fileDetail) throws IOException, InterruptedException, ExecutionException, TimeoutException{
+		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
+		String path=ADVERTISE_PHOTO+deviceId+"/"+id+".jpg";
+		visitorService.rememPhoto(path, uploadedInputStream);
+		SyncFuture<String> future = new SyncFuture<>();
+		ChannelHandlerContext ctx = DeviceService.getSocketMap(deviceId);
+		if (ctx == null) {
+			return null;
+		}
+		FutureMap.addFuture(ctx.channel().id().asLongText() + "111_12", future);
+		ServiceDistribution.handleJson111_11(deviceId,path,id);
+		String result = future.get(6, TimeUnit.SECONDS);
+		FutureMap.removeFutureMap(ctx.channel().id().asLongText() + "111_12");
+		if(result!=null){
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);	
+		}
+		else{
+			File file=new File(path);
+			file.delete();
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, "device is offline");		
 		}
 	}
 	

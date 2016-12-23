@@ -769,4 +769,41 @@ public class ServiceDistribution implements ApplicationContextAware {
 		socketChannel.write(encoded);
 		socketChannel.flush();
 	}
+
+	public static Boolean handleJson111_11(String deviceId, String path,String id) {
+		// TODO Auto-generated method stub
+		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("type", 111);
+		jsonObject.put("code", 11);
+		String adPic=Base64Utils.GetImageStr(path);
+		jsonObject.put("picId", id);
+		jsonObject.put("adPic", adPic);
+		byte[] result = SocketService.responseByte(jsonObject, "111", "11");
+		if (null != channel) {
+			excuteWrite(result, channel);
+			return true;
+		} 
+		else {
+			return false;
+		}
+	}
+
+	public static Boolean handleJson111_21(String deviceId, String path) {
+		// TODO Auto-generated method stub
+		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("type", 111);
+		jsonObject.put("code", 21);
+		String id=path.substring(path.lastIndexOf("/")+1, path.lastIndexOf("."));
+		jsonObject.put("picId", id);
+		byte[] result = SocketService.responseByte(jsonObject, "111", "21");
+		if (null != channel) {
+			excuteWrite(result, channel);
+			return true;
+		} 
+		else {
+			return false;
+		}
+	}
 }

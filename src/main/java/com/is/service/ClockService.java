@@ -22,6 +22,7 @@ import com.is.model.ClockAbnormal;
 import com.is.model.ClockAppeal;
 import com.is.model.ClockTime;
 import com.is.model.ClockRecord;
+import com.is.model.ClockRecordSelect;
 import com.is.model.Company;
 import com.is.model.Employee;
 import com.is.system.dao.CloudDao;
@@ -100,7 +101,7 @@ public class ClockService {
 		return clockList;
 	}
 
-	public List<ClockRecord> getClockByWhere(String department, String user, String stratClock, String endClock,
+	public List<ClockRecordSelect> getClockByWhere(String department, String user, String stratClock, String endClock,
 			String rule, String deviceId) {
 		return intelligenceDao.getClockByWhere(department, user, stratClock, endClock, rule, deviceId);
 	}

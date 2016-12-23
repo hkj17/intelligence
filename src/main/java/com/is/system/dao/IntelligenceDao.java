@@ -10,6 +10,7 @@ import com.is.model.ClockAppeal;
 import com.is.model.ClockTime;
 import com.is.model.CollectionPhoto;
 import com.is.model.ClockRecord;
+import com.is.model.ClockRecordSelect;
 import com.is.model.Company;
 import com.is.model.Department;
 import com.is.model.Employee;
@@ -34,7 +35,7 @@ public interface IntelligenceDao {
 	
 	public List<ClockRecord> getClockList();
 	
-	public List<ClockRecord> getClockByWhere(String department,String user,String stratClock,String endClock,String rule,String deviceId);
+	public List<ClockRecordSelect> getClockByWhere(String department,String user,String stratClock,String endClock,String rule,String deviceId);
 	
 	public List<Notification> getNotifyList();
 	

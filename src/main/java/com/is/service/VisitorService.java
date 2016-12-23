@@ -192,7 +192,9 @@ public class VisitorService {
 			visitorInfo.setTelphone(telphone);
 			visitorInfo.setEmail(email);
 			visitorInfo.setImportance(Integer.parseInt(importance));
-			visitorInfo.setBirth(birth);
+			if (birth != null && !"".equals(birth)) {
+				visitorInfo.setBirth(birth);
+			}
 			cloudDao.update(visitorInfo);
 			return true;
 		}

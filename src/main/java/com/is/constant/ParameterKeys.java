@@ -45,7 +45,7 @@ public class ParameterKeys {
 	//public static final String DEVICE_ID="deviceId";
 	public static final String FACE_PHOTO_PATH="/cloudweb/server/tomcat_intel/webapps/face_photo/";
 	//public static final String FACE_PHOTO_PATH="E:\\complete\\";
-	public static final String ADVERTISE_PHOTO="/cloudweb/server/tomcat_intel/webapps/template_photo/";
+	public static final String ADVERTISE_PHOTO="/cloudweb/server/tomcat_intel/webapps/template_photo/advertise_photo/";
 	public static final String CLOCK_PHOTO_PATH="/cloudweb/server/tomcat_intel/webapps/clock_img/";
 	public static final String EMPLOYEE_TEMPLATE="/cloudweb/server/tomcat_intel/webapps/template_photo/employee_template/";
 	public static final String VISITOR_TEMPLATE="/cloudweb/server/tomcat_intel/webapps/template_photo/visitor_template/";

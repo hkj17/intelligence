@@ -14,9 +14,9 @@ import org.hibernate.annotations.NotFoundAction;
 
 
 
-@Entity(name = "ClockRecord")
+@Entity(name = "ClockRecordSelect")
 @Table(name = "clockrecord")
-public class ClockRecord {
+public class ClockRecordSelect {
 	
 	@Id
 	@Column(name = "cr_id")
@@ -35,13 +35,10 @@ public class ClockRecord {
 	@Column(name = "state")
 	private String state;
 	
-	@Transient
 	private String employeeName;
 	
-	@Transient
 	private String jobId;
 	
-	@Transient
 	private String department;
 	
 	public void setEmployeeName(String employeeName) {

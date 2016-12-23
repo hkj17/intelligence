@@ -91,7 +91,11 @@ public class test {
 		   }  
 	
 	public static void main(String[] args) throws UnsupportedEncodingException {
-		 KafkaProducer producerThread = new KafkaProducer(KafkaProperties.topic,"123");
-	     producerThread.start();
+		/* KafkaProducer producerThread = new KafkaProducer(KafkaProperties.topic,"123");
+	     producerThread.start();*/
+		File file=new File("D:\\IotCloud\\321");
+		if(file.isDirectory()){
+			System.out.println(123);
+		}
 	}
 }

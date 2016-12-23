@@ -21,6 +21,7 @@ import com.is.model.Appointment;
 import com.is.model.ClockAbnormal;
 import com.is.model.ClockAppeal;
 import com.is.model.ClockRecord;
+import com.is.model.ClockRecordSelect;
 import com.is.model.ClockTime;
 import com.is.model.CollectionPhoto;
 import com.is.model.Company;
@@ -83,14 +84,14 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 	}
 
 	@Override
-	public List<ClockRecord> getClockByWhere(String department, String user, String startClock, String endClock,
+	public List<ClockRecordSelect> getClockByWhere(String department, String user, String startClock, String endClock,
 			String rule, String deviceId) {
-		String sql = "select clock,b.employeeName,b.jobId,b.department.department from ClockRecord clock,Employee b where clock.employeeId=b.employeeId and b.deviceId='"
+		String sql = "select c.*,b.employee_name as employeeName,b.job_id as jobId,d.department as department from clockrecord c LEFT JOIN employee b on c.employee_id=b.employee_id LEFT JOIN department d on d.id=b.department_id where b.device_id='"
 				+ deviceId + "'";
 		Map<Integer, String> map = new HashMap<>();
 		int i = 0;
 		if (user != null && !"".equals(user)) {
-			sql = sql + " and (b.pingyin like ? or b.pingyin like ? or b.employeeName like ?)";
+			sql = sql + " and (b.pingyin like ? or b.pingyin like ? or b.employee_name like ?)";
 			map.put(i, user + '%');
 			map.put(i + 1, '%' + "," + user + '%');
 			map.put(i + 2, '%' + user + '%');
@@ -98,30 +99,30 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 		}
 		if (startClock != null && !"".equals(startClock)) {
 			startClock = startClock + " 00:00:00";
-			sql += " and clock.startClock>=?";
+			sql += " and c.start_clock>=?";
 			map.put(i, startClock);
 			i = i + 1;
 		}
 		if (department != null && !"".equals(department)) {
-			sql += " and b.department.id=?";
+			sql += " and b.department_id=?";
 			map.put(i, department);
 			i = i + 1;
 		}
 		if (endClock != null && !"".equals(endClock)) {
 			endClock = endClock + " 23:59:59";
-			sql += " and clock.startClock<=?";
+			sql += " and c.start_clock<=?";
 			map.put(i, endClock);
 		}
 		if ("1".equals(rule)) {
-			sql += " and clock.state!=0";
+			sql += " and c.state!=0";
 		}
-		sql+=" order by clock.startClock";
+		sql+=" order by c.start_clock";
 
-		Query query = getSession().createQuery(sql);
+		Query query = getSession().createSQLQuery(sql);
 		for (int p = 0; p < map.size(); p++) {
 			query.setParameter(p, map.get(p));
 		}
-		return query.list();
+		return ((SQLQuery) query).addEntity(ClockRecordSelect.class).list();
 	}
 
 	@Override

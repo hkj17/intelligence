@@ -37,6 +37,7 @@ import com.is.constant.ResponseCode;
 import com.is.model.ClockAbnormal;
 import com.is.model.ClockAppeal;
 import com.is.model.ClockRecord;
+import com.is.model.ClockRecordSelect;
 import com.is.model.ClockTime;
 import com.is.model.Employee;
 import com.is.service.ClockService;
@@ -69,7 +70,7 @@ public class ClockHandle {
 	public Response getClockByWhere(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		String deviceId=(String) request.getSession().getAttribute("deviceSn");
-		List<ClockRecord> clockRecords = clockService.getClockByWhere(requestMap.get(DEPARTMENT),requestMap.get(NAME), requestMap.get(START_TIME),
+		List<ClockRecordSelect> clockRecords = clockService.getClockByWhere(requestMap.get(DEPARTMENT),requestMap.get(NAME), requestMap.get(START_TIME),
 				requestMap.get(END_TIME), requestMap.get(RULE),deviceId);
 		if (!clockRecords.equals(null)) {
 			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, clockRecords);
@@ -151,6 +152,19 @@ public class ClockHandle {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		String deviceId=(String) request.getSession().getAttribute("deviceSn");
 		boolean state = clockService.checkHandClock(requestMap.get("clockId"),requestMap.get("result"),deviceId);
+		if (state) {
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
+		} else {
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.REQUEST_FAIL, null);
+		}
+	}
+	
+	@POST
+	@Path("/test")
+	@LoginRequired
+	public Response test(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		boolean state = clockService.addClock(requestMap.get("employeeId"),requestMap.get("morningClock"),requestMap.get("nightClock"));
 		if (state) {
 			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
 		} else {

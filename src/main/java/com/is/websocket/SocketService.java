@@ -218,6 +218,18 @@ public class SocketService {
 				 future.setResponse("114_2");
 			 }
 		}
+		else if (type.equals("111") && code.equals("12")) {
+			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.channel().id().asLongText()+"111_12");
+			 if(future!=null){
+				 future.setResponse("111_12");
+			 }
+		}
+		else if (type.equals("111") && code.equals("22")) {
+			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.channel().id().asLongText()+"111_22");
+			 if(future!=null){
+				 future.setResponse("111_22");
+			 }
+		}
 		else if (type.equals("112") && code.equals("2")) {
 			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.channel().id().asLongText()+"112_2");
 			 if(future!=null){
@@ -276,6 +288,9 @@ public class SocketService {
 		}
 		if(jsonObject.containsKey("templatePic")){
 			jsonObject.remove("templatePic");
+		}
+		if(jsonObject.containsKey("adPic")){
+			jsonObject.remove("adPic");
 		}
 		logger.info(jsonObject);
 		return result;
