@@ -544,6 +544,7 @@ public class AdminService {
 			employee.setEmployeeId(employeeId);
 			employee.setAdmin(admin);
 			employee.setEmployeeName(username);
+			employee.setDeviceId(deviceId);
 			cloudDao.add(employee);
 			return true;
 

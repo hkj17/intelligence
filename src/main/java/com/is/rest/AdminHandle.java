@@ -330,7 +330,6 @@ public class AdminHandle {
 	}
 	
 	@POST
-	@LoginRequired
 	@Path("/adminManage")
 	public Response adminManage(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams){
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);

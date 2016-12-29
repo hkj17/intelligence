@@ -642,4 +642,10 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 		return (Employee) cloudDao.getByHql(Hql.GET_EMPLOYEE_BY_PHOTO_PATH, path);
 	}
 
+	@Override
+	public List<Appointment> getAppointmentByVisitor(String visitorId) {
+		// TODO Auto-generated method stub
+		return cloudDao.findByHql(Hql.GET_APPOINTMENT_BY_VISITOR, visitorId);
+	}
+
 }

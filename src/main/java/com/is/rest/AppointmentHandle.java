@@ -53,6 +53,15 @@ public class AppointmentHandle {
 	
 	@POST
 	@LoginRequired
+	@Path("/getAppointmentByVisitor")
+	public Response getAppointmentByVisitor(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		List<Appointment> list=appointmentService.getAppointmentByVisitor(requestMap.get("visitorInfoId"));
+		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, list);
+	}
+	
+	@POST
+	@LoginRequired
 	@Path("/editAppointment")
 	public Response editAppointment(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);

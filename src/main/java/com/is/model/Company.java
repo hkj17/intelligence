@@ -1,18 +1,23 @@
 package com.is.model;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity(name = "Company")
 @Table(name = "company")
-public class Company {
+public class Company implements Serializable{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8277558290253034732L;
+
 	@Id
 	@Column(name = "company_id")
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -106,4 +106,9 @@ public class AppointmentService {
 			return false;
 		}
 	}
+
+	public List<Appointment> getAppointmentByVisitor(String visitorId) {
+		// TODO Auto-generated method stub
+		return intelligenceDao.getAppointmentByVisitor(visitorId);
+	}
 }

@@ -126,5 +126,7 @@ public interface IntelligenceDao {
 	public VersionUpdate autoUpdate();
 	
 	public Employee getEmployeeByPhotoPath(String path);
+
+	public List<Appointment> getAppointmentByVisitor(String visitorId);
 	
 }

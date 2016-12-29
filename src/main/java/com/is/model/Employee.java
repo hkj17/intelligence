@@ -1,5 +1,7 @@
 package com.is.model;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -7,13 +9,21 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.JoinColumnOrFormula;
+import org.hibernate.annotations.JoinColumnsOrFormulas;
+import org.hibernate.annotations.JoinFormula;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 
 @Entity(name = "Employee")
 @Table(name = "employee")
-public class Employee {
+public class Employee implements Serializable {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8452577535288156957L;
+
 	@Id
 	@Column(name = "employee_id")
 	private String employeeId;
@@ -43,11 +53,6 @@ public class Employee {
 	@JoinColumn(name = "admin_id")
 	@NotFound(action=NotFoundAction.IGNORE) 
 	private Admin admin;
-	
-	@ManyToOne
-	@JoinColumn(name = "company_id")
-	@NotFound(action=NotFoundAction.IGNORE) 
-	private Company company;
 
 	
 	@Column(name = "content")
@@ -88,6 +93,11 @@ public class Employee {
 	@JoinColumn(name="department_id")
 	@NotFound(action=NotFoundAction.IGNORE)  
 	private Department department;
+	
+	@ManyToOne
+	@NotFound(action=NotFoundAction.IGNORE)
+	@JoinColumn(name = "device_id", referencedColumnName = "device_id", nullable = true, insertable = false, updatable = false)
+	private Company company;
 	
 	public void setTemplatePath(String templatePath) {
 		this.templatePath = templatePath;

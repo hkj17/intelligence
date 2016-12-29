@@ -18,11 +18,6 @@ function confirm(){
 	var deviceSn=$("#deviceSn").val();
 	var username=$("#username").val();
 	var password=$("#password").val();
-	var company=$("#company").val();
-	var address=$("#address").val();
-	var contact=$("#contact").val();
-	var startTime=$("#startTime").val();
-	var endTime=$("#endTime").val();
 	
 	
 	$.ajax({
@@ -32,12 +27,7 @@ function confirm(){
 		"data" : {
 			"deviceSn" : deviceSn,
 			"username" : username,
-			"password" : password,
-			"company" : company,
-			"address" : address,
-			"contact" : contact,
-			"startTime" : startTime,
-			"endTime":endTime
+			"password" : password
 		},
 		success : function(data) {
 			if(data.result_code==0){
@@ -86,20 +76,7 @@ function checkname(){
 <label>密码:</label>
 <input id="password" type="password" style="margin-top: 10px;"/><br>
 
-<label>公司名称:</label>
-<input id="company" type="text" style="margin-top: 10px;"/><br>
 
-<label>地址:</label>
-<input id="address" type="text" style="margin-top: 10px;"/><br>
-
-<label>联系方式:</label>
-<input id="contact" type="text" style="margin-top: 10px;"/><br>
-
-<label>上班时间:</label>
-<input id="startTime" type="text" style="margin-top: 10px;" onClick="WdatePicker({dateFmt:'HH:mm:ss'})" /><br>
-
-<label>下班时间:</label>
-<input id="endTime" type="text" style="margin-top: 10px;" onClick="WdatePicker({dateFmt:'HH:mm:ss'})" /><br>
 
 <input type="button" value="保存" onclick="confirm()" style="margin-top: 30px;"/>
 </div>

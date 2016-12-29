@@ -75,14 +75,24 @@ public class ServiceDistribution implements ApplicationContextAware {
 		responseCode.put("type", 1);
 		responseCode.put("code", 2);
 		responseCode.put("deviceSn", devcieSn);
-		
-		responseCode.put("company", company.getCompanyName());
-		responseCode.put("address", company.getAddress());
-		responseCode.put("phone", company.getContact());
-		responseCode.put("Sign_in_time_A", company.getMorningTimeStart());
-		responseCode.put("Sign_in_time_B", company.getMorningTimeEnd());
-		responseCode.put("Sign_out_time_A", company.getNightTimeStart());
-		responseCode.put("Sign_out_time_B", company.getNightTimeEnd());
+		if(company!=null){
+			responseCode.put("company", company.getCompanyName());
+			responseCode.put("address", company.getAddress());
+			responseCode.put("phone", company.getContact());
+			responseCode.put("Sign_in_time_A", company.getMorningTimeStart());
+			responseCode.put("Sign_in_time_B", company.getMorningTimeEnd());
+			responseCode.put("Sign_out_time_A", company.getNightTimeStart());
+			responseCode.put("Sign_out_time_B", company.getNightTimeEnd());
+		}
+		else{
+			responseCode.put("company", "");
+			responseCode.put("address", "");
+			responseCode.put("phone", "");
+			responseCode.put("Sign_in_time_A", "");
+			responseCode.put("Sign_in_time_B", "");
+			responseCode.put("Sign_out_time_A", "");
+			responseCode.put("Sign_out_time_B", "");
+		}
 		return responseCode;
 	}
 	
