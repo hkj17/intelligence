@@ -8,6 +8,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
@@ -41,7 +42,16 @@ public class Appointment {
 	@Column(name = "create_at")
 	private Date createAt;
 	
+	@Transient
+	private String employeeName;
 	
+	public String getEmployeeName() {
+		return employeeName;
+	}
+	
+	public void setEmployeeName(String employeeName) {
+		this.employeeName = employeeName;
+	}
 
 	public String getCreateBy() {
 		return createBy;

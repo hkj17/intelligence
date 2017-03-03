@@ -8,21 +8,24 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.xml.bind.annotation.XmlRootElement;
 
-import org.hibernate.annotations.JoinColumnOrFormula;
-import org.hibernate.annotations.JoinColumnsOrFormulas;
-import org.hibernate.annotations.JoinFormula;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 
 @Entity(name = "Employee")
 @Table(name = "employee")
+@XmlRootElement
 public class Employee implements Serializable {
 	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -8452577535288156957L;
+	
+	public Employee() {
+		// TODO Auto-generated constructor stub
+	}
 
 	@Id
 	@Column(name = "employee_id")
@@ -96,7 +99,7 @@ public class Employee implements Serializable {
 	
 	@ManyToOne
 	@NotFound(action=NotFoundAction.IGNORE)
-	@JoinColumn(name = "device_id", referencedColumnName = "device_id", nullable = true, insertable = false, updatable = false)
+	@JoinColumn(name = "company_id")
 	private Company company;
 	
 	public void setTemplatePath(String templatePath) {

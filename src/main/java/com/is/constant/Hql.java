@@ -74,7 +74,7 @@ public class Hql {
 	
 	public static final String GET_APPOINTMENT_BY_USER="from Appointment where createBy=?";
 	
-	public static final String GET_APPOINTMENT_BY_VISITOR="from Appointment where info.id=?";
+	public static final String GET_APPOINTMENT_BY_VISITOR="select a,b.employeeName from Appointment a,Employee b where a.createBy=b.employeeId and a.info.id=?";
 	
 	public static final String GET_EMPLOYEE_BY_PHOTO_PATH="from Employee where photoPath=?";
 }

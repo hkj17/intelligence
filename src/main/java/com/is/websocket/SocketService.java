@@ -101,6 +101,12 @@ public class SocketService {
 			byte[] answer=responseByte(responseCode,anType,anCode);
 			excuteWrite(answer,socketChannel);
 		}
+		else if (type.equals("7") && code.equals("1")) {
+			ServiceDistribution.handleJson7_1(jsonObject,socketChannel);
+		}
+		else if (type.equals("7") && code.equals("11")) {
+			ServiceDistribution.handleJson7_11(jsonObject,socketChannel);
+		}
 		else if (type.equals("8") && code.equals("1")) {
 			responseCode=ServiceDistribution.handleJson8_1(jsonObject,socketChannel);
 			anType="8";
@@ -111,6 +117,34 @@ public class SocketService {
 		else if (type.equals("8") && code.equals("11")) {
 			responseCode=ServiceDistribution.handleJson8_11(jsonObject,socketChannel);
 			anType="8";
+			anCode="12";
+			byte[] answer=responseByte(responseCode,anType,anCode);
+			excuteWrite(answer,socketChannel);
+		}
+		else if (type.equals("9") && code.equals("1")) {
+			responseCode=ServiceDistribution.handleJson9_1(jsonObject,socketChannel);
+			anType="9";
+			anCode="2";
+			byte[] answer=responseByte(responseCode,anType,anCode);
+			excuteWrite(answer,socketChannel);
+		}
+		else if (type.equals("9") && code.equals("11")) {
+			responseCode=ServiceDistribution.handleJson9_11(jsonObject,socketChannel);
+			anType="9";
+			anCode="12";
+			byte[] answer=responseByte(responseCode,anType,anCode);
+			excuteWrite(answer,socketChannel);
+		}
+		else if (type.equals("10") && code.equals("1")) {
+			responseCode=ServiceDistribution.handleJson10_1(jsonObject,socketChannel);
+			anType="10";
+			anCode="2";
+			byte[] answer=responseByte(responseCode,anType,anCode);
+			excuteWrite(answer,socketChannel);
+		}
+		else if (type.equals("10") && code.equals("11")) {
+			responseCode=ServiceDistribution.handleJson10_11(jsonObject,socketChannel);
+			anType="10";
 			anCode="12";
 			byte[] answer=responseByte(responseCode,anType,anCode);
 			excuteWrite(answer,socketChannel);

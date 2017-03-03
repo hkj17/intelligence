@@ -51,4 +51,6 @@ public class ParameterKeys {
 	public static final String VISITOR_TEMPLATE="/cloudweb/server/tomcat_intel/webapps/template_photo/visitor_template/";
 	public static final String VISITOR_FACE="/cloudweb/server/tomcat_intel/webapps/template_photo/visitor_face/";
 	public static final String EMPLOYEE_FACE="/cloudweb/server/tomcat_intel/webapps/template_photo/employee_face/";
+	
+	public static final String XML="/cloudweb/server/tomcat_intel/webapps/xml/";
 }
