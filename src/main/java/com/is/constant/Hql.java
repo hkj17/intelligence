@@ -3,7 +3,7 @@ package com.is.constant;
 public class Hql {
 	public static final String GET_USER_BY_NAME = "from Admin a where a.username = ?";
 	
-	public static final String GET_EMPLOYEE_LIST = "from Employee em where em.deviceId=?";
+	public static final String GET_EMPLOYEE_LIST = "from Employee  where company.companyId=?";
 	
 	public static final String GET_COMPANY_BY_ID = "from Company a where a.companyId = ?";
 	
@@ -29,7 +29,7 @@ public class Hql {
 	
 	//public static final String GET_CLOCK_BY_NC="from ClockRecord cr where cr.employee.employeeId=? and cr.endClock like ?%";
 	
-	public static final String GET_EMPLOYEE_BY_NAME="from Employee e where e.employeeName=? and e.deviceId=?";
+	public static final String GET_EMPLOYEE_BY_NAME="from Employee e where e.employeeName=? and e.company.companyId=?";
 	
 	public static final String GET_CLOCK_PHOTO="from ClockPhoto cp";
 	
@@ -47,7 +47,7 @@ public class Hql {
 	
 	public static final String GET_MESSAGE_BY_EMPLOYEE_ID="from Message where employeeId=?";
 	
-	public static final String GET_COMPANY_BY_DEVICE_ID="from Company a where a.deviceId = ?";
+	//public static final String GET_COMPANY_BY_DEVICE_ID="from Company a,Device b where a.deviceId = ?";
 	
 	public static final String GET_VISITOR_BY_ID="from Visitor where id=?";
 	
@@ -64,9 +64,9 @@ public class Hql {
 	public static final String GET_CLOCK_ABNORMAL_BY_ID="from ClockAbnormal where id=?";
 	//public static final String GET_AUDIT_PERSON_LIST="select employeeId,employeeName,admin.auditAuth,admin.deviceId from Employee where admin.auditAuth=1 and admin.deviceId=?";
 
-	public static final String GET_VISITOR_INFO_LIST="from VisitorInfo where deviceId=?";
+	public static final String GET_VISITOR_INFO_LIST="from VisitorInfo where companyId=?";
 	
-	public static final String GET_VISITOR_INFO_BY_NAME="from VisitorInfo where deviceId=? and name=?";
+	public static final String GET_VISITOR_INFO_BY_NAME="from VisitorInfo where companyId=? and name=?";
 	
 	public static final String GET_COLLECTION_PHOTO_BY_ID="from CollectionPhoto where id=?";
 	 

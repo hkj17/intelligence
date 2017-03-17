@@ -13,8 +13,8 @@ public class VisitorInfo {
 	@Column(name = "id")
 	private String id;
 	
-	@Column(name = "device_id")
-	private String deviceId;
+	@Column(name = "company_id")
+	private String companyId;
 	
 	@Column(name = "name")
 	private String name;
@@ -46,6 +46,17 @@ public class VisitorInfo {
 	@Column(name = "template_path")
 	private String templatePath;
 	
+	@Column(name = "visitor_fold")
+	private String visitorFold;
+	
+	public void setVisitorFold(String visitorFold) {
+		this.visitorFold = visitorFold;
+	}
+	
+	public String getVisitorFold() {
+		return visitorFold;
+	}
+	
 	public String getTemplatePath() {
 		return templatePath;
 	}
@@ -54,12 +65,12 @@ public class VisitorInfo {
 		this.templatePath = templatePath;
 	}
 
-	public String getDeviceId() {
-		return deviceId;
+	public void setCompanyId(String companyId) {
+		this.companyId = companyId;
 	}
-
-	public void setDeviceId(String deviceId) {
-		this.deviceId = deviceId;
+	
+	public String getCompanyId() {
+		return companyId;
 	}
 
 	public int getImportance() {

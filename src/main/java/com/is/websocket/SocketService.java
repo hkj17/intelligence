@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.apache.log4j.Logger;
 
+import com.is.map.EmployeeFoldMap;
 import com.is.map.FutureMap;
 
 import io.netty.buffer.ByteBuf;
@@ -108,11 +109,17 @@ public class SocketService {
 			ServiceDistribution.handleJson7_11(jsonObject,socketChannel);
 		}
 		else if (type.equals("8") && code.equals("1")) {
-			responseCode=ServiceDistribution.handleJson8_1(jsonObject,socketChannel);
-			anType="8";
-			anCode="2";
-			byte[] answer=responseByte(responseCode,anType,anCode);
-			excuteWrite(answer,socketChannel);
+			String isEnd=jsonObject.getString("isEnd");
+			if("0".equals(isEnd)){
+				responseCode=ServiceDistribution.handleJson8_1(jsonObject,socketChannel);
+				anType="8";
+				anCode="2";
+				byte[] answer=responseByte(responseCode,anType,anCode);
+				excuteWrite(answer,socketChannel);
+			}
+			else{
+				ServiceDistribution.SyncEmployee(jsonObject);
+			}
 		}
 		else if (type.equals("8") && code.equals("11")) {
 			responseCode=ServiceDistribution.handleJson8_11(jsonObject,socketChannel);
@@ -171,10 +178,13 @@ public class SocketService {
 		}
 		else if (type.equals("103") && code.equals("2")) {
 			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.channel().id().asLongText()+"103_2");
+			 String employeeId=null;
 			 if(future!=null){
+				 employeeId=jsonObject.getString("employeeId");
+				 String employeeFold = jsonObject.getString("employeeFold");
+				 EmployeeFoldMap.setData(employeeId, employeeFold);	 
 				 future.setResponse("103_2");
 			 }
-			 String employeeId=jsonObject.getString("employeeId");
 			 ServiceDistribution.handleJson109_1(employeeId, socketChannel);
 		}
 		else if (type.equals("103") && code.equals("12")) {
@@ -184,6 +194,7 @@ public class SocketService {
 			 }
 			 String visitorId=jsonObject.getString("visitorId");
 			 ServiceDistribution.handleJson109_11(visitorId, socketChannel);
+			 ServiceDistribution.handleJson103_12(jsonObject,socketChannel);
 		}
 		else if (type.equals("106") && code.equals("2")) {
 			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.channel().id().asLongText()+"106_2");
@@ -283,12 +294,12 @@ public class SocketService {
 				 future.setResponse("113_2");
 			 }
 		}
-		else if (type.equals("115") && code.equals("2")) {
+		/*else if (type.equals("115") && code.equals("2")) {
 			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.channel().id().asLongText()+"115_2");
 			 if(future!=null){
 				 future.setResponse("115_2");
 			 }
-		}
+		}*/
 		else {
 			excuteWrite("error type or code!".getBytes(),socketChannel);
 		}
@@ -317,8 +328,12 @@ public class SocketService {
 		//json报文
 		System.arraycopy(json, 0, result, 36, len);
 		
+		//打印的日志去掉base64字符串
 		if(jsonObject.containsKey("photo")){
 			jsonObject.remove("photo");
+		}
+		if(jsonObject.containsKey("potrait")){
+			jsonObject.remove("potrait");
 		}
 		if(jsonObject.containsKey("templatePic")){
 			jsonObject.remove("templatePic");

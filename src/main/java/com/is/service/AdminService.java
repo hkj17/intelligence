@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.is.constant.ResponseCode;
 import com.is.map.DeviceService;
+import com.is.map.EmployeeFoldMap;
 import com.is.map.FutureMap;
 import com.is.map.PhotoMap;
 import com.is.model.Admin;
@@ -29,6 +30,7 @@ import com.is.model.Employee;
 import com.is.model.Visitor;
 import com.is.system.dao.CloudDao;
 import com.is.system.dao.IntelligenceDao;
+import com.is.util.Base64Utils;
 import com.is.util.PasswordUtil;
 import com.is.websocket.AddFuture;
 import com.is.websocket.CheckResponse;
@@ -37,6 +39,7 @@ import com.is.websocket.SyncFuture;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
+import net.sf.json.JSONObject;
 import net.sourceforge.pinyin4j.PinyinHelper;
 import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
 import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat;
@@ -108,8 +111,8 @@ public class AdminService {
 		}
 	}
 
-	public List<Employee> getEmployeeList(String deviceId) {
-		return intelligenceDao.getEmployeeList(deviceId);
+	public List<Employee> getEmployeeList(int companyId) {
+		return intelligenceDao.getEmployeeList(companyId);
 	}
 
 	public List<Company> getCompanyList() {
@@ -134,7 +137,9 @@ public class AdminService {
 		ServiceDistribution.handleJson103_1(employeeId, strangerId, name, birth, deviceId);
 		String result = future.get(6, TimeUnit.SECONDS);
 		FutureMap.removeFutureMap(ctx.channel().id().asLongText() + "103_2");
+		
 		if (result != null) {
+			String employeeFold=EmployeeFoldMap.getData(employeeId);	
 			Admin admin = new Admin();
 			String adminId = UUID.randomUUID().toString().trim().replaceAll("-", "");
 			admin.setAdminId(adminId);
@@ -152,7 +157,7 @@ public class AdminService {
 				String pingyin = converterToSpell(name);
 				employee.setPingyin(pingyin);
 			}
-
+			employee.setEmployeeFold(employeeFold);
 			employee.setEmployeeId(employeeId);
 			employee.setAdmin(admin);
 			employee.setEmployeeName(name);
@@ -196,7 +201,6 @@ public class AdminService {
 					return null;
 				}
 			}
-
 			cloudDao.add(employee);
 
 			if (cid != null && !"".equals(cid)) {
@@ -306,8 +310,8 @@ public class AdminService {
 		return intelligenceDao.getEmployeeById(id);
 	}
 
-	public List<Employee> getEmployeeByName(String name, String deviceId) {
-		return intelligenceDao.getEmployeeByName(name, deviceId);
+	public List<Employee> getEmployeeByName(String name, int companyId) {
+		return intelligenceDao.getEmployeeByName(name, companyId);
 	}
 
 	/*
@@ -346,8 +350,8 @@ public class AdminService {
 	 * }
 	 */
 
-	public List<Employee> getEmployeeByWhere(String word, String department, String deviceId) {
-		return intelligenceDao.getEmployeeByWhere(word, department, deviceId);
+	public List<Employee> getEmployeeByWhere(String word, String department, int companyId) {
+		return intelligenceDao.getEmployeeByWhere(word, department, companyId);
 	}
 
 	public void updateEmployeeTemplatePhoto(String employeeId, String path) {
@@ -633,6 +637,17 @@ public class AdminService {
 			cloudDao.update(admin);
 		}
 		return state;
+	}
+
+	public void updateEmployeeFoldAndSync(String employeeId) {
+		Employee employee=intelligenceDao.getEmployeeById(employeeId);
+		List<String> list=intelligenceDao.getDeviceList(employee.getDeviceId());
+		if(list!=null){
+			for(String deviceId:list){
+				ServiceDistribution.handleJson118_1(deviceId,employee.getEmployeeId(), employee.getEmployeeFold(),employee.getEmployeeName(),
+						employee.getBirth(),employee.getPhotoPath());
+			}
+		}
 	}
 
 }

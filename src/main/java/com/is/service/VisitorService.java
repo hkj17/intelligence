@@ -99,7 +99,8 @@ public class VisitorService {
 		else{
 			VisitorInfo info = new VisitorInfo();
 			info.setId(id);
-			info.setDeviceId(deviceId);
+			String companyId=intelligenceDao.getCompanyIdByDeviceId(deviceId);
+			info.setCompanyId(companyId);
 			info.setName(name);
 			info.setCompany(company);
 			info.setPosition(position);
@@ -134,7 +135,8 @@ public class VisitorService {
 		if(result!=null){
 			VisitorInfo info = new VisitorInfo();
 			info.setId(id);
-			info.setDeviceId(deviceId);
+			String companyId=intelligenceDao.getCompanyIdByDeviceId(deviceId);
+			info.setCompanyId(companyId);
 			info.setName(name);
 			info.setCompany(company);
 			info.setPosition(position);
@@ -258,7 +260,8 @@ public class VisitorService {
 		if(result!=null){
 			VisitorInfo info = new VisitorInfo();
 			info.setId(id);
-			info.setDeviceId(deviceId);
+			String companyId=intelligenceDao.getCompanyIdByDeviceId(deviceId);
+			info.setCompanyId(companyId);
 			info.setName(name);
 			info.setCompany(company);
 			info.setPosition(position);
@@ -292,7 +295,8 @@ public class VisitorService {
 	}
 
 	public List<VisitorInfo> getVisitorInfoByWhere(String deviceId, String name) {
-		return intelligenceDao.getVisitorInfoByWhere(deviceId, name);
+		String companyId=intelligenceDao.getCompanyIdByDeviceId(deviceId);
+		return intelligenceDao.getVisitorInfoByWhere(companyId, name);
 	}
 
 	public void updateVisitorTemplate(String id, String path) {
@@ -365,6 +369,21 @@ public class VisitorService {
 
 	public CollectionPhoto getCollectByStrangerId(String id) {
 		return intelligenceDao.getCollectByStrangerId(id);
+	}
+
+	public void updateVisitorAndSync(String visitorId, String visitorFold, String deviceId) {
+		// TODO Auto-generated method stub
+		VisitorInfo visitorInfo=intelligenceDao.getVisitorInfoById(visitorId);
+		visitorInfo.setVisitorFold(visitorFold);
+		cloudDao.update(visitorInfo);
+		
+		List<String> list=intelligenceDao.getDeviceList(deviceId);
+		if(list!=null){
+			for(String id:list){
+				ServiceDistribution.handleJson118_11(id,visitorId, visitorInfo.getVisitorFold(),
+						visitorInfo.getName(),visitorInfo.getBirth(),visitorInfo.getPhotoPath());
+			}
+		}
 	}
 
 }

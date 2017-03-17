@@ -27,7 +27,7 @@ public interface IntelligenceDao {
 	
 	public Admin getAdminByName(String username);
 	
-	public List<Employee> getEmployeeList(String deviceId);
+	public List<Employee> getEmployeeList(int companyId);
 	
 	public Company getCompanyById(int id);
 	
@@ -78,7 +78,7 @@ public interface IntelligenceDao {
 	
 	public List<ClockTime> getClockPhoto();
 	
-	public List<Employee> getEmployeeByName(String name,String deviceId);
+	public List<Employee> getEmployeeByName(String name,int companyId);
 	
 	public String getEmployeeByMobile(String mobile);
 	
@@ -90,7 +90,7 @@ public interface IntelligenceDao {
 	
 	public List<ClockAbnormal> getHandClockList(String startTime,String endTime,String deviceId);
 	
-	public List<Employee> getEmployeeByWhere(String word,String department,String deviceId);
+	public List<Employee> getEmployeeByWhere(String word,String department,int companyId);
 	
 	public VisitorInfo getVisitorInfoById(String id);
 	
@@ -111,7 +111,7 @@ public interface IntelligenceDao {
 	
 	public Visitor getVisitorById(String id);
 	
-	public List<VisitorInfo> getVisitorInfoByWhere(String deviceId,String name);
+	public List<VisitorInfo> getVisitorInfoByWhere(String companyId,String name);
 	
 	public List<Employee> getAuditPersonList(String deviceId);
 	
@@ -128,5 +128,11 @@ public interface IntelligenceDao {
 	public Employee getEmployeeByPhotoPath(String path);
 
 	public List<Appointment> getAppointmentByVisitor(String visitorId);
+
+	public List<String> getDeviceList(String deviceId);
+
+	public String getCompanyIdByDeviceId(String deviceId);
+
+	public List<String> getDeviceListAll(String deviceId);
 	
 }

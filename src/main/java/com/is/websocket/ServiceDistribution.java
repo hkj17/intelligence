@@ -170,6 +170,7 @@ public class ServiceDistribution implements ApplicationContextAware {
 	}
 
 	public static JSONObject handleJson8_1(JSONObject jsonObject, ChannelHandlerContext socketChannel) {
+		
 		String employeeId = jsonObject.getString("employeeId");
 		String templateSeqno = jsonObject.getString("templateSeqno");
 		String templateId = jsonObject.getString("templateId");
@@ -713,7 +714,7 @@ public class ServiceDistribution implements ApplicationContextAware {
 	}
 
 	public static boolean handleJson115_1(String deviceId, String name, String address, String phone,
-			String morningTimeStart, String morningTimeEnd, String nightTimeStart, String nightTimeEnd) {
+			String morningTimeStart, String morningTimeEnd, String nightTimeStart, String nightTimeEnd, int i) {
 		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.put("type", 115);
@@ -721,6 +722,7 @@ public class ServiceDistribution implements ApplicationContextAware {
 		jsonObject.put("company", name);
 		jsonObject.put("address", address);
 		jsonObject.put("phone", phone);
+		jsonObject.put("znqt_num", String.valueOf(i));
 		jsonObject.put("Sign_in_time_A", morningTimeStart);
 		jsonObject.put("Sign_in_time_B", morningTimeEnd);
 		jsonObject.put("Sign_out_time_A", nightTimeStart);
@@ -814,11 +816,11 @@ public class ServiceDistribution implements ApplicationContextAware {
 					num++;
 					String path = fileTemp.getAbsolutePath();
 					String adPic = Base64Utils.GetImageStr(path);
-					sendTempToDevice(adPic, num, employeeId, socketChannel);
+					sendTempToDevice(adPic, num, employeeId, socketChannel,employee.getEmployeeFold());
 				}
 			}
 		} else {
-			sendTempToDevice("", 0, employeeId, socketChannel);
+			sendTempToDevice("", 0, employeeId, socketChannel,employee.getEmployeeFold());
 		}
 	}
 
@@ -860,7 +862,7 @@ public class ServiceDistribution implements ApplicationContextAware {
 		}
 	}
 
-	private static void sendTempToDevice(String adPic, int num, String employeeId, ChannelHandlerContext channel) {
+	private static void sendTempToDevice(String adPic, int num, String employeeId, ChannelHandlerContext channel,String employeeFold) {
 		// TODO Auto-generated method stub
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.put("type", 7);
@@ -868,6 +870,7 @@ public class ServiceDistribution implements ApplicationContextAware {
 		jsonObject.put("templatePic", adPic);
 		jsonObject.put("templateSeqno", String.valueOf(num));
 		jsonObject.put("employeeId", employeeId);
+		jsonObject.put("employeeFold", employeeFold);
 		byte[] result = SocketService.responseByte(jsonObject, "7", "2");
 		if (null != channel) {
 			excuteWrite(result, channel);
@@ -969,5 +972,64 @@ public class ServiceDistribution implements ApplicationContextAware {
 		result.put("type", 10);
 		result.put("code", 12);
 		return result;
+	}
+
+
+	public static void handleJson118_1(String deviceId, String employeeId, String employeeFold, String employeeName,
+			String birth, String photoPath) {
+		// TODO Auto-generated method stub
+		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
+		String base64=Base64Utils.GetImageStr(photoPath);
+		JSONObject jsonObject=new JSONObject();
+		jsonObject.put("type", 118);
+		jsonObject.put("code", 1);
+		jsonObject.put("employeeId", employeeId);
+		jsonObject.put("employeeFold", employeeFold);
+		jsonObject.put("employeeName", employeeName);
+		jsonObject.put("birth", birth);
+		jsonObject.put("potrait", base64);
+		jsonObject.put("operate", "add");
+		byte[] result = SocketService.responseByte(jsonObject, "118", "1");
+		if (null != channel) {
+			excuteWrite(result, channel);
+		}
+		
+		
+	}
+
+	public static void handleJson103_12(JSONObject jsonObject, ChannelHandlerContext socketChannel) {
+		// TODO Auto-generated method stub
+		String deviceId=ChannelNameToDeviceMap.getDeviceMap(socketChannel.channel().id());
+		String visitorId = jsonObject.getString("visitorId");
+		String visitorFold = jsonObject.getString("visitorFold");
+		VisitorService visitorService = (VisitorService) ServiceDistribution.getContext().getBean("visitorService");
+		visitorService.updateVisitorAndSync(visitorId,visitorFold,deviceId);
+	}
+
+	public static void handleJson118_11(String id, String visitorId, String visitorFold, String name, String birth,
+			String photoPath) {
+		// TODO Auto-generated method stub
+		ChannelHandlerContext channel = DeviceService.getSocketMap(id);
+		String base64=Base64Utils.GetImageStr(photoPath);
+		JSONObject jsonObject=new JSONObject();
+		jsonObject.put("type", 118);
+		jsonObject.put("code", 11);
+		jsonObject.put("visitorId", visitorId);
+		jsonObject.put("visitorFold", visitorFold);
+		jsonObject.put("visitorName", name);
+		jsonObject.put("birth", birth);
+		jsonObject.put("potrait", base64);
+		jsonObject.put("operate", "add");
+		byte[] result = SocketService.responseByte(jsonObject, "118", "11");
+		if (null != channel) {
+			excuteWrite(result, channel);
+		}
+	}
+
+	public static void SyncEmployee(JSONObject jsonObject) {
+		// TODO Auto-generated method stub
+		String employeeId = jsonObject.getString("employeeId");
+		AdminService adminService = (AdminService) ServiceDistribution.getContext().getBean("adminService");
+		adminService.updateEmployeeFoldAndSync(employeeId);
 	}
 }

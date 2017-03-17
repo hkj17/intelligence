@@ -23,8 +23,6 @@ public class Company implements Serializable{
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int companyId;
 	
-	@Column(name = "device_id")
-	private String deviceId;
 	
 	@Column(name = "company_name")
 	private String companyName;
@@ -50,15 +48,7 @@ public class Company implements Serializable{
 	@Column(name = "night_time_end")
 	private String nightTimeEnd;
 	
-	
-	public void setDeviceId(String deviceId) {
-		this.deviceId = deviceId;
-	}
-	
-	public String getDeviceId() {
-		return deviceId;
-	}
-	
+
 	public int getCompanyId() {
 		return companyId;
 	}

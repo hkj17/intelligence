@@ -83,7 +83,7 @@ public class CompanyService {
 			Company company=intelligenceDao.getCompanyByDeviceId(deviceId);
 			if(company==null){
 				Company companyNew=new Company();
-				companyNew.setDeviceId(deviceId);
+				//companyNew.setDeviceId(deviceId);
 				companyNew.setAddress(address);
 				companyNew.setCompanyName(name);
 				companyNew.setContact(phone);
@@ -104,13 +104,17 @@ public class CompanyService {
 				cloudDao.update(company);
 			}
 			
-			SyncFuture<String> future=AddFuture.setFuture(deviceId,"115_2");
-			CheckResponse response=new CheckResponse(deviceId, "115_2",future);
-			response.start();
-			ServiceDistribution.handleJson115_1(deviceId, name, address, phone, morningTimeStart,morningTimeEnd,nightTimeStart,nightTimeEnd);
+			List<String> list=intelligenceDao.getDeviceListAll(deviceId);
+			if(list!=null){
+				for(int i=0;i<list.size();i++){
+					ServiceDistribution.handleJson115_1(list.get(i), name, address, phone, morningTimeStart,morningTimeEnd,nightTimeStart,nightTimeEnd,i+1);
+				}
+			}
 			return true;
 		
 	}
+	
+	
 	
 	public Boolean deleteCompany(String device,String id){
 		Company company=intelligenceDao.getCompanyById(Integer.parseInt(id));

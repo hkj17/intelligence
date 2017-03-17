@@ -31,7 +31,7 @@ public class HttpServerInboundHandler extends ChannelInboundHandlerAdapter {
 
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-		System.out.println("throw exption..."+cause.getMessage());
+		System.out.println("throw exption..."+cause);
 		ctx.writeAndFlush("error:"+cause.getMessage());
 		ctx.close();
 	}

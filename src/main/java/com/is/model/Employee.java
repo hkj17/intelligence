@@ -102,6 +102,17 @@ public class Employee implements Serializable {
 	@JoinColumn(name = "company_id")
 	private Company company;
 	
+	@Column(name = "employee_fold")
+	private String employeeFold;
+	
+	public String getEmployeeFold() {
+		return employeeFold;
+	}
+	
+	public void setEmployeeFold(String employeeFold) {
+		this.employeeFold = employeeFold;
+	}
+	
 	public void setTemplatePath(String templatePath) {
 		this.templatePath = templatePath;
 	}

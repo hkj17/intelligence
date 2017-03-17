@@ -64,8 +64,8 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 	}
 
 	@Override
-	public List<Employee> getEmployeeList(String deviceId) {
-		return cloudDao.findByHql(Hql.GET_EMPLOYEE_LIST, deviceId);
+	public List<Employee> getEmployeeList(int companyId) {
+		return cloudDao.findByHql(Hql.GET_EMPLOYEE_LIST, companyId);
 	}
 
 	@Override
@@ -126,8 +126,8 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 	}
 
 	@Override
-	public List<Employee> getEmployeeByWhere(String word, String department, String deviceId) {
-		String sql="select a from Employee a where a.deviceId='"+deviceId+"'";
+	public List<Employee> getEmployeeByWhere(String word, String department, int companyId) {
+		String sql="select a from Employee a where a.company.companyId="+companyId;
 		int i=0;
 		Map<Integer, String> map = new HashMap<>();
 		if (department != null && !"".equals(department)) {
@@ -210,8 +210,8 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 	}
 
 	@Override
-	public List<Employee> getEmployeeByName(String name, String deviceId) {
-		return cloudDao.findByHql(Hql.GET_EMPLOYEE_BY_NAME, name, deviceId);
+	public List<Employee> getEmployeeByName(String name, int companyId) {
+		return cloudDao.findByHql(Hql.GET_EMPLOYEE_BY_NAME, name, companyId);
 	}
 
 	@Override
@@ -432,8 +432,9 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 
 	@Override
 	public Company getCompanyByDeviceId(String deviceId) {
-		return (Company) cloudDao.getByHql(Hql.GET_COMPANY_BY_DEVICE_ID, deviceId);
-		// TODO Auto-generated method stub
+		Query query = getSession().createSQLQuery("select a.* from company a LEFT JOIN device b on b.company_id=a.company_id where b.device_id='"+deviceId+"'");
+		Company company =  (Company) ((SQLQuery) query).addEntity(Company.class).uniqueResult();
+		return company;
 	}
 
 	@Override
@@ -570,12 +571,12 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 	}
 
 	@Override
-	public List<VisitorInfo> getVisitorInfoByWhere(String deviceId, String name) {
+	public List<VisitorInfo> getVisitorInfoByWhere(String companyId, String name) {
 		// TODO Auto-generated method stub
 		if (name == null || "".equals(name)) {
-			return cloudDao.findByHql(Hql.GET_VISITOR_INFO_LIST, deviceId);
+			return cloudDao.findByHql(Hql.GET_VISITOR_INFO_LIST, companyId);
 		} else {
-			return cloudDao.findByHql(Hql.GET_VISITOR_INFO_BY_NAME, deviceId, name);
+			return cloudDao.findByHql(Hql.GET_VISITOR_INFO_BY_NAME, companyId, name);
 		}
 	}
 
@@ -646,6 +647,31 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 	public List<Appointment> getAppointmentByVisitor(String visitorId) {
 		// TODO Auto-generated method stub
 		return cloudDao.findByHql(Hql.GET_APPOINTMENT_BY_VISITOR, visitorId);
+	}
+
+	@Override
+	public List<String> getDeviceList(String deviceId) {
+		// TODO Auto-generated method stub
+		Query query = getSession().createSQLQuery("select a.device_id from device a LEFT JOIN device b on a.company_id=b.company_id where b.device_id='"+deviceId+"' and a.device_id!='"+deviceId+"'");
+		List<String> result=query.list();
+		return result;
+	}
+	
+	@Override
+	public List<String> getDeviceListAll(String deviceId) {
+		// TODO Auto-generated method stub
+		Query query = getSession().createSQLQuery("select a.device_id from device a LEFT JOIN device b on a.company_id=b.company_id where b.device_id='"+deviceId+"'");
+		List<String> result=query.list();
+		return result;
+	}
+
+	@Override
+	public String getCompanyIdByDeviceId(String deviceId) {
+		// TODO Auto-generated method stub
+		Query query = getSession().createSQLQuery(
+				"select company_id from device where device_id='"+deviceId+"'");
+		String companyId = query.uniqueResult().toString();
+		return companyId;
 	}
 
 }
