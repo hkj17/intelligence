@@ -118,6 +118,11 @@ public class SocketService {
 				excuteWrite(answer,socketChannel);
 			}
 			else{
+				responseCode=ServiceDistribution.handleJson8_1_end(jsonObject,socketChannel);
+				anType="8";
+				anCode="2";
+				byte[] answer=responseByte(responseCode,anType,anCode);
+				excuteWrite(answer,socketChannel);
 				ServiceDistribution.SyncEmployee(jsonObject);
 			}
 		}
@@ -155,6 +160,12 @@ public class SocketService {
 			anCode="12";
 			byte[] answer=responseByte(responseCode,anType,anCode);
 			excuteWrite(answer,socketChannel);
+		}
+		else if (type.equals("12") && code.equals("1")) {
+			ServiceDistribution.handleJson12_1(jsonObject,socketChannel);
+		}
+		else if (type.equals("12") && code.equals("11")) {
+			ServiceDistribution.handleJson12_11(jsonObject,socketChannel);
 		}
 		else if (type.equals("100") && code.equals("100")) {
 			responseCode=ServiceDistribution.handleJson100_100();
@@ -282,10 +293,23 @@ public class SocketService {
 				 future.setResponse(voice);
 			 }
 		}
+		else if (type.equals("119") && code.equals("2")) {
+			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.channel().id().asLongText()+"119_2");
+			 if(future!=null){
+				 String focus=jsonObject.getString("focus");
+				 future.setResponse(focus);
+			 }
+		}
 		else if (type.equals("112") && code.equals("12")) {
 			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.channel().id().asLongText()+"112_12");
 			 if(future!=null){
 				 future.setResponse("112_12");
+			 }
+		}
+		else if (type.equals("119") && code.equals("12")) {
+			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.channel().id().asLongText()+"119_12");
+			 if(future!=null){
+				 future.setResponse("119_12");
 			 }
 		}
 		else if (type.equals("113") && code.equals("2")) {

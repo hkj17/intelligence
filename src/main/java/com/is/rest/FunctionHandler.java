@@ -240,5 +240,40 @@ public class FunctionHandler {
 		}
 	}
 	
+	@GET
+	@Path("/camerafocus")
+	public Response camerafocus(@Context HttpServletRequest request) throws IOException, InterruptedException, ExecutionException, TimeoutException{
+		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		SyncFuture<String> future=new SyncFuture<>();
+		 ChannelHandlerContext ctx=DeviceService.getSocketMap(deviceId);
+		 if(ctx==null){
+			 return null;
+		 }
+		 ChannelId name=ctx.channel().id();
+		 FutureMap.addFuture(name.asLongText()+"119_2", future);
+		 
+		ServiceDistribution.handleJson119_1(deviceId);
+		String focus=future.get(6, TimeUnit.SECONDS);
+		FutureMap.removeFutureMap(name.asLongText()+"119_2");
+		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, focus);
+
+	}
+	
+	@POST
+	@Path("/modifyCamerafocus")
+	public Response modifyCamerafocus(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws IOException{
+		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		SyncFuture<String> future=AddFuture.setFuture(deviceId,"119_12");
+		CheckResponse response=new CheckResponse(deviceId, "119_12",future);
+		response.start();
+		boolean state=ServiceDistribution.handleJson119_11(deviceId,requestMap.get("focus"));
+		if (state) {
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
+		} else {
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.REQUEST_FAIL, null);
+		}
+	}
+	
 
 }

@@ -13,6 +13,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
@@ -193,6 +194,16 @@ public class ServiceDistribution implements ApplicationContextAware {
 		responseCode.put("employeeId", employeeId);
 		responseCode.put("templateId", templateId);
 		responseCode.put("templateSeqno", templateSeqno);
+		return responseCode;
+
+	}
+	
+	public static JSONObject handleJson8_1_end(JSONObject jsonObject, ChannelHandlerContext socketChannel) {	
+		String employeeId = jsonObject.getString("employeeId");	
+		JSONObject responseCode = new JSONObject();
+		responseCode.put("type", 8);
+		responseCode.put("code", 2);
+		responseCode.put("employeeId", employeeId);
 		return responseCode;
 
 	}
@@ -679,6 +690,21 @@ public class ServiceDistribution implements ApplicationContextAware {
 		}
 
 	}
+	
+	public static Boolean handleJson119_1(String deviceId) {
+		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("type", 119);
+		jsonObject.put("code", 1);
+		byte[] result = SocketService.responseByte(jsonObject, "119", "1");
+		if (null != channel) {
+			excuteWrite(result, channel);
+			return true;
+		} else {
+			return false;
+		}
+
+	}
 
 	public static Boolean handleJson112_11(String deviceId, String voice) {
 		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
@@ -689,6 +715,24 @@ public class ServiceDistribution implements ApplicationContextAware {
 			jsonObject.put("volume", Integer.parseInt(voice));
 		}
 		byte[] result = SocketService.responseByte(jsonObject, "112", "11");
+		if (null != channel) {
+			excuteWrite(result, channel);
+			return true;
+		} else {
+			return false;
+		}
+
+	}
+	
+	public static Boolean handleJson119_11(String deviceId, String focus) {
+		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("type", 119);
+		jsonObject.put("code", 11);
+		if (focus != null && !"".equals(focus)) {
+			jsonObject.put("focus", Integer.parseInt(focus));
+		}
+		byte[] result = SocketService.responseByte(jsonObject, "119", "11");
 		if (null != channel) {
 			excuteWrite(result, channel);
 			return true;
@@ -812,15 +856,19 @@ public class ServiceDistribution implements ApplicationContextAware {
 			if (file.isDirectory()) {
 				File[] files = file.listFiles();
 				int num = 0;
+				int isEnd=0;
 				for (File fileTemp : files) {
 					num++;
 					String path = fileTemp.getAbsolutePath();
 					String adPic = Base64Utils.GetImageStr(path);
-					sendTempToDevice(adPic, num, employeeId, socketChannel,employee.getEmployeeFold());
+					if(num==files.length){
+						isEnd=1;
+					}
+					sendTempToDevice(adPic, num, employeeId, socketChannel,employee.getEmployeeFold(),isEnd,fileTemp.getName());
 				}
 			}
 		} else {
-			sendTempToDevice("", 0, employeeId, socketChannel,employee.getEmployeeFold());
+			sendTempToDevice("", 0, employeeId, socketChannel,employee.getEmployeeFold(),1,null);
 		}
 	}
 
@@ -862,13 +910,15 @@ public class ServiceDistribution implements ApplicationContextAware {
 		}
 	}
 
-	private static void sendTempToDevice(String adPic, int num, String employeeId, ChannelHandlerContext channel,String employeeFold) {
+	private static void sendTempToDevice(String adPic, int num, String employeeId, ChannelHandlerContext channel,String employeeFold, int isEnd,String filename) {
 		// TODO Auto-generated method stub
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.put("type", 7);
 		jsonObject.put("code", 2);
 		jsonObject.put("templatePic", adPic);
+		jsonObject.put("templateId", filename);
 		jsonObject.put("templateSeqno", String.valueOf(num));
+		jsonObject.put("isEnd", String.valueOf(isEnd));
 		jsonObject.put("employeeId", employeeId);
 		jsonObject.put("employeeFold", employeeFold);
 		byte[] result = SocketService.responseByte(jsonObject, "7", "2");
@@ -1031,5 +1081,123 @@ public class ServiceDistribution implements ApplicationContextAware {
 		String employeeId = jsonObject.getString("employeeId");
 		AdminService adminService = (AdminService) ServiceDistribution.getContext().getBean("adminService");
 		adminService.updateEmployeeFoldAndSync(employeeId);
+	}
+
+	public static void handleJson12_1(JSONObject jsonObject, ChannelHandlerContext socketChannel) {
+		// TODO Auto-generated method stub
+		String deviceId=ChannelNameToDeviceMap.getDeviceMap(socketChannel.channel().id());
+		String employeeIds = jsonObject.getString("employeeIdArray");
+		if(employeeIds!=null && !"".equals(employeeIds)){
+			employeeIds=employeeIds.replace("[", "(").replace("]", ")");
+		}
+		AdminService adminService = (AdminService) ServiceDistribution.getContext().getBean("adminService");
+		List<Employee> list=adminService.getEmployeeByIds(employeeIds,deviceId);
+		for(Employee employee:list){
+			send12_2(deviceId, employee.getEmployeeId(), employee.getEmployeeFold(), employee.getEmployeeName(), employee.getBirth(), employee.getPhotoPath());
+		}
+		
+		if(employeeIds!=null && !"".equals(employeeIds)){
+			List<String> existEmployee=adminService.getExistEmployee(employeeIds,deviceId);
+			String[] eids=employeeIds.substring(1,employeeIds.length()-1).split(",");
+			for(String eid:eids){
+				eid=eid.substring(1,eid.length()-1);
+				if(!existEmployee.contains(eid)){
+					sendDel12_2(deviceId,eid);
+				}
+			}
+		}
+	}
+	
+	public static void sendDel12_2(String deviceId, String employeeId) {
+		// TODO Auto-generated method stub
+		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
+		JSONObject jsonObject=new JSONObject();
+		jsonObject.put("type", 12);
+		jsonObject.put("code", 2);
+		jsonObject.put("employeeId", employeeId);
+		jsonObject.put("operate", "del");
+		byte[] result = SocketService.responseByte(jsonObject, "12", "2");
+		if (null != channel) {
+			excuteWrite(result, channel);
+		}	
+	}
+	
+	public static void send12_2(String deviceId, String employeeId, String employeeFold, String employeeName,
+			String birth, String photoPath) {
+		// TODO Auto-generated method stub
+		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
+		String base64=Base64Utils.GetImageStr(photoPath);
+		JSONObject jsonObject=new JSONObject();
+		jsonObject.put("type", 12);
+		jsonObject.put("code", 2);
+		jsonObject.put("operate", "add");
+		jsonObject.put("employeeId", employeeId);
+		jsonObject.put("employeeFold", employeeFold);
+		jsonObject.put("employeeName", employeeName);
+		jsonObject.put("birth", birth);
+		jsonObject.put("potrait", base64);
+		byte[] result = SocketService.responseByte(jsonObject, "12", "2");
+		if (null != channel) {
+			excuteWrite(result, channel);
+		}	
+	}
+	
+	public static void handleJson12_11(JSONObject jsonObject, ChannelHandlerContext socketChannel) {
+		// TODO Auto-generated method stub
+		String deviceId=ChannelNameToDeviceMap.getDeviceMap(socketChannel.channel().id());
+		String visitorIds = jsonObject.getString("visitorIdArray");
+		if(visitorIds!=null && !"".equals(visitorIds)){
+			visitorIds=visitorIds.replace("[", "(").replace("]", ")");
+		}
+		VisitorService visitorService = (VisitorService) ServiceDistribution.getContext().getBean("visitorService");
+		List<VisitorInfo> list=visitorService.getVisitorByIds(visitorIds,deviceId);
+		for(VisitorInfo visitorInfo:list){
+			send12_12(deviceId, visitorInfo.getId(), visitorInfo.getVisitorFold(), visitorInfo.getName(), visitorInfo.getBirth(), visitorInfo.getPhotoPath());
+		}
+		
+		if(visitorIds!=null && !"".equals(visitorIds)){
+			List<String> existVisitor=visitorService.getExistVisitor(visitorIds,deviceId);
+			String[] eids=visitorIds.substring(1,visitorIds.length()-1).split(",");
+			for(String eid:eids){
+				eid=eid.substring(1,eid.length()-1);
+				if(!existVisitor.contains(eid)){
+					sendDel12_12(deviceId,eid);
+				}
+			}
+		}
+	}
+	
+	public static void sendDel12_12(String deviceId, String visitorId) {
+		// TODO Auto-generated method stub
+		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
+		JSONObject jsonObject=new JSONObject();
+		jsonObject.put("type", 12);
+		jsonObject.put("code", 12);
+		jsonObject.put("visitorId", visitorId);
+		jsonObject.put("operate", "del");
+		byte[] result = SocketService.responseByte(jsonObject, "12", "12");
+		if (null != channel) {
+			excuteWrite(result, channel);
+		}	
+	}
+	
+	public static void send12_12(String id, String visitorId, String visitorFold, String name, String birth,
+			String photoPath) {
+		// TODO Auto-generated method stub
+		ChannelHandlerContext channel = DeviceService.getSocketMap(id);
+		String base64=Base64Utils.GetImageStr(photoPath);
+		JSONObject jsonObject=new JSONObject();
+		jsonObject.put("type", 12);
+		jsonObject.put("code", 12);
+		jsonObject.put("operate", "add");
+		jsonObject.put("visitorId", visitorId);
+		jsonObject.put("visitorFold", visitorFold);
+		jsonObject.put("visitorName", name);
+		jsonObject.put("birth", birth);
+		jsonObject.put("potrait", base64);
+		byte[] result = SocketService.responseByte(jsonObject, "12", "12");
+		if (null != channel) {
+			excuteWrite(result, channel);
+		}
 	}
 }

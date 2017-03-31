@@ -134,7 +134,11 @@ public class AdminService {
 			return null;
 		}
 		FutureMap.addFuture(ctx.channel().id().asLongText() + "103_2", future);
-		ServiceDistribution.handleJson103_1(employeeId, strangerId, name, birth, deviceId);
+		
+		List<String> list=intelligenceDao.getDeviceListAll(deviceId);
+		for(String did:list){
+			ServiceDistribution.handleJson103_1(employeeId, strangerId, name, birth, did);
+		}
 		String result = future.get(6, TimeUnit.SECONDS);
 		FutureMap.removeFutureMap(ctx.channel().id().asLongText() + "103_2");
 		
@@ -224,7 +228,11 @@ public class AdminService {
 			return null;
 		}
 		FutureMap.addFuture(ctx.channel().id().asLongText() + "105_2", future);
-		ServiceDistribution.handleJson105_1(deviceId, employee.getEmployeeId());
+		List<String> list=intelligenceDao.getDeviceListAll(deviceId);
+		for(String did:list){
+			ServiceDistribution.handleJson105_1(did, employee.getEmployeeId());
+		}
+			
 		String result = future.get(6, TimeUnit.SECONDS);
 		FutureMap.removeFutureMap(ctx.channel().id().asLongText() + "105_2");
 		if (result != null) {
@@ -258,6 +266,10 @@ public class AdminService {
 			ChannelHandlerContext ctx = DeviceService.getSocketMap(deviceId);
 			if (ctx == null) {
 				return null;
+			}
+			List<String> list=intelligenceDao.getDeviceListAll(deviceId);
+			for(String did:list){
+				ServiceDistribution.handleJson104_1(did, employeeId, name, birth, strangerId);
 			}
 			FutureMap.addFuture(ctx.channel().id().asLongText() + "104_2", future);
 			ServiceDistribution.handleJson104_1(deviceId, employeeId, name, birth, strangerId);
@@ -648,6 +660,16 @@ public class AdminService {
 						employee.getBirth(),employee.getPhotoPath());
 			}
 		}
+	}
+
+	public List<Employee> getEmployeeByIds(String employeeIds, String deviceId) {
+		// TODO Auto-generated method stub
+		return intelligenceDao.getEmployeeByIds(employeeIds,deviceId);
+	}
+
+	public List<String> getExistEmployee(String employeeIds, String deviceId) {
+		// TODO Auto-generated method stub
+		return intelligenceDao.getExistEmployee(employeeIds,deviceId);
 	}
 
 }

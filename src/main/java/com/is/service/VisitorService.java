@@ -89,8 +89,12 @@ public class VisitorService {
 			return null;
 		}
 		FutureMap.addFuture(ctx.channel().id().asLongText() + "103_12", future);
-		ServiceDistribution.handleJson103_11(id, strangerId, name, company, position, birth, deviceId,
-				path);
+		List<String> list=intelligenceDao.getDeviceListAll(deviceId);
+		for(String did:list){
+			ServiceDistribution.handleJson103_11(id, strangerId, name, company, position, birth, did,
+					path);
+		}
+		
 		String result = future.get(6, TimeUnit.SECONDS);
 		FutureMap.removeFutureMap(ctx.channel().id().asLongText() + "103_12");
 		if (result==null) {
@@ -129,7 +133,11 @@ public class VisitorService {
 			return null;
 		}
 		FutureMap.addFuture(ctx.channel().id().asLongText() + "103_12", future);
-		ServiceDistribution.handleJson103_11(id, strangerId, name, company, position, birth, deviceId,null);
+		List<String> list=intelligenceDao.getDeviceListAll(deviceId);
+		for(String did:list){
+			ServiceDistribution.handleJson103_11(id, strangerId, name, company, position, birth, did,null);
+		}
+		
 		String result = future.get(6, TimeUnit.SECONDS);
 		FutureMap.removeFutureMap(ctx.channel().id().asLongText() + "103_12");
 		if(result!=null){
@@ -181,8 +189,12 @@ public class VisitorService {
 			return false;
 		}
 		FutureMap.addFuture(ctx.channel().id().asLongText() + "104_12", future);
-		ServiceDistribution.handleJson104_11(deviceId, id, name, company, position, telphone, email,
-				importance, birth);
+		List<String> list=intelligenceDao.getDeviceListAll(deviceId);
+		for(String did:list){
+			ServiceDistribution.handleJson104_11(did, id, name, company, position, telphone, email,
+					importance, birth);
+		}
+		
 		String result = future.get(6, TimeUnit.SECONDS);
 		FutureMap.removeFutureMap(ctx.channel().id().asLongText() + "104_12");
 
@@ -231,7 +243,11 @@ public class VisitorService {
 			return false;
 		}
 		FutureMap.addFuture(ctx.channel().id().asLongText() + "105_12", future);
-		ServiceDistribution.handleJson105_11(deviceId, visitorId);
+		List<String> list=intelligenceDao.getDeviceListAll(deviceId);
+		for(String did:list){
+			ServiceDistribution.handleJson105_11(did, visitorId);
+		}
+		
 		String result = future.get(6, TimeUnit.SECONDS);
 		FutureMap.removeFutureMap(ctx.channel().id().asLongText() + "105_12");
 
@@ -253,7 +269,11 @@ public class VisitorService {
 			return null;
 		}
 		FutureMap.addFuture(ctx.channel().id().asLongText() + "103_12", future);
-		ServiceDistribution.handleJson103_11(id, strangerId, name, company, position, birth, deviceId, null);
+		List<String> list=intelligenceDao.getDeviceListAll(deviceId);
+		for(String did:list){
+			ServiceDistribution.handleJson103_11(id, strangerId, name, company, position, birth, did, null);
+		}
+		
 		String result = future.get(6, TimeUnit.SECONDS);
 		FutureMap.removeFutureMap(ctx.channel().id().asLongText() + "103_12");
 		
@@ -384,6 +404,16 @@ public class VisitorService {
 						visitorInfo.getName(),visitorInfo.getBirth(),visitorInfo.getPhotoPath());
 			}
 		}
+	}
+
+	public List<VisitorInfo> getVisitorByIds(String visitorIds, String deviceId) {
+		// TODO Auto-generated method stub
+		return intelligenceDao.getVisitorByIds(visitorIds,deviceId);
+	}
+
+	public List<String> getExistVisitor(String visitorIds, String deviceId) {
+		// TODO Auto-generated method stub
+		return intelligenceDao.getExistVisitor(visitorIds,deviceId);
 	}
 
 }

@@ -439,7 +439,7 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 
 	@Override
 	public List<Admin> searchAdmin(String name, String auth, String deviceId) {
-		String sql = "select a.admin,a.employeeName from Employee a where a.admin.deviceId='" + deviceId + "'";
+		String sql = "select a.admin,a.employeeName from Employee a where a.authority!=0 and a.admin.deviceId='" + deviceId + "'";
 		Map<Integer, Object> map = new HashMap<>();
 		int i = 0;
 		if (name != null && !"".equals(name)) {
@@ -672,6 +672,50 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 				"select company_id from device where device_id='"+deviceId+"'");
 		String companyId = query.uniqueResult().toString();
 		return companyId;
+	}
+
+	@Override
+	public List<Employee> getEmployeeByIds(String employeeIds,String deviceId) {
+		// TODO Auto-generated method stub
+		Query query=null;
+		if(employeeIds!=null && !"".equals(employeeIds)){
+			query = getSession().createSQLQuery("select a.* from employee a LEFT JOIN device b on b.company_id=a.company_id where b.device_id='"+deviceId+"' and a.employee_id not in "+employeeIds);
+		}
+		else{
+			query = getSession().createSQLQuery("select a.* from employee a LEFT JOIN device b on b.company_id=a.company_id where b.device_id='"+deviceId+"'");
+		}
+		List<Employee> list = ((SQLQuery) query).addEntity(Employee.class).list();
+		return list;
+	}
+
+	@Override
+	public List<VisitorInfo> getVisitorByIds(String visitorIds,String deviceId) {
+		// TODO Auto-generated method stub
+		Query query=null;
+		if(visitorIds!=null && !"".equals(visitorIds)){
+			query = getSession().createSQLQuery("select a.* from visitor_info a LEFT JOIN device b on b.company_id=a.company_id where b.device_id='"+deviceId+"' and a.id not in "+visitorIds);
+		}
+		else{
+			query = getSession().createSQLQuery("select a.* from visitor_info a LEFT JOIN device b on b.company_id=a.company_id where b.device_id='"+deviceId+"'");
+		}
+		List<VisitorInfo> list = ((SQLQuery) query).addEntity(VisitorInfo.class).list();
+		return list;
+	}
+
+	@Override
+	public List<String> getExistEmployee(String employeeIds, String deviceId) {
+		// TODO Auto-generated method stub
+		Query query = getSession().createSQLQuery("select a.employee_id from employee a LEFT JOIN device b on b.company_id=a.company_id where b.device_id='"+deviceId+"' and a.employee_id in "+employeeIds);
+		List<String> list = query.list();
+		return list;
+	}
+
+	@Override
+	public List<String> getExistVisitor(String visitorIds, String deviceId) {
+		// TODO Auto-generated method stub
+		Query query = getSession().createSQLQuery("select a.id from visitor_info a LEFT JOIN device b on b.company_id=a.company_id where b.device_id='"+deviceId+"' and a.id not in "+visitorIds);
+		List<String> list = query.list();
+		return list;
 	}
 
 }

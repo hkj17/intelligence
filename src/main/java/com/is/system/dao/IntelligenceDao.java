@@ -134,5 +134,13 @@ public interface IntelligenceDao {
 	public String getCompanyIdByDeviceId(String deviceId);
 
 	public List<String> getDeviceListAll(String deviceId);
+
+	public List<Employee> getEmployeeByIds(String employeeIds, String deviceId);
+
+	public List<VisitorInfo> getVisitorByIds(String visitorIds, String deviceId);
+
+	public List<String> getExistEmployee(String employeeIds, String deviceId);
+
+	public List<String> getExistVisitor(String visitorIds, String deviceId);
 	
 }

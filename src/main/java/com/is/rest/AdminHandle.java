@@ -390,5 +390,29 @@ public class AdminHandle {
 				
 	}
 	
+	@POST
+	@Path("/test")
+	public Response test(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams){
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		String deviceId=requestMap.get("id");
+		String employeeIds=requestMap.get("value");
+		if(employeeIds!=null || !"".equals(employeeIds)){
+			employeeIds=employeeIds.replace("[", "(").replace("]", ")");
+		}
+		List<Employee> list=adminService.getEmployeeByIds(employeeIds,deviceId);
+		for(Employee employee:list){
+			System.out.println(1);
+		}
+		
+		List<String> existEmployee=adminService.getExistEmployee(employeeIds,deviceId);
+		String[] eids=employeeIds.substring(1,employeeIds.length()-1).split(",");
+		for(String eid:eids){
+			if(!existEmployee.contains(eid)){
+				System.out.println(eid);
+			}
+		}
+		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
+	}
+	
 	
 }
