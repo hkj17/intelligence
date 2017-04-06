@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -12,6 +13,7 @@ import java.util.concurrent.TimeoutException;
 
 import javax.xml.crypto.Data;
 
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,11 +22,13 @@ import com.is.map.DeviceService;
 import com.is.map.FutureMap;
 import com.is.model.ClockAbnormal;
 import com.is.model.ClockAppeal;
+import com.is.model.ClockRecordDept;
 import com.is.model.ClockTime;
 import com.is.model.ClockRecord;
 import com.is.model.ClockRecordSelect;
 import com.is.model.Company;
 import com.is.model.Employee;
+import com.is.model.EmployeeClock;
 import com.is.system.dao.CloudDao;
 import com.is.system.dao.IntelligenceDao;
 import com.is.websocket.AddFuture;
@@ -274,4 +278,26 @@ public class ClockService {
 	public List<ClockAbnormal> getHandClockList(String startTime, String endTime, String deviceId) {
 		return intelligenceDao.getHandClockList(startTime, endTime, deviceId);
 	}
+
+	public List<ClockRecordDept> getClockByDepartmentData(String company_id,
+			String departmentId, String date) {
+		// TODO Auto-generated method stub
+		return intelligenceDao.getClockByDepartmentData(company_id, departmentId, date);
+	}
+
+	public List<EmployeeClock> getClockByEmployeeData(String employee_id,String company_id,String date) {
+		// TODO Auto-generated method stub
+		return intelligenceDao.getClockByEmployeeData(employee_id,company_id, date);
+	}
+
+	public List<EmployeeClock> getClockByEmployeeDataKey(String key,String company_id, String date) {
+		// TODO Auto-generated method stub
+		return intelligenceDao.getClockByEmployeeDataKey(key,company_id, date);
+	}
+
+	public HSSFWorkbook export(List<Map<String, String>> list) {
+		// TODO Auto-generated method stub
+		return intelligenceDao.export(list);
+	}
+
 }

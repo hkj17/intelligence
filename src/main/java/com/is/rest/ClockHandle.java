@@ -20,6 +20,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -30,6 +31,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -37,13 +39,16 @@ import com.is.constant.ResponseCode;
 import com.is.model.ClockAbnormal;
 import com.is.model.ClockAppeal;
 import com.is.model.ClockRecord;
+import com.is.model.ClockRecordDept;
 import com.is.model.ClockRecordSelect;
 import com.is.model.ClockTime;
 import com.is.model.Employee;
+import com.is.model.EmployeeClock;
 import com.is.service.ClockService;
 import com.is.util.BusinessHelper;
 import com.is.util.LoginRequired;
 import com.is.util.ResponseFactory;
+import com.is.util.ExportExcel;
 
 @Component("clockHandle")
 @Path("clock")
@@ -238,6 +243,7 @@ public class ClockHandle {
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, clockPhotos);
 	}
 	
+
 	@POST
 	@Path("/getClockByEmployee")
 	@LoginRequired
@@ -246,8 +252,46 @@ public class ClockHandle {
 		List<ClockRecord> list=clockService.getClockByEmployee(requestMap.get(EMPLOYEE_ID));
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, list);
 	}
-
-
+	
+	@POST
+	@Path("/getClockByDepartmentData")
+	@LoginRequired
+	public Response getClockByDepartmentData(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		List<ClockRecordDept> list=clockService.getClockByDepartmentData(
+				request.getSession().getAttribute(COMPANY_ID).toString(),
+				requestMap.get("departmentId"),
+				requestMap.get("date")
+				);
+		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, list);
+	}
+	
+	@POST
+	@Path("/getClockByEmployeeData")
+	@LoginRequired
+	public Response getClockByEmployeeData(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		List<EmployeeClock> list=clockService.getClockByEmployeeData(
+				requestMap.get("employee_id"),
+				request.getSession().getAttribute(COMPANY_ID).toString(),
+				requestMap.get("date")
+				);
+		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, list);
+	}
+	
+	@POST
+	@Path("/getClockByEmployeeDataKey")
+	@LoginRequired
+	public Response getClockByEmployeeDataKey(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		List<EmployeeClock> list=clockService.getClockByEmployeeDataKey(
+				requestMap.get("key"),
+				request.getSession().getAttribute(COMPANY_ID).toString(),
+				requestMap.get("date")
+				);
+		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, list);
+	}
+	
 	@POST
 	@Path("/getDetailClock")
 	@LoginRequired
@@ -267,4 +311,14 @@ public class ClockHandle {
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, list);
 	}
 
+	@GET
+	@Path("/getHandClockListExcel")
+	public void getHandClockListExcel(@Context HttpServletResponse response) {
+		try {			
+			ExportExcel.createWorkBook( response);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}    
+	}
 }

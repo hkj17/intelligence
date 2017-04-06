@@ -2,11 +2,17 @@ package com.is.dao.impl;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
@@ -21,12 +27,15 @@ import com.is.model.Appointment;
 import com.is.model.ClockAbnormal;
 import com.is.model.ClockAppeal;
 import com.is.model.ClockRecord;
+import com.is.model.ClockRecordDept;
 import com.is.model.ClockRecordSelect;
 import com.is.model.ClockTime;
 import com.is.model.CollectionPhoto;
 import com.is.model.Company;
 import com.is.model.Department;
 import com.is.model.Employee;
+import com.is.model.EmployeeClock;
+import com.is.model.EmployeeId;
 import com.is.model.Message;
 import com.is.model.Notification;
 import com.is.model.VersionUpdate;
@@ -717,5 +726,161 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 		List<String> list = query.list();
 		return list;
 	}
+
+	@Override
+	public List<ClockRecordDept> getClockByDepartmentData(String COMPANY_ID,String departmentId, String date) {
+		// TODO Auto-generated method stub
+		//获取公司考勤规则
+		Query company = getSession().createSQLQuery("select * from company where company_id='"+COMPANY_ID+"'");
+		List<Company> rules = ((SQLQuery) company).addEntity(Company.class).list();
+		if( rules.size() > 0 ){
+		Company cc = rules.get(0);
+		String morning_start = cc.getMorningTimeStart();
+		String morning_end = cc.getMorningTimeEnd();
+		String night_start = cc.getNightTimeStart();
+		//获取考勤记录
+		Query query = getSession().createSQLQuery(" select * from clockrecord where start_clock like '"+date+"%'");
+		List<ClockRecord> list = ((SQLQuery) query).addEntity(ClockRecord.class).list();
+		//获取人员名单
+		Query employee = getSession().createSQLQuery(" select * from department as a,employee as b where a.company_id='"+COMPANY_ID+"' and a.id = b.department_id and b.department_id='"+departmentId+"'");
+		List<ClockRecordDept> result = ((SQLQuery) employee).addEntity(ClockRecordDept.class).list();
+		for (ClockRecordDept CRD : result) {
+			String employee_id = CRD.employee_id();
+			for (ClockRecord CR : list) {
+				String e_id = CR.getEmployeeId();
+				if( e_id.equals(employee_id) ){
+					CRD.setTotal(CRD.getTotal()+1);
+					//判断是是否早退
+					int s = checkstate(morning_start,morning_end,night_start,CR.getStartClock(),CR.getEndClock());
+					if( s==3 ){
+						CRD.setEarly(CRD.getEarly()+1);
+					}else if( s==2 ){
+						CRD.setLate(CRD.getLate()+1);
+					}
+				}
+			}
+		}
+		return result;
+		
+		
+	}else{
+		return null;
+	}
+	
+	}
+
+	private int checkstate(String morning_start, String morning_end,
+			String night_start, String startClock, String endClock) {
+		// TODO Auto-generated method stub
+		SimpleDateFormat simpleDateFormat =new SimpleDateFormat("HH:mm:ss");
+		try {
+			if( null != endClock && null != night_start && null != endClock){
+				long date_morning_start=simpleDateFormat.parse(morning_start).getTime();
+				long date_morning_end=simpleDateFormat.parse(morning_end).getTime();
+				long date_night_start=simpleDateFormat.parse(night_start).getTime();
+				
+				long _startClock=simpleDateFormat.parse(startClock.substring(11, 19)).getTime();
+				long _endClock=simpleDateFormat.parse(endClock.substring(11, 19)).getTime();
+				//判断是否正常上班
+				if( _startClock <= date_morning_end && _endClock >= _startClock && (_endClock-_startClock ) > ( date_night_start-date_morning_start ) ){
+					return 1;
+				}else if( _startClock > date_morning_end ){
+					return 2;
+				}else{
+					return 3;
+				}
+			}else{
+				//早退
+				return 3;
+			}
+			
+			
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		
+		return 0;
+	}
+
+	@Override
+	public List<EmployeeClock> getClockByEmployeeData(String employee_id,String company_id,String date) {
+		// TODO Auto-generated method stub
+		//获取公司考勤规则
+		Query company = getSession().createSQLQuery("select * from company where company_id='"+company_id+"'");
+		List<Company> rules = ((SQLQuery) company).addEntity(Company.class).list();
+		if( rules.size() > 0 ){
+			Company cc = rules.get(0);
+			String morning_start = cc.getMorningTimeStart();
+			String morning_end = cc.getMorningTimeEnd();
+			String night_start = cc.getNightTimeStart();	
+			//获取到这个人的当月考勤记录
+			Query query = getSession().createSQLQuery(" select * from clockrecord where start_clock like '"+date+"%' and employee_id='"+employee_id+"'");
+			List<ClockRecord> list = ((SQLQuery) query).addEntity(ClockRecord.class).list();
+			//获取人员信息
+			Query employee = getSession().createSQLQuery("select a.employee_id,a.employee_name,b.department from employee as a,department as b where a.department_id = b.id and a.employee_id ='"+employee_id+"'");
+			List<EmployeeClock> employeeresult = ((SQLQuery) employee).addEntity(EmployeeClock.class).list();
+			if( employeeresult.size()>0 ){
+				EmployeeClock empl = employeeresult.get(0);
+				for (ClockRecord CRD : list) {
+					empl.setTotal(empl.getTotal()+1);
+					empl.setTotal_days(empl.getTotal_days()+","+CRD.getStartClock().substring(5,10));
+					//判断是是否早退
+					int s = checkstate(morning_start,morning_end,night_start,CRD.getStartClock(),CRD.getEndClock());
+					if( s == 3 ){
+						empl.setEarly(empl.getEarly()+1);
+						empl.setEarly_days(empl.getEarly_days()+","+CRD.getStartClock().substring(5,10));
+					}else if( s == 2 ){
+						empl.setLate(empl.getLate()+1);
+						empl.setLate_days(empl.getLate_days()+","+CRD.getStartClock().substring(5,10));
+					}
+				}
+				return employeeresult;
+				
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public List<EmployeeClock> getClockByEmployeeDataKey(String key,String company_id, String date) {
+		//获取人员信息
+		Query employee = getSession().createSQLQuery("select employee_id from employee where pingyin like '%"+key+"%'");
+		List<EmployeeId> employeeresult = ((SQLQuery) employee).addEntity(EmployeeId.class).list();
+		List<EmployeeClock> result = new ArrayList<EmployeeClock>();
+		for (EmployeeId EmployeeId : employeeresult) {
+			String employee_id = EmployeeId.getEmployee_id();
+			List<EmployeeClock> employ = this.getClockByEmployeeData(employee_id, company_id, date);
+			if( employ!=null && employ.size()>0 ){
+				result.add(employ.get(0));
+			}
+		}
+		return result;
+	}
+
+	@Override
+	public HSSFWorkbook export(List<Map<String, String>> list) {
+		// TODO Auto-generated method stub
+		String[] excelHeader = { "Sno", "Name", "Age"};
+		HSSFWorkbook wb = new HSSFWorkbook();    
+        HSSFSheet sheet = wb.createSheet("Campaign");    
+        HSSFRow row = sheet.createRow((int) 0);    
+        HSSFCellStyle style = wb.createCellStyle();    
+        style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+		
+        for (int i = 0; i < excelHeader.length; i++) {    
+            HSSFCell cell = row.createCell(i);    
+            cell.setCellValue(excelHeader[i]);    
+            cell.setCellStyle(style);    
+            sheet.autoSizeColumn(i);    
+        } 
+        
+		
+		return wb;
+	}
+	
+	
 
 }

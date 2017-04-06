@@ -21,9 +21,9 @@ public class SocketHandle implements ApplicationListener<ContextRefreshedEvent>{
 	
 
 	private static final String IP = "120.26.60.164";
-	//private static final String IP = "192.168.223.31";
+	//private static final String IP = "localhost";
 
-	//protected static final int BIZGROUPSIZE = Runtime.getRuntime().availableProcessors() * 2; // 榛樿
+	//protected static final int BIZGROUPSIZE = Runtime.getRuntime().availableProcessors() * 2; // 姒涙顓�
 
 	//protected static final int BIZTHREADSIZE = 4;
 
@@ -59,7 +59,7 @@ public class SocketHandle implements ApplicationListener<ContextRefreshedEvent>{
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent arg0) {
 		// TODO Auto-generated method stub
-		System.out.println("寮�濮嬪惎鍔═CP鏈嶅姟鍣�...");
+		System.out.println("瀵拷婵鎯庨崝鈺怌P閺堝秴濮熼崳锟�...");
 		logger.info("start tcp...");
 		try {
 			SocketHandle.start();

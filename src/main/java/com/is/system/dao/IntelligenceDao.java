@@ -3,10 +3,13 @@ package com.is.system.dao;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+
 import com.is.model.Admin;
 import com.is.model.Appointment;
 import com.is.model.ClockAbnormal;
 import com.is.model.ClockAppeal;
+import com.is.model.ClockRecordDept;
 import com.is.model.ClockTime;
 import com.is.model.CollectionPhoto;
 import com.is.model.ClockRecord;
@@ -14,6 +17,7 @@ import com.is.model.ClockRecordSelect;
 import com.is.model.Company;
 import com.is.model.Department;
 import com.is.model.Employee;
+import com.is.model.EmployeeClock;
 import com.is.model.Message;
 import com.is.model.Notification;
 import com.is.model.VersionUpdate;
@@ -142,5 +146,15 @@ public interface IntelligenceDao {
 	public List<String> getExistEmployee(String employeeIds, String deviceId);
 
 	public List<String> getExistVisitor(String visitorIds, String deviceId);
+
+	public List<ClockRecordDept> getClockByDepartmentData(String COMPANY_ID,
+			String departmentId, String date);
+
+	public List<EmployeeClock> getClockByEmployeeData(String employee_id,String company_id,String date);
+
+	public List<EmployeeClock> getClockByEmployeeDataKey(String key,String company_id, String date);
+
+	public HSSFWorkbook export(List<Map<String, String>> list);
+
 	
 }
