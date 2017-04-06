@@ -11,6 +11,13 @@ $(function() {
 	if(url.substring(url.indexOf("#")+1)!="admin"){
 		 window.location.href="login.html";
 	}
+	$("#down").click(function(){
+		var elemIF = document.createElement("iframe");
+		elemIF.src = "rest/clock/getHandClockListExcel";
+		elemIF.style.display = "none";
+		document.body.appendChild(elemIF); 
+	})
+	
 })
 
 
@@ -80,6 +87,6 @@ function checkname(){
 
 <input type="button" value="保存" onclick="confirm()" style="margin-top: 30px;"/>
 </div>
-
+<button id='down'>123</button>
 </body>
 </html>
