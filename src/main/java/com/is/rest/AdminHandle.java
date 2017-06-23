@@ -334,7 +334,7 @@ public class AdminHandle {
 	@Path("/adminManage")
 	public Response adminManage(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams){
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
-		boolean state=adminService.adminManage(requestMap.get("deviceSn"), requestMap.get("username"),requestMap.get("password"));
+		boolean state=adminService.adminManage(requestMap.get("deviceSn"), requestMap.get("companyId"), requestMap.get("username"),requestMap.get("password"));
 		if (state) {
 			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
 		} else {

@@ -23,6 +23,7 @@ $(function() {
 
 function confirm(){
 	var deviceSn=$("#deviceSn").val();
+	var companyId=$("#companyId").val();
 	var username=$("#username").val();
 	var password=$("#password").val();
 	
@@ -33,6 +34,7 @@ function confirm(){
 		"dataType" : "json",
 		"data" : {
 			"deviceSn" : deviceSn,
+			"companyId": companyId,
 			"username" : username,
 			"password" : password
 		},
@@ -41,7 +43,7 @@ function confirm(){
                 alert("添加成功");
                 window.location.href="index.html";
             }else{
-                alert("添加失败");
+                alert("添加失败, 用户名已存在");
             }
 		}
 	})
@@ -78,6 +80,8 @@ function checkname(){
 <div style="margin-top:30px" class="main">
 <label>设备id:</label>
 <input id="deviceSn" type="text" /><br>
+<label>公司id:</label>
+<input id="companyId" type="text" style="margin-top: 10px;"/><br>
 <label>超级管理员账号:</label>
 <input id="username" type="text" style="margin-top: 10px;" onblur="checkname()"/><br>
 <label>密码:</label>

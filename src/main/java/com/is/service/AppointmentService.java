@@ -14,6 +14,7 @@ import com.is.model.Appointment;
 import com.is.model.VisitorInfo;
 import com.is.system.dao.CloudDao;
 import com.is.system.dao.IntelligenceDao;
+import com.is.util.CommonUtil;
 import com.is.websocket.AddFuture;
 import com.is.websocket.CheckResponse;
 import com.is.websocket.ServiceDistribution;
@@ -34,7 +35,7 @@ public class AppointmentService {
 		try {
 			startTime=startTime+":00";
 			Appointment appointment=new Appointment();
-			String id=UUID.randomUUID().toString().trim().replaceAll("-", "");
+			String id= CommonUtil.generateRandomUUID();
 			appointment.setId(id);
 			VisitorInfo info=intelligenceDao.getVisitorInfoById(visitorInfoId);
 			appointment.setInfo(info);

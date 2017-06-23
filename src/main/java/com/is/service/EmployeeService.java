@@ -114,8 +114,45 @@ public class EmployeeService {
 		return map;
 	}
 	
-	public VersionUpdate autoUpdate(){
-		return intelligenceDao.autoUpdate();
+	public VersionUpdate autoUpdate(String deviceId){
+		return intelligenceDao.autoUpdate(deviceId);
+	}
+	
+	public static JSONObject needUpdate(String currentVersion, String updateVersion){
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("currentVersion", currentVersion);
+		jsonObject.put("latestVersion", updateVersion);
+		if(currentVersion==null || updateVersion==null){
+			jsonObject.put("needUpdate", false);
+			return jsonObject;
+		}
+		try{
+			String[] currentVersionCode = currentVersion.split("\\.");
+			String[] updateVersionCode = updateVersion.split("\\.");
+			int length = Math.max(currentVersionCode.length, updateVersionCode.length);
+			for(int i=0;i<length;i++){
+				int num0 = i<currentVersionCode.length ? Integer.parseInt(currentVersionCode[i]) : 0;
+				int num1 = i<updateVersionCode.length ? Integer.parseInt(updateVersionCode[i]) : 0;
+				System.out.println(num0 + " " + num1);
+				if(num0 < num1){
+					jsonObject.put("needUpdate", true);
+					return jsonObject;
+				}
+				if(num0 > num1){
+					jsonObject.put("needUpdate", false);
+					return jsonObject;
+				}
+			}
+			jsonObject.put("needUpdate", false);
+			return jsonObject;
+		}catch(Exception e){
+			e.printStackTrace();
+			jsonObject.put("needUpdate", false);
+			return jsonObject;
+		}
 	}
 
+	public static void main(String[] args){
+		System.out.println(EmployeeService.needUpdate("1.2.2.1", "1.2.3"));
+	}
 }

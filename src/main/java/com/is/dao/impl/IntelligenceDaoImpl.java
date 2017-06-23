@@ -94,9 +94,9 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 
 	@Override
 	public List<ClockRecordSelect> getClockByWhere(String department, String user, String startClock, String endClock,
-			String rule, String deviceId) {
-		String sql = "select c.*,b.employee_name as employeeName,b.job_id as jobId,d.department as department from clockrecord c LEFT JOIN employee b on c.employee_id=b.employee_id LEFT JOIN department d on d.id=b.department_id where b.device_id='"
-				+ deviceId + "'";
+			String rule, String companyId) {
+		String sql = "select c.*,b.employee_name as employeeName,b.job_id as jobId,d.department as department from clockrecord c LEFT JOIN employee b on c.employee_id=b.employee_id LEFT JOIN department d on d.id=b.department_id where b.company_id='"
+				+ companyId + "'";
 		Map<Integer, String> map = new HashMap<>();
 		int i = 0;
 		if (user != null && !"".equals(user)) {
@@ -137,6 +137,8 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 	@Override
 	public List<Employee> getEmployeeByWhere(String word, String department, int companyId) {
 		String sql="select a from Employee a where a.company.companyId="+companyId;
+		//不在员工页面展示管理员账号
+		sql += " and a.admin.authority!=0";
 		int i=0;
 		Map<Integer, String> map = new HashMap<>();
 		if (department != null && !"".equals(department)) {
@@ -155,10 +157,12 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 			map.put(i + 1, "%" + "," + word + "%");
 			map.put(i + 2, "%" + word + "%");
 		}
+		
 		Query query = getSession().createQuery(sql);
 		for (int p = 0; p < map.size(); p++) {
 			query.setParameter(p, map.get(p));
 		}
+		
 		return query.list();
 
 	}
@@ -448,7 +452,7 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 
 	@Override
 	public List<Admin> searchAdmin(String name, String auth, String deviceId) {
-		String sql = "select a.admin,a.employeeName from Employee a where a.authority!=0 and a.admin.deviceId='" + deviceId + "'";
+		String sql = "select a.admin,a.employeeName from Employee a where a.admin.deviceId='" + deviceId + "'";
 		Map<Integer, Object> map = new HashMap<>();
 		int i = 0;
 		if (name != null && !"".equals(name)) {
@@ -634,8 +638,9 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 	}
 
 	@Override
-	public VersionUpdate autoUpdate() {
-		Query query = getSession().createSQLQuery("select * from version_update ORDER BY created_at DESC LIMIT 1");
+	public VersionUpdate autoUpdate(String deviceId) {
+		Query query = getSession().createSQLQuery("select * from version_update where device_id IS NULL OR "
+				+ "device_id ='" + deviceId +"' ORDER BY created_at DESC LIMIT 1");
 		VersionUpdate update =  (VersionUpdate) ((SQLQuery) query).addEntity(VersionUpdate.class).uniqueResult();
 		return update;
 	}
@@ -880,7 +885,5 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 		
 		return wb;
 	}
-	
-	
 
 }

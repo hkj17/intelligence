@@ -74,9 +74,11 @@ public class ClockHandle {
 	@LoginRequired
 	public Response getClockByWhere(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
-		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		//String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		//共享考勤数据，以公司ID来查询考勤信息
+		Integer companyId=(Integer) request.getSession().getAttribute("companyId");
 		List<ClockRecordSelect> clockRecords = clockService.getClockByWhere(requestMap.get(DEPARTMENT),requestMap.get(NAME), requestMap.get(START_TIME),
-				requestMap.get(END_TIME), requestMap.get(RULE),deviceId);
+				requestMap.get(END_TIME), requestMap.get(RULE),companyId.toString());
 		if (!clockRecords.equals(null)) {
 			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, clockRecords);
 		} else {

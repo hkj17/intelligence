@@ -25,8 +25,6 @@ import com.is.model.Visitor;
 import com.is.model.VisitorInfo;
 import com.is.util.Page;
 
-import net.sf.json.JSONObject;
-
 public interface IntelligenceDao {
 	
 	public Admin getAdminByName(String username);
@@ -39,7 +37,7 @@ public interface IntelligenceDao {
 	
 	public List<ClockRecord> getClockList();
 	
-	public List<ClockRecordSelect> getClockByWhere(String department,String user,String stratClock,String endClock,String rule,String deviceId);
+	public List<ClockRecordSelect> getClockByWhere(String department,String user,String stratClock,String endClock,String rule,String companyId);
 	
 	public List<Notification> getNotifyList();
 	
@@ -127,7 +125,7 @@ public interface IntelligenceDao {
 	
 	public CollectionPhoto getCollectByStrangerId(String id);
 	
-	public VersionUpdate autoUpdate();
+	public VersionUpdate autoUpdate(String deviceId);
 	
 	public Employee getEmployeeByPhotoPath(String path);
 
@@ -155,6 +153,5 @@ public interface IntelligenceDao {
 	public List<EmployeeClock> getClockByEmployeeDataKey(String key,String company_id, String date);
 
 	public HSSFWorkbook export(List<Map<String, String>> list);
-
 	
 }

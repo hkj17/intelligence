@@ -30,11 +30,13 @@ import org.springframework.stereotype.Component;
 
 import com.is.constant.ResponseCode;
 import com.is.map.DeviceService;
+import com.is.map.DeviceToVersionMap;
 import com.is.map.FutureMap;
 import com.is.model.VersionUpdate;
 import com.is.service.EmployeeService;
 import com.is.service.VisitorService;
 import com.is.util.BusinessHelper;
+import com.is.util.CommonUtil;
 import com.is.util.LoginRequired;
 import com.is.util.ResponseFactory;
 import com.is.websocket.AddFuture;
@@ -69,7 +71,7 @@ public class FunctionHandler {
 	@Path("/autoUpdate")
 	public Response autoUpdate(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws IOException{
 		String deviceId=(String) request.getSession().getAttribute("deviceSn");
-		VersionUpdate update=employeeService.autoUpdate();
+		VersionUpdate update=employeeService.autoUpdate(deviceId);
 		SyncFuture<String> future=AddFuture.setFuture(deviceId,"114_2");
 		CheckResponse response=new CheckResponse(deviceId, "114_2",future);
 		response.start();
@@ -78,6 +80,22 @@ public class FunctionHandler {
 			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
 		} else {
 			return ResponseFactory.response(Response.Status.OK, ResponseCode.REQUEST_FAIL, null);
+		}
+	}
+	
+	@POST
+	@Path("/checkUpdate")
+	public Response checkUpdate(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams){
+		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		String currentVersion = DeviceToVersionMap.getVersionMap(deviceId);
+		VersionUpdate update=employeeService.autoUpdate(deviceId);
+		if(update != null){
+			JSONObject jsonObject = EmployeeService.needUpdate(currentVersion, update.getVersion());
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, jsonObject);
+		}else{
+			//没有找到任何版本号
+			JSONObject jsonObject = EmployeeService.needUpdate(currentVersion, null);
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, jsonObject);
 		}
 	}
 	
@@ -218,7 +236,7 @@ public class FunctionHandler {
 	public Response insertAdvertisementPhoto(@Context HttpServletRequest request,@FormDataParam("photo") InputStream uploadedInputStream,
 			@FormDataParam("photo") FormDataContentDisposition fileDetail) throws IOException, InterruptedException, ExecutionException, TimeoutException{
 		String deviceId=(String) request.getSession().getAttribute("deviceSn");
-		String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
+		String id = CommonUtil.generateRandomUUID();
 		String path=ADVERTISE_PHOTO+deviceId+"/"+id+".jpg";
 		visitorService.rememPhoto(path, uploadedInputStream);
 		SyncFuture<String> future = new SyncFuture<>();

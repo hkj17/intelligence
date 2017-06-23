@@ -31,6 +31,7 @@ import com.is.model.Visitor;
 import com.is.model.VisitorInfo;
 import com.is.system.dao.CloudDao;
 import com.is.system.dao.IntelligenceDao;
+import com.is.util.CommonUtil;
 import com.is.websocket.AddFuture;
 import com.is.websocket.CheckResponse;
 import com.is.websocket.ServiceDistribution;
@@ -125,7 +126,7 @@ public class VisitorService {
 
 	public String addVisitorInfo(String name, String company, String position, String telphone, String email,
 			String companyUrl, String deviceId, String importance, String birth, String path, String cid) throws InterruptedException, ExecutionException, TimeoutException {
-		String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
+		String id = CommonUtil.generateRandomUUID();
 		String strangerId = path == null ? null : path.substring(path.lastIndexOf("/") + 1, path.lastIndexOf("."));
 		SyncFuture<String> future = new SyncFuture<>();
 		ChannelHandlerContext ctx = DeviceService.getSocketMap(deviceId);
@@ -261,7 +262,7 @@ public class VisitorService {
 			String companyUrl, String deviceId, String importance, String birth, String visitorId) throws InterruptedException, ExecutionException, TimeoutException {
 		Visitor visitor = intelligenceDao.getVisitorById(visitorId);
 		String path = visitor.getPhoto();
-		String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
+		String id = CommonUtil.generateRandomUUID();
 		String strangerId = path == null ? null : path.substring(path.lastIndexOf("/") + 1, path.lastIndexOf("."));
 		SyncFuture<String> future = new SyncFuture<>();
 		ChannelHandlerContext ctx = DeviceService.getSocketMap(deviceId);
@@ -329,7 +330,7 @@ public class VisitorService {
 
 	public void insertVisitor(String deviceId, String infoId, String time, String employeeId, String path) {
 		Visitor visitor = new Visitor();
-		String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
+		String id = CommonUtil.generateRandomUUID();
 		visitor.setId(id);
 		if (infoId != null) {
 			VisitorInfo visitorInfo = intelligenceDao.getVisitorInfoById(infoId);
@@ -363,7 +364,7 @@ public class VisitorService {
 
 	public void collectionPhoto(String deviceId, String time, String path, String strangerId) {
 		CollectionPhoto photo = new CollectionPhoto();
-		String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
+		String id = CommonUtil.generateRandomUUID();
 		photo.setId(id);
 		photo.setDeviceId(deviceId);
 		photo.setPhoto(path);

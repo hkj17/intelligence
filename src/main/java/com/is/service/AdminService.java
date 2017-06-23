@@ -1,11 +1,12 @@
 package com.is.service;
 
 import java.io.File;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -26,11 +27,13 @@ import com.is.model.Admin;
 import com.is.model.CollectionPhoto;
 import com.is.model.Company;
 import com.is.model.Department;
+import com.is.model.Device;
 import com.is.model.Employee;
 import com.is.model.Visitor;
 import com.is.system.dao.CloudDao;
 import com.is.system.dao.IntelligenceDao;
 import com.is.util.Base64Utils;
+import com.is.util.CommonUtil;
 import com.is.util.PasswordUtil;
 import com.is.websocket.AddFuture;
 import com.is.websocket.CheckResponse;
@@ -69,7 +72,7 @@ public class AdminService {
 	public boolean AccountAssignment(String adminName, String password, String auth, String employeeId,
 			String deviceId) {
 		Admin admin = new Admin();
-		String adminId = UUID.randomUUID().toString().trim().replaceAll("-", "");
+		String adminId = CommonUtil.generateRandomUUID();
 		admin.setAdminId(adminId);
 		admin.setUsername(adminName);
 		admin.setPassword(PasswordUtil.generatePassword(password));
@@ -122,7 +125,7 @@ public class AdminService {
 	public String addEmployee(String name, String birth, String contact, String deviceId, String photo, String position,
 			String jobId, String address, String email, String idCard, String workPos, String department, String sex,
 			String isduty, String cid) throws InterruptedException, ExecutionException, TimeoutException {
-		String employeeId = UUID.randomUUID().toString().trim().replaceAll("-", "");
+		String employeeId = CommonUtil.generateRandomUUID();
 		String strangerId = null;
 		if (photo != null) {
 			strangerId = photo.substring(photo.lastIndexOf("/") + 1, photo.lastIndexOf("."));
@@ -145,7 +148,7 @@ public class AdminService {
 		if (result != null) {
 			String employeeFold=EmployeeFoldMap.getData(employeeId);	
 			Admin admin = new Admin();
-			String adminId = UUID.randomUUID().toString().trim().replaceAll("-", "");
+			String adminId = CommonUtil.generateRandomUUID();
 			admin.setAdminId(adminId);
 			admin.setAuthority(3);
 			admin.setDeviceId(deviceId);
@@ -537,7 +540,7 @@ public class AdminService {
 		return true;
 	}
 
-	public Boolean adminManage(String deviceId, String username, String password) {
+	public Boolean adminManage(String deviceId, String companyId, String username, String password) {
 		try {
 			/*
 			 * SyncFuture<String> future = AddFuture.setFuture(deviceId,
@@ -545,27 +548,57 @@ public class AdminService {
 			 * "115_2", future); response.start(); boolean state =
 			 * ServiceDistribution.handleJson115_1(deviceId, company);
 			 */
-			Admin admin = new Admin();
-			String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
-			admin.setAdminId(id);
-			admin.setAuditAuth(1);
-			admin.setAuthority(0);
-			admin.setDeviceId(deviceId);
-			admin.setPassword(PasswordUtil.generatePassword(password));
-			admin.setUsername(username);
-			cloudDao.add(admin);
+			
+			Admin admin = intelligenceDao.getAdminByName(username);
+			if(admin == null){//当该管理员不存在时添加管理员账号
+				admin = new Admin();
+				String adminId = CommonUtil.generateRandomUUID();
+				admin.setAdminId(adminId);
+				admin.setAuditAuth(1);
+				admin.setAuthority(0);
+				admin.setDeviceId(deviceId);
+				admin.setPassword(PasswordUtil.generatePassword(password));
+				admin.setUsername(username);
+				cloudDao.add(admin);
 
-			Employee employee = new Employee();
-			String employeeId = UUID.randomUUID().toString().trim().replaceAll("-", "");
-			employee.setEmployeeId(employeeId);
-			employee.setAdmin(admin);
-			employee.setEmployeeName(username);
-			employee.setDeviceId(deviceId);
-			cloudDao.add(employee);
-			return true;
-
+				int compId = Integer.parseInt(companyId);
+				Company companyById = intelligenceDao.getCompanyById(compId);
+				if(companyById == null){//新公司
+					companyById = new Company();
+					//公司ID为自增
+					companyById.setAdminId(adminId);
+					cloudDao.add(companyById);
+				}
+				
+				Company companyByDeviceId = intelligenceDao.getCompanyByDeviceId(deviceId);
+				if(companyByDeviceId==null){//新设备
+					Device device = new Device();
+					String id = CommonUtil.generateRandomUUID();
+					device.setId(id);
+					device.setCompany(companyById);
+					device.setDeviceId(deviceId);
+					Date javaDate = new Date();
+					Timestamp timestamp = new Timestamp(javaDate.getTime());
+					device.setCreatedAt(timestamp);
+					cloudDao.add(device);
+				}
+				
+				Employee employee = new Employee();
+				String employeeId = CommonUtil.generateRandomUUID();
+				employee.setEmployeeId(employeeId);
+				employee.setAdmin(admin);
+				employee.setEmployeeName(username);
+				employee.setDeviceId(deviceId);
+				employee.setCompany(companyById);
+				cloudDao.add(employee);
+				return true;
+			}else{
+				System.err.println("管理员用户" + username + "已存在");
+				return false;
+			}
 		} catch (Exception e) {
 			// TODO: handle exception
+			e.printStackTrace();
 			return false;
 		}
 	}

@@ -31,6 +31,7 @@ import com.is.model.Employee;
 import com.is.model.EmployeeClock;
 import com.is.system.dao.CloudDao;
 import com.is.system.dao.IntelligenceDao;
+import com.is.util.CommonUtil;
 import com.is.websocket.AddFuture;
 import com.is.websocket.CheckResponse;
 import com.is.websocket.ServiceDistribution;
@@ -106,8 +107,8 @@ public class ClockService {
 	}
 
 	public List<ClockRecordSelect> getClockByWhere(String department, String user, String stratClock, String endClock,
-			String rule, String deviceId) {
-		return intelligenceDao.getClockByWhere(department, user, stratClock, endClock, rule, deviceId);
+			String rule, String companyId) {
+		return intelligenceDao.getClockByWhere(department, user, stratClock, endClock, rule, companyId);
 	}
 
 	public List<Employee> getEmployeeByCompany(String companyId) {
@@ -130,7 +131,7 @@ public class ClockService {
 	public Boolean clockTimeAppeal(String deviceId, String employeeId, String firstClock, String lastClock,
 			String appealReason, String appealContent, String auditPersonId, String appealTime) {
 		ClockAppeal clockAppeal = new ClockAppeal();
-		String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
+		String id = CommonUtil.generateRandomUUID();
 		clockAppeal.setId(id);
 		clockAppeal.setEmployeeId(employeeId);
 		clockAppeal.setFirstClock(firstClock);
@@ -258,7 +259,7 @@ public class ClockService {
 	public void insertAbonormalClockPhoto(String employeeId, String path, String deviceId) {
 		ClockAbnormal clockAbnormal = new ClockAbnormal();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
+		String id = CommonUtil.generateRandomUUID();
 		clockAbnormal.setId(id);
 		clockAbnormal.setEmployeeId(employeeId);
 		clockAbnormal.setClockTime(sdf.format(new Date()));

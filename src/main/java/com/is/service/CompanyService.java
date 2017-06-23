@@ -19,6 +19,7 @@ import com.is.model.Department;
 import com.is.model.Employee;
 import com.is.system.dao.CloudDao;
 import com.is.system.dao.IntelligenceDao;
+import com.is.util.CommonUtil;
 import com.is.util.PasswordUtil;
 import com.is.websocket.AddFuture;
 import com.is.websocket.CheckResponse;
@@ -50,7 +51,7 @@ public class CompanyService {
 			String morningTimeStart,String morningTimeEnd,String nightTimeStart,String nightTimeEnd,
 			String adminName,String password,String name,String contact){
 		Admin admin=new Admin();
-		String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
+		String id = CommonUtil.generateRandomUUID();
 		admin.setAdminId(id);
 		admin.setAuthority(2);
 		admin.setUsername(adminName);
@@ -143,7 +144,7 @@ public class CompanyService {
 	
 	public Boolean insertDepartment(String name,String people,String grade,String parentId,String companyId){
 		Department department=new Department();
-		String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
+		String id = CommonUtil.generateRandomUUID();
 		department.setId(id);
 		department.setCompanyId(companyId);
 		department.setDepartment(name);

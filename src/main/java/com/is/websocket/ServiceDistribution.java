@@ -24,6 +24,7 @@ import org.springframework.stereotype.Component;
 
 import com.is.map.ChannelNameToDeviceMap;
 import com.is.map.DeviceService;
+import com.is.map.DeviceToVersionMap;
 import com.is.map.PhotoMap;
 import com.is.model.CollectionPhoto;
 import com.is.model.Company;
@@ -64,21 +65,23 @@ public class ServiceDistribution implements ApplicationContextAware {
 	}
 
 	public static JSONObject handleJson1_1(JSONObject jsonObject, ChannelHandlerContext socketChannel) {
-		String devcieSn = jsonObject.getString("deviceSn");
-		if (DeviceService.getSocketMap(devcieSn) != null) {
-			ChannelHandlerContext old = DeviceService.getSocketMap(devcieSn);
+		String deviceSn = jsonObject.getString("deviceSn");
+		String versionCode = jsonObject.optString("version","0.0.0");
+		if (DeviceService.getSocketMap(deviceSn) != null) {
+			ChannelHandlerContext old = DeviceService.getSocketMap(deviceSn);
 			ChannelNameToDeviceMap.removeDeviceMap(old.channel().id());
-			DeviceService.removeSocketMap(devcieSn);
+			DeviceService.removeSocketMap(deviceSn);
 		}
-		DeviceService.addSocketMap(devcieSn, socketChannel);
-		ChannelNameToDeviceMap.addDeviceMap(socketChannel.channel().id(), devcieSn);
-
+		DeviceService.addSocketMap(deviceSn, socketChannel);
+		ChannelNameToDeviceMap.addDeviceMap(socketChannel.channel().id(), deviceSn);
+		DeviceToVersionMap.addVersionMap(deviceSn, versionCode);
+		
 		CompanyService companyService = (CompanyService) ServiceDistribution.getContext().getBean("companyService");
-		Company company = companyService.getCompanyInfo(devcieSn);
+		Company company = companyService.getCompanyInfo(deviceSn);
 		JSONObject responseCode = new JSONObject();
 		responseCode.put("type", 1);
 		responseCode.put("code", 2);
-		responseCode.put("deviceSn", devcieSn);
+		responseCode.put("deviceSn", deviceSn);
 		if (company != null) {
 			responseCode.put("company", company.getCompanyName());
 			responseCode.put("address", company.getAddress());
@@ -671,6 +674,7 @@ public class ServiceDistribution implements ApplicationContextAware {
 			excuteWrite(result, channel);
 			return true;
 		} else {
+			System.out.println("channel not established");
 			return false;
 		}
 
@@ -1199,5 +1203,18 @@ public class ServiceDistribution implements ApplicationContextAware {
 		if (null != channel) {
 			excuteWrite(result, channel);
 		}
+	}
+	
+	public static void main(String[] args){
+		JSONObject jsonObject=new JSONObject();
+		jsonObject.put("type", 12);
+		jsonObject.put("code", 12);
+		jsonObject.put("operate", "add");
+		jsonObject.put("visitorId", "123");
+		jsonObject.put("visitorFold", "/home");
+		jsonObject.put("visitorName", "keji");
+		jsonObject.put("birth", "1990");
+		jsonObject.put("potrait", "");
+		System.out.println(jsonObject.optString("keji","000"));
 	}
 }

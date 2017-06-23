@@ -24,6 +24,9 @@ public class VersionUpdate {
 	@Column(name = "path")
 	private String path;
 	
+	@Column(name = "device_id")
+	private String deviceId;
+	
 	@Column(name = "created_at")
 	private Date createdAt;
 	
@@ -54,6 +57,14 @@ public class VersionUpdate {
 		this.path = path;
 	}
 
+	public String getDeviceId() {
+		return deviceId;
+	}
+
+	public void setDeviceId(String deviceId) {
+		this.deviceId = deviceId;
+	}
+	
 	public Date getCreatedAt() {
 		return createdAt;
 	}

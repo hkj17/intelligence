@@ -28,6 +28,7 @@ import com.is.model.Visitor;
 import com.is.model.VisitorInfo;
 import com.is.service.VisitorService;
 import com.is.util.BusinessHelper;
+import com.is.util.CommonUtil;
 import com.is.util.LoginRequired;
 import com.is.util.ResponseFactory;
 import static com.is.constant.ParameterKeys.VISITOR_FACE;
@@ -69,7 +70,7 @@ public class VisitorHandler {
 			@FormDataParam("photo") InputStream uploadedInputStream,@FormDataParam("photo") FormDataContentDisposition fileDetail, @Context HttpServletRequest request)
 			throws IOException, InterruptedException, ExecutionException, TimeoutException {
 		String deviceId=(String) request.getSession().getAttribute("deviceSn");
-		String id = UUID.randomUUID().toString().trim().replaceAll("-", "");
+		String id = CommonUtil.generateRandomUUID();
 		String path=VISITOR_FACE+deviceId+"/"+id+".jpg";
 		visitorService.rememPhoto(path, uploadedInputStream);
 		boolean state=visitorService.addVisitorInfoByMobile(id, name, company, position, telphone, email, companyUrl, deviceId, importance, birth, path);

@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
 
 
 /** 
@@ -384,10 +385,7 @@ public class CommonUtil {
 	    	return originalStr;
 	    }
 	    
-	public static void main(String[] args){
-//longToBytes(0x00fEABl);
-//System.out.println(bytesToDouble(new byte[]{0x00,0x00,0x00,(byte) 0x00,0x00,0x00,0x00,0x00}));
-		String originalStr = ":钥匙+:指纹";
-		System.out.println(buildStringWithLabel(originalStr,":","1号","2号"));
-	}
+	    public static String generateRandomUUID(){
+	    	return UUID.randomUUID().toString().trim().replaceAll("-", "");
+	    }
 }
