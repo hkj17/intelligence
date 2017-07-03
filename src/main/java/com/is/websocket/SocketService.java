@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.apache.log4j.Logger;
 
+import com.is.constant.ParameterKeys;
 import com.is.map.EmployeeFoldMap;
 import com.is.map.FutureMap;
 
@@ -13,7 +14,6 @@ import io.netty.channel.ChannelHandlerContext;
 import net.sf.json.JSONObject;
 public class SocketService {
 	private static Logger logger = Logger.getLogger(SocketService.class);
-	//private static ByteArrayOutputStream databuff = new ByteArrayOutputStream();
 
 	public static void handleSocketMsg(byte[] bytes,ChannelHandlerContext socketChannel) throws IOException {
 		int len=bytes.length;
@@ -31,7 +31,6 @@ public class SocketService {
 	public static void excuteWrite(byte[] responseMsg,ChannelHandlerContext socketChannel){
 		ByteBuf encoded = Unpooled.buffer();
 		encoded.writeBytes(responseMsg);
-		//System.out.println(encoded.getByte(0));
 		socketChannel.write(encoded);
 		socketChannel.flush();
 	}
@@ -39,15 +38,18 @@ public class SocketService {
 	public static void handlePayload(String payload,ChannelHandlerContext socketChannel) {
 		JSONObject jsonObject = JSONObject.fromObject(payload);
 		JSONObject responseCode = new JSONObject();
-		String type = jsonObject.getString("type");
-		String code = jsonObject.getString("code");
+		String type = jsonObject.getString(ParameterKeys.TYPE);
+		String code = jsonObject.getString(ParameterKeys.CODE);
 		JSONObject log=new JSONObject();
-		log=JSONObject.fromObject(payload);;
-		if(log.containsKey("photo")){
-			log.remove("photo");
+		log=JSONObject.fromObject(payload);
+		if(log.containsKey(ParameterKeys.PHOTO)){
+			log.remove(ParameterKeys.PHOTO);
 		}
-		if(log.containsKey("templatePic")){
-			log.remove("templatePic");
+		if(log.containsKey(ParameterKeys.IMAGE_STAT)){
+			log.remove(ParameterKeys.IMAGE_STAT);
+		}
+		if(log.containsKey(ParameterKeys.PORTRAIT)){
+			log.remove(ParameterKeys.PORTRAIT);
 		}
 		logger.info(log);
 		String anType=null;
@@ -179,7 +181,6 @@ public class SocketService {
 			 if(future!=null){
 				 future.setResponse("101_2");
 			 }
-			 System.out.println("accept!");
 		}
 		else if (type.equals("102") && code.equals("2")) {
 			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.channel().id().asLongText()+"102_2");
@@ -190,20 +191,24 @@ public class SocketService {
 		else if (type.equals("103") && code.equals("2")) {
 			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.channel().id().asLongText()+"103_2");
 			 String employeeId=null;
+			 String templateId=null;
+			 String strangerId=null;
 			 if(future!=null){
-				 employeeId=jsonObject.getString("employeeId");
-				 String employeeFold = jsonObject.getString("employeeFold");
+				 employeeId=jsonObject.getString(ParameterKeys.EMPLOYEE_ID);
+				 templateId=jsonObject.getString(ParameterKeys.TEMPLATE_ID);
+				 strangerId=jsonObject.getString(ParameterKeys.STRANGER_ID);
+				 String employeeFold = jsonObject.getString(ParameterKeys.EMPLOYEE_FOLD);
 				 EmployeeFoldMap.setData(employeeId, employeeFold);	 
 				 future.setResponse("103_2");
 			 }
-			 ServiceDistribution.handleJson109_1(employeeId, socketChannel);
+			 ServiceDistribution.handleJson109_1(employeeId, templateId, strangerId, socketChannel);
 		}
 		else if (type.equals("103") && code.equals("12")) {
 			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.channel().id().asLongText()+"103_12");
 			 if(future!=null){
 				 future.setResponse("103_12");
 			 }
-			 String visitorId=jsonObject.getString("visitorId");
+			 String visitorId=jsonObject.getString(ParameterKeys.VISITOR_ID);
 			 ServiceDistribution.handleJson109_11(visitorId, socketChannel);
 			 ServiceDistribution.handleJson103_12(jsonObject,socketChannel);
 		}
@@ -250,6 +255,12 @@ public class SocketService {
 				 future.setResponse("105_2");
 			 }
 		}
+		else if (type.equals("105") && code.equals("4")){
+			SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.channel().id().asLongText()+"105_4");
+			 if(future!=null){
+				 future.setResponse("105_4");
+			 }
+		}
 		else if (type.equals("105") && code.equals("12")) {
 			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.channel().id().asLongText()+"105_12");
 			 if(future!=null){
@@ -263,6 +274,10 @@ public class SocketService {
 			 }
 		}
 		else if (type.equals("109") && code.equals("2")) {
+			SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.channel().id().asLongText()+"109_2");
+			 if(future!=null){
+				 future.setResponse("109_2");
+			 }
 			ServiceDistribution.handleJson109_2(jsonObject,socketChannel);
 		}
 		else if (type.equals("109") && code.equals("12")) {
@@ -353,14 +368,14 @@ public class SocketService {
 		System.arraycopy(json, 0, result, 36, len);
 		
 		//打印的日志去掉base64字符串
-		if(jsonObject.containsKey("photo")){
-			jsonObject.remove("photo");
+		if(jsonObject.containsKey(ParameterKeys.PHOTO)){
+			jsonObject.remove(ParameterKeys.PHOTO);
 		}
-		if(jsonObject.containsKey("potrait")){
-			jsonObject.remove("potrait");
+		if(jsonObject.containsKey(ParameterKeys.PORTRAIT)){
+			jsonObject.remove(ParameterKeys.PORTRAIT);
 		}
-		if(jsonObject.containsKey("templatePic")){
-			jsonObject.remove("templatePic");
+		if(jsonObject.containsKey(ParameterKeys.IMAGE_STAT)){
+			jsonObject.remove(ParameterKeys.IMAGE_STAT);
 		}
 		if(jsonObject.containsKey("adPic")){
 			jsonObject.remove("adPic");

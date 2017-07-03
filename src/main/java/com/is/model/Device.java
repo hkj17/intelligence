@@ -20,7 +20,7 @@ public class Device implements Serializable{
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = -2641474378626130139L;
 
 	@Id
 	@Column(name = "id")

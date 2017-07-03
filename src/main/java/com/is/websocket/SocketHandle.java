@@ -58,13 +58,10 @@ public class SocketHandle implements ApplicationListener<ContextRefreshedEvent>{
 
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent arg0) {
-		// TODO Auto-generated method stub
-		// System.out.println("瀵拷婵鎯庨崝鈺怌P閺堝秴濮熼崳锟�...");
 		logger.info("starting tcp...");
 		try {
 			SocketHandle.start();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

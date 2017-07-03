@@ -38,12 +38,15 @@ import com.is.model.EmployeeClock;
 import com.is.model.EmployeeId;
 import com.is.model.Message;
 import com.is.model.Notification;
+import com.is.model.Template;
 import com.is.model.VersionUpdate;
 import com.is.model.Visitor;
 import com.is.model.VisitorInfo;
 import com.is.system.dao.CloudDao;
 import com.is.system.dao.IntelligenceDao;
 import com.is.util.Page;
+
+import io.netty.util.internal.StringUtil;
 
 /**
  * @author lishuhuan
@@ -99,25 +102,25 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 				+ companyId + "'";
 		Map<Integer, String> map = new HashMap<>();
 		int i = 0;
-		if (user != null && !"".equals(user)) {
+		if (!StringUtil.isNullOrEmpty(user)) {
 			sql = sql + " and (b.pingyin like ? or b.pingyin like ? or b.employee_name like ?)";
 			map.put(i, user + '%');
 			map.put(i + 1, '%' + "," + user + '%');
 			map.put(i + 2, '%' + user + '%');
 			i = i + 3;
 		}
-		if (startClock != null && !"".equals(startClock)) {
+		if (!StringUtil.isNullOrEmpty(startClock)) {
 			startClock = startClock + " 00:00:00";
 			sql += " and c.start_clock>=?";
 			map.put(i, startClock);
 			i = i + 1;
 		}
-		if (department != null && !"".equals(department)) {
+		if (!StringUtil.isNullOrEmpty(department)) {
 			sql += " and b.department_id=?";
 			map.put(i, department);
 			i = i + 1;
 		}
-		if (endClock != null && !"".equals(endClock)) {
+		if (!StringUtil.isNullOrEmpty(endClock)) {
 			endClock = endClock + " 23:59:59";
 			sql += " and c.start_clock<=?";
 			map.put(i, endClock);
@@ -141,7 +144,7 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 		sql += " and a.admin.authority!=0";
 		int i=0;
 		Map<Integer, String> map = new HashMap<>();
-		if (department != null && !"".equals(department)) {
+		if (!StringUtil.isNullOrEmpty(department)) {
 			if(department.equals("0")){
 				sql = sql + " and a.department=null";
 			}
@@ -151,7 +154,7 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 				i = i + 1;
 			}
 		}
-		if (word != null && !"".equals(word)) {
+		if (!StringUtil.isNullOrEmpty(word)) {
 			sql += " and (a.pingyin like ? or a.pingyin like ? or a.employeeName like ?)";
 			map.put(i, word + "%");
 			map.put(i + 1, "%" + "," + word + "%");
@@ -286,43 +289,41 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 	}
 
 	@Override
-	public List<Visitor> indexVisitor(String depaertmentId, String name, String startTime, String endTime,
+	public List<Visitor> indexVisitor(String departmentId, String name, String startTime, String endTime,
 			String deviceId) {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 		String sql = "select a from Visitor a where a.deviceId='" + deviceId + "' ";
 		Map<Integer, Object> map = new HashMap<>();
 		int i = 0;
-		if (depaertmentId != null && !"".equals(depaertmentId)) {
+		if (!StringUtil.isNullOrEmpty(departmentId)) {
 			sql = sql + " and a.employee.department.id=?";
-			map.put(i, depaertmentId);
+			map.put(i, departmentId);
 			i = i + 1;
 		}
-		if (name != null && !"".equals(name)) {
+		if (!StringUtil.isNullOrEmpty(name)) {
 			sql += " and (a.employee.pingyin like ? or a.employee.pingyin like ? or a.employee.employeeName like ?)";
 			map.put(i, name + "%");
 			map.put(i + 1, "%" + "," + name + "%");
 			map.put(i + 2, "%" + name + "%");
 			i = i + 3;
 		}
-		if (startTime != null && !"".equals(startTime)) {
+		if (!StringUtil.isNullOrEmpty(startTime)) {
 			startTime=startTime+" 00:00:00";
 			sql += " and a.startTime>=?";
 			try {
 				map.put(i, sdf.parse(startTime));
 			} catch (ParseException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			i = i + 1;
 		}
-		if (endTime != null && !"".equals(endTime)) {
+		if (!StringUtil.isNullOrEmpty(endTime)) {
 			endTime=endTime+" 23:59:59";
 			sql += " and a.startTime<=?";
 			try {
 				map.put(i, sdf.parse(endTime));
 			} catch (ParseException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -336,7 +337,7 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 	}
 
 	@Override
-	public List<Visitor> indexVisitorPath(String depaertmentId, String name, String startTime, String endTime,
+	public List<Visitor> indexVisitorPath(String departmentId, String name, String startTime, String endTime,
 			String deviceId, int firstResult) {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -344,34 +345,32 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 				+ deviceId + "' ";
 		Map<Integer, Object> map = new HashMap<>();
 		int i = 0;
-		if (depaertmentId != null && !"".equals(depaertmentId)) {
+		if (!StringUtil.isNullOrEmpty(departmentId)) {
 			sql = sql + " and b.department_id=?";
-			map.put(i, depaertmentId);
+			map.put(i, departmentId);
 			i = i + 1;
 		}
-		if (name != null && !"".equals(name)) {
+		if (!StringUtil.isNullOrEmpty(name)) {
 			sql += " and (b.pingyin like ? or b.pingyin like ? or b.employee_name like ?)";
 			map.put(i, name + "%");
 			map.put(i + 1, "%" + "," + name + "%");
 			map.put(i + 2, "%" + name + "%");
 			i = i + 3;
 		}
-		if (startTime != null && !"".equals(startTime)) {
+		if (!StringUtil.isNullOrEmpty(startTime)) {
 			sql += " and a.start_time>=?";
 			try {
 				map.put(i, sdf.parse(startTime));
 			} catch (ParseException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			i = i + 1;
 		}
-		if (endTime != null && !"".equals(endTime)) {
+		if (!StringUtil.isNullOrEmpty(endTime)) {
 			sql += " and a.start_time<=?";
 			try {
 				map.put(i, sdf.parse(endTime));
 			} catch (ParseException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -387,41 +386,39 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 	}
 
 	@Override
-	public int indexVisitorCount(String depaertmentId, String name, String startTime, String endTime, String deviceId) {
+	public int indexVisitorCount(String departmentId, String name, String startTime, String endTime, String deviceId) {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
 		String sql = "select count(*) from visitor a left join employee b on a.employee_id=b.employee_id where a.device_id='"
 				+ deviceId + "' ";
 		Map<Integer, Object> map = new HashMap<>();
 		int i = 0;
-		if (depaertmentId != null && !"".equals(depaertmentId)) {
+		if (!StringUtil.isNullOrEmpty(departmentId)) {
 			sql = sql + " and b.department_id=?";
-			map.put(i, depaertmentId);
+			map.put(i, departmentId);
 			i = i + 1;
 		}
-		if (name != null && !"".equals(name)) {
+		if (!StringUtil.isNullOrEmpty(name)) {
 			sql += " and (b.pingyin like ? or b.pingyin like ? or b.employee_name like ?)";
 			map.put(i, name + "%");
 			map.put(i + 1, "%" + "," + name + "%");
 			map.put(i + 2, "%" + name + "%");
 			i = i + 3;
 		}
-		if (startTime != null && !"".equals(startTime)) {
+		if (!StringUtil.isNullOrEmpty(startTime)) {
 			sql += " and a.start_time>=?";
 			try {
 				map.put(i, sdf.parse(startTime));
 			} catch (ParseException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			i = i + 1;
 		}
-		if (endTime != null && !"".equals(endTime)) {
+		if (StringUtil.isNullOrEmpty(endTime)) {
 			sql += " and a.start_time<=?";
 			try {
 				map.put(i, sdf.parse(endTime));
 			} catch (ParseException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -455,12 +452,12 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 		String sql = "select a.admin,a.employeeName from Employee a where a.admin.deviceId='" + deviceId + "'";
 		Map<Integer, Object> map = new HashMap<>();
 		int i = 0;
-		if (name != null && !"".equals(name)) {
+		if (!StringUtil.isNullOrEmpty(name)) {
 			sql = sql + " and a.employeeName like ?";
 			map.put(i, '%' + name + '%');
 			i = i + 1;
 		}
-		if (auth != null && !"".equals(auth)) {
+		if (!StringUtil.isNullOrEmpty(auth)) {
 			sql += " and a.admin.authority=?";
 			map.put(i, Integer.parseInt(auth));
 		}
@@ -475,7 +472,6 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 
 	@Override
 	public Visitor getVisitorById(String id) {
-		// TODO Auto-generated method stub
 		Visitor visitor = (Visitor) cloudDao.getByHql(Hql.GET_VISITOR_BY_ID, id);
 		return visitor;
 	}
@@ -496,19 +492,16 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 
 	@Override
 	public List<ClockAppeal> getClockTimeAppealByEmployee(String employeeId) {
-		// TODO Auto-generated method stub
 		return cloudDao.findByHql(Hql.GET_CLOCK_APPEAL_BY_EMPLOYEE, employeeId);
 	}
 
 	@Override
 	public ClockAppeal getClockAppealById(String id) {
-		// TODO Auto-generated method stub
 		return (ClockAppeal) cloudDao.getByHql(Hql.GET_CLOCK_APPEAL_BY_ID, id);
 	}
 
 	@Override
 	public Map<String, String> getDepartmentOrganization(String departmentId, String grade) {
-		// TODO Auto-generated method stub
 		String sql = null;
 		if (grade.equals("1")) {
 			sql = "select a.department as one from department a where a.id='" + departmentId + "'";
@@ -531,13 +524,11 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 
 	@Override
 	public List<ClockAppeal> getClockAuditList(String auditId) {
-		// TODO Auto-generated method stub
 		return cloudDao.findByHql(Hql.GET_CLOCK_APPEAL_BY_AUDIT, auditId);
 	}
 
 	@Override
 	public List<ClockTime> getDetailClock(String employeeId,String time) {
-		// TODO Auto-generated method stub
 		String sql = "SELECT a,b.employeeName,b.jobId,b.department.department from ClockTime a,Employee b where b.employeeId=a.employeeId and a.employeeId=? and a.clockTime like ? order by a.clockTime";
 		Query query = getSession().createQuery(sql);
 		query.setParameter(0, employeeId);
@@ -558,13 +549,13 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 				+ deviceId + "'";
 		Map<Integer, String> map = new HashMap<>();
 		int i = 0;
-		if (startTime != null && !"".equals(startTime)) {
+		if (!StringUtil.isNullOrEmpty(startTime)) {
 			startTime=startTime+" 00:00:00";
 			sql += " and a.clockTime>=?";
 			map.put(i, startTime);
 			i = i + 1;
 		}
-		if (endTime != null && !"".equals(endTime)) {
+		if (!StringUtil.isNullOrEmpty(endTime)) {
 			endTime=endTime+" 23:59:59";
 			sql += " and a.clockTime<=?";
 			map.put(i, endTime);
@@ -579,14 +570,12 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 
 	@Override
 	public ClockAbnormal getHandClockById(String id) {
-		// TODO Auto-generated method stub
 		return (ClockAbnormal) cloudDao.getByHql(Hql.GET_CLOCK_ABNORMAL_BY_ID, id);
 	}
 
 	@Override
 	public List<VisitorInfo> getVisitorInfoByWhere(String companyId, String name) {
-		// TODO Auto-generated method stub
-		if (name == null || "".equals(name)) {
+		if (!StringUtil.isNullOrEmpty(name)) {
 			return cloudDao.findByHql(Hql.GET_VISITOR_INFO_LIST, companyId);
 		} else {
 			return cloudDao.findByHql(Hql.GET_VISITOR_INFO_BY_NAME, companyId, name);
@@ -600,12 +589,12 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 				+ deviceId + "' ";
 		Map<Integer, Object> map = new HashMap<>();
 		int i = 0;
-		if (startTime != null && !"".equals(startTime)) {
+		if (!StringUtil.isNullOrEmpty(startTime)) {
 			sql += " and time>=?";
 			map.put(i, startTime);
 			i = i + 1;
 		}
-		if (endTime != null && !"".equals(endTime)) {
+		if (!StringUtil.isNullOrEmpty(endTime)) {
 			endTime=endTime+" 23:59:59";
 			sql += " and time<=?";
 			map.put(i, endTime);
@@ -627,13 +616,11 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 
 	@Override
 	public CollectionPhoto getCollectionPhotoById(String id) {
-		// TODO Auto-generated method stub
 		return (CollectionPhoto) cloudDao.getByHql(Hql.GET_COLLECTION_PHOTO_BY_ID, id);
 	}
 
 	@Override
 	public CollectionPhoto getCollectByStrangerId(String id) {
-		// TODO Auto-generated method stub
 		return (CollectionPhoto) cloudDao.getByHql(Hql.GET_COLLECTION_BY_STRANGER_ID, id);
 	}
 
@@ -647,25 +634,21 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 
 	@Override
 	public List<Appointment> getAppointmentByUser(String userid) {
-		// TODO Auto-generated method stub
 		return cloudDao.findByHql(Hql.GET_APPOINTMENT_BY_USER, userid);
 	}
 
 	@Override
 	public Employee getEmployeeByPhotoPath(String path) {
-		// TODO Auto-generated method stub
 		return (Employee) cloudDao.getByHql(Hql.GET_EMPLOYEE_BY_PHOTO_PATH, path);
 	}
 
 	@Override
 	public List<Appointment> getAppointmentByVisitor(String visitorId) {
-		// TODO Auto-generated method stub
 		return cloudDao.findByHql(Hql.GET_APPOINTMENT_BY_VISITOR, visitorId);
 	}
 
 	@Override
 	public List<String> getDeviceList(String deviceId) {
-		// TODO Auto-generated method stub
 		Query query = getSession().createSQLQuery("select a.device_id from device a LEFT JOIN device b on a.company_id=b.company_id where b.device_id='"+deviceId+"' and a.device_id!='"+deviceId+"'");
 		List<String> result=query.list();
 		return result;
@@ -673,7 +656,6 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 	
 	@Override
 	public List<String> getDeviceListAll(String deviceId) {
-		// TODO Auto-generated method stub
 		Query query = getSession().createSQLQuery("select a.device_id from device a LEFT JOIN device b on a.company_id=b.company_id where b.device_id='"+deviceId+"'");
 		List<String> result=query.list();
 		return result;
@@ -681,7 +663,6 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 
 	@Override
 	public String getCompanyIdByDeviceId(String deviceId) {
-		// TODO Auto-generated method stub
 		Query query = getSession().createSQLQuery(
 				"select company_id from device where device_id='"+deviceId+"'");
 		String companyId = query.uniqueResult().toString();
@@ -690,9 +671,8 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 
 	@Override
 	public List<Employee> getEmployeeByIds(String employeeIds,String deviceId) {
-		// TODO Auto-generated method stub
 		Query query=null;
-		if(employeeIds!=null && !"".equals(employeeIds)){
+		if(!StringUtil.isNullOrEmpty(employeeIds)){
 			query = getSession().createSQLQuery("select a.* from employee a LEFT JOIN device b on b.company_id=a.company_id where b.device_id='"+deviceId+"' and a.employee_id not in "+employeeIds);
 		}
 		else{
@@ -704,9 +684,8 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 
 	@Override
 	public List<VisitorInfo> getVisitorByIds(String visitorIds,String deviceId) {
-		// TODO Auto-generated method stub
 		Query query=null;
-		if(visitorIds!=null && !"".equals(visitorIds)){
+		if(!StringUtil.isNullOrEmpty(visitorIds)){
 			query = getSession().createSQLQuery("select a.* from visitor_info a LEFT JOIN device b on b.company_id=a.company_id where b.device_id='"+deviceId+"' and a.id not in "+visitorIds);
 		}
 		else{
@@ -718,7 +697,6 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 
 	@Override
 	public List<String> getExistEmployee(String employeeIds, String deviceId) {
-		// TODO Auto-generated method stub
 		Query query = getSession().createSQLQuery("select a.employee_id from employee a LEFT JOIN device b on b.company_id=a.company_id where b.device_id='"+deviceId+"' and a.employee_id in "+employeeIds);
 		List<String> list = query.list();
 		return list;
@@ -726,7 +704,6 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 
 	@Override
 	public List<String> getExistVisitor(String visitorIds, String deviceId) {
-		// TODO Auto-generated method stub
 		Query query = getSession().createSQLQuery("select a.id from visitor_info a LEFT JOIN device b on b.company_id=a.company_id where b.device_id='"+deviceId+"' and a.id not in "+visitorIds);
 		List<String> list = query.list();
 		return list;
@@ -734,7 +711,6 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 
 	@Override
 	public List<ClockRecordDept> getClockByDepartmentData(String COMPANY_ID,String departmentId, String date) {
-		// TODO Auto-generated method stub
 		//获取公司考勤规则
 		Query company = getSession().createSQLQuery("select * from company where company_id='"+COMPANY_ID+"'");
 		List<Company> rules = ((SQLQuery) company).addEntity(Company.class).list();
@@ -776,7 +752,6 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 
 	private int checkstate(String morning_start, String morning_end,
 			String night_start, String startClock, String endClock) {
-		// TODO Auto-generated method stub
 		SimpleDateFormat simpleDateFormat =new SimpleDateFormat("HH:mm:ss");
 		try {
 			if( null != endClock && null != night_start && null != endClock){
@@ -801,7 +776,6 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 			
 			
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -812,7 +786,6 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 
 	@Override
 	public List<EmployeeClock> getClockByEmployeeData(String employee_id,String company_id,String date) {
-		// TODO Auto-generated method stub
 		//获取公司考勤规则
 		Query company = getSession().createSQLQuery("select * from company where company_id='"+company_id+"'");
 		List<Company> rules = ((SQLQuery) company).addEntity(Company.class).list();
@@ -867,7 +840,6 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 
 	@Override
 	public HSSFWorkbook export(List<Map<String, String>> list) {
-		// TODO Auto-generated method stub
 		String[] excelHeader = { "Sno", "Name", "Age"};
 		HSSFWorkbook wb = new HSSFWorkbook();    
         HSSFSheet sheet = wb.createSheet("Campaign");    
@@ -881,9 +853,22 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
             cell.setCellStyle(style);    
             sheet.autoSizeColumn(i);    
         } 
-        
-		
 		return wb;
+	}
+
+	@Override
+	public Template getTemplateById(String templateId) {
+		return (Template) cloudDao.getByHql(Hql.GET_TEMPLATE_BY_ID, templateId);
+	}
+
+	@Override
+	public Template getTemplateByPhotoPath(String path) {
+		return (Template) cloudDao.getByHql(Hql.GET_TEMPLATE_BY_PHOTO_PATH, path);
+	}
+
+	@Override
+	public List<Template> getTemplatesByEmployeeId(String employeeId) {
+		return cloudDao.findByHql(Hql.GET_TEMPLATES_BY_EMPLOYEE_ID, employeeId);
 	}
 
 }

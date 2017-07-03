@@ -38,6 +38,7 @@ import com.is.websocket.ServiceDistribution;
 import com.is.websocket.SyncFuture;
 
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.util.internal.StringUtil;
 
 /**
  * @author lishuhuan
@@ -118,10 +119,10 @@ public class ClockService {
 	public Boolean addClock(String employeeId, String morningClock, String nightClock) {
 		ClockRecord clockRecord = new ClockRecord();
 		clockRecord.setEmployeeId(employeeId);
-		if (!"".equals(morningClock) && null != morningClock) {
+		if (!StringUtil.isNullOrEmpty(morningClock)) {
 			clockRecord.setStartClock(morningClock);
 		}
-		if (!"".equals(nightClock) && null != nightClock) {
+		if (!StringUtil.isNullOrEmpty(nightClock)) {
 			clockRecord.setEndClock(nightClock);
 		}
 		cloudDao.add(clockRecord);
@@ -157,7 +158,6 @@ public class ClockService {
 			try {
 				addClocknormal(deviceId, abnormal.getEmployeeId(), abnormal.getClockTime());
 			} catch (ParseException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -186,10 +186,10 @@ public class ClockService {
 		ClockRecord clockRecord = new ClockRecord();
 		// Employee employee=intelligenceDao.getEmployeeById(employeeId);
 		clockRecord.setEmployeeId(employeeId);
-		if (!"".equals(morningClock) && null != morningClock) {
+		if (!StringUtil.isNullOrEmpty(morningClock)) {
 			clockRecord.setStartClock(morningClock);
 		}
-		if (!"".equals(nightClock) && null != nightClock) {
+		if (!StringUtil.isNullOrEmpty(nightClock)) {
 			clockRecord.setEndClock(nightClock);
 		}
 		clockRecord.setCrId(Integer.parseInt(crId));
@@ -282,22 +282,18 @@ public class ClockService {
 
 	public List<ClockRecordDept> getClockByDepartmentData(String company_id,
 			String departmentId, String date) {
-		// TODO Auto-generated method stub
 		return intelligenceDao.getClockByDepartmentData(company_id, departmentId, date);
 	}
 
 	public List<EmployeeClock> getClockByEmployeeData(String employee_id,String company_id,String date) {
-		// TODO Auto-generated method stub
 		return intelligenceDao.getClockByEmployeeData(employee_id,company_id, date);
 	}
 
 	public List<EmployeeClock> getClockByEmployeeDataKey(String key,String company_id, String date) {
-		// TODO Auto-generated method stub
 		return intelligenceDao.getClockByEmployeeDataKey(key,company_id, date);
 	}
 
 	public HSSFWorkbook export(List<Map<String, String>> list) {
-		// TODO Auto-generated method stub
 		return intelligenceDao.export(list);
 	}
 

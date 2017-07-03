@@ -51,7 +51,6 @@ public class VisitorService {
 	private CloudDao cloudDao;
 
 	public void rememPhoto(String path, InputStream uploadedInputStream) throws IOException {
-		// path="D:\\IotCloud\\111\\1.jpg";
 		// 1、创建一个DiskFileItemFactory工厂
 		DiskFileItemFactory factory = new DiskFileItemFactory();
 		// 2、创建一个文件上传解析器
@@ -70,10 +69,8 @@ public class VisitorService {
 				out.write(buffer, 0, len);
 			}
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
 			uploadedInputStream.close();
@@ -355,7 +352,6 @@ public class VisitorService {
 				visitor.setStartTime(new Date());
 			}
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		visitor.setDeviceId(deviceId);
@@ -393,7 +389,6 @@ public class VisitorService {
 	}
 
 	public void updateVisitorAndSync(String visitorId, String visitorFold, String deviceId) {
-		// TODO Auto-generated method stub
 		VisitorInfo visitorInfo=intelligenceDao.getVisitorInfoById(visitorId);
 		visitorInfo.setVisitorFold(visitorFold);
 		cloudDao.update(visitorInfo);
@@ -408,12 +403,10 @@ public class VisitorService {
 	}
 
 	public List<VisitorInfo> getVisitorByIds(String visitorIds, String deviceId) {
-		// TODO Auto-generated method stub
 		return intelligenceDao.getVisitorByIds(visitorIds,deviceId);
 	}
 
 	public List<String> getExistVisitor(String visitorIds, String deviceId) {
-		// TODO Auto-generated method stub
 		return intelligenceDao.getExistVisitor(visitorIds,deviceId);
 	}
 

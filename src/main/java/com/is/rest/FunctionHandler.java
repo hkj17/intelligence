@@ -2,6 +2,7 @@ package com.is.rest;
 
 import static com.is.constant.ParameterKeys.EMPLOYEE_ID;
 import static com.is.constant.ParameterKeys.ADVERTISE_PHOTO;
+import static com.is.constant.ParameterKeys.DEVICE_SN;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,6 +29,7 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.is.constant.ParameterKeys;
 import com.is.constant.ResponseCode;
 import com.is.map.DeviceService;
 import com.is.map.DeviceToVersionMap;
@@ -70,7 +72,7 @@ public class FunctionHandler {
 	@POST
 	@Path("/autoUpdate")
 	public Response autoUpdate(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws IOException{
-		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		String deviceId=(String) request.getSession().getAttribute(DEVICE_SN);
 		VersionUpdate update=employeeService.autoUpdate(deviceId);
 		SyncFuture<String> future=AddFuture.setFuture(deviceId,"114_2");
 		CheckResponse response=new CheckResponse(deviceId, "114_2",future);
@@ -86,7 +88,7 @@ public class FunctionHandler {
 	@POST
 	@Path("/checkUpdate")
 	public Response checkUpdate(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams){
-		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		String deviceId=(String) request.getSession().getAttribute(DEVICE_SN);
 		String currentVersion = DeviceToVersionMap.getVersionMap(deviceId);
 		VersionUpdate update=employeeService.autoUpdate(deviceId);
 		if(update != null){
@@ -102,7 +104,7 @@ public class FunctionHandler {
 	@POST
 	@Path("/systemVoice")
 	public Response getSystemVoice(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws IOException, InterruptedException, ExecutionException, TimeoutException{
-		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		String deviceId=(String) request.getSession().getAttribute(DEVICE_SN);
 		SyncFuture<String> future=new SyncFuture<>();
 		 ChannelHandlerContext ctx=DeviceService.getSocketMap(deviceId);
 		 if(ctx==null){
@@ -121,7 +123,7 @@ public class FunctionHandler {
 	@POST
 	@Path("/modifySystemVoice")
 	public Response modifySystemVoice(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws IOException{
-		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		String deviceId=(String) request.getSession().getAttribute(DEVICE_SN);
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		SyncFuture<String> future=AddFuture.setFuture(deviceId,"112_12");
 		CheckResponse response=new CheckResponse(deviceId, "112_12",future);
@@ -137,7 +139,7 @@ public class FunctionHandler {
 	@POST
 	@Path("/resetWifiPassword")
 	public Response resetWifiPassword(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws IOException{
-		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		String deviceId=(String) request.getSession().getAttribute(DEVICE_SN);
 		SyncFuture<String> future=AddFuture.setFuture(deviceId,"113_2");
 		CheckResponse response=new CheckResponse(deviceId, "113_2",future);
 		response.start();
@@ -154,7 +156,7 @@ public class FunctionHandler {
 	@Path("/getStrangerPhoto")
 	@LoginRequired
 	public Response getStrangerPhoto(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws IOException{
-		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		String deviceId=(String) request.getSession().getAttribute(DEVICE_SN);
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		JSONObject result=employeeService.getStrangerPhoto(requestMap.get("departmentId"),requestMap.get("name"),requestMap.get("startTime"),requestMap.get("endTime"),requestMap.get("tag"),deviceId);
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, result);
@@ -164,7 +166,7 @@ public class FunctionHandler {
 	@Path("/getCollectionPhoto")
 	@LoginRequired
 	public Response getCollectionPhoto(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws IOException{
-		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		String deviceId=(String) request.getSession().getAttribute(DEVICE_SN);
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		JSONObject result=employeeService.getCollectionPhotoList(requestMap.get("startTime"),requestMap.get("endTime"),requestMap.get("tag"),deviceId);
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, result);
@@ -174,7 +176,7 @@ public class FunctionHandler {
 	@Path("/getAdvertisementPhoto")
 	@LoginRequired
 	public Response getAdvertisementPhoto(@Context HttpServletRequest request){
-		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		String deviceId=(String) request.getSession().getAttribute(DEVICE_SN);
 		File file=new File(ADVERTISE_PHOTO+deviceId);
 		List<String> list = new ArrayList<>();
 		if(file.isDirectory()){
@@ -200,7 +202,7 @@ public class FunctionHandler {
 	@Path("/deleteAdvertisementPhoto")
 	@LoginRequired
 	public Response deleteAdvertisementPhoto(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws IOException, InterruptedException, ExecutionException, TimeoutException{
-		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		String deviceId=(String) request.getSession().getAttribute(DEVICE_SN);
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		String path=requestMap.get("path");
 		
@@ -235,7 +237,7 @@ public class FunctionHandler {
 	@Consumes("multipart/form-data")
 	public Response insertAdvertisementPhoto(@Context HttpServletRequest request,@FormDataParam("photo") InputStream uploadedInputStream,
 			@FormDataParam("photo") FormDataContentDisposition fileDetail) throws IOException, InterruptedException, ExecutionException, TimeoutException{
-		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		String deviceId=(String) request.getSession().getAttribute(DEVICE_SN);
 		String id = CommonUtil.generateRandomUUID();
 		String path=ADVERTISE_PHOTO+deviceId+"/"+id+".jpg";
 		visitorService.rememPhoto(path, uploadedInputStream);
@@ -258,10 +260,31 @@ public class FunctionHandler {
 		}
 	}
 	
+	@POST
+	@Path("/getPhotoPath")
+	public Response getEmployeePhotoList(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams){
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		List<String> photos = employeeService.getEmployeePhotoList(requestMap.get(EMPLOYEE_ID));
+		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, photos);
+	}
+	
+	@POST
+	@Path("/updatePortrait")
+	public Response updateEmployeePortrait(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams){
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		boolean state = employeeService.updateEmployeePortrait(requestMap.get(EMPLOYEE_ID),requestMap.get(ParameterKeys.PHOTO_PATH));
+		if(state){
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
+		}else{
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.REQUEST_FAIL, null);
+		}
+	}
+	
+	
 	@GET
 	@Path("/camerafocus")
 	public Response camerafocus(@Context HttpServletRequest request) throws IOException, InterruptedException, ExecutionException, TimeoutException{
-		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		String deviceId=(String) request.getSession().getAttribute(DEVICE_SN);
 		SyncFuture<String> future=new SyncFuture<>();
 		 ChannelHandlerContext ctx=DeviceService.getSocketMap(deviceId);
 		 if(ctx==null){
@@ -280,7 +303,7 @@ public class FunctionHandler {
 	@POST
 	@Path("/modifyCamerafocus")
 	public Response modifyCamerafocus(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws IOException{
-		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		String deviceId=(String) request.getSession().getAttribute(DEVICE_SN);
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		SyncFuture<String> future=AddFuture.setFuture(deviceId,"119_12");
 		CheckResponse response=new CheckResponse(deviceId, "119_12",future);

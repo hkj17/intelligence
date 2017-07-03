@@ -9,17 +9,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.is.model.Employee;
+import com.is.model.Template;
 import com.is.model.VersionUpdate;
 import com.is.model.Visitor;
+import com.is.system.dao.CloudDao;
 import com.is.system.dao.IntelligenceDao;
 import com.is.util.JavaSms;
 import com.is.util.Page;
+import com.is.websocket.SocketService;
 
+import io.netty.util.internal.StringUtil;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
@@ -33,6 +38,11 @@ public class EmployeeService {
 
 	@Autowired
 	private IntelligenceDao intelligenceDao;
+	
+	@Autowired
+	private CloudDao cloudDao;
+	
+	private static Logger logger = Logger.getLogger(EmployeeService.class);
 
 	private static String ENCODING = "UTF-8";
 
@@ -52,10 +62,8 @@ public class EmployeeService {
 					+ URLEncoder.encode(employee.getEmployeeName(), ENCODING);
 			result = JavaSms.tplSendSms(tpl_value, employee.getTelphone(),tqlId);
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return result;
@@ -152,7 +160,32 @@ public class EmployeeService {
 		}
 	}
 
-	public static void main(String[] args){
-		System.out.println(EmployeeService.needUpdate("1.2.2.1", "1.2.3"));
+	public List<String> getEmployeePhotoList(String employeeId) {
+		List<String> photoPathList = new ArrayList<String>();
+		List<Template> templates = intelligenceDao.getTemplatesByEmployeeId(employeeId);
+		for(Template template: templates){
+			String path = template.getPhotoPath();
+			if(!StringUtil.isNullOrEmpty(path)){
+				photoPathList.add(path);
+			}
+		}
+		logger.info("图片列表: " + photoPathList);
+		return photoPathList;
+	}
+
+	public boolean updateEmployeePortrait(String employeeId, String photoPath) {
+		try{
+			Employee employee = intelligenceDao.getEmployeeById(employeeId);
+			if(!StringUtil.isNullOrEmpty(photoPath)){
+				employee.setPhotoPath(photoPath);
+				cloudDao.update(employee);
+				return true;
+			}else{
+				return false;
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			return false;
+		}
 	}
 }

@@ -10,6 +10,9 @@ import static com.is.constant.ParameterKeys.OLD_PASSWORD;
 import static com.is.constant.ParameterKeys.SESSION_USER;
 import static com.is.constant.ParameterKeys.USER_NAME;
 import static com.is.constant.ParameterKeys.USER_PSW;
+import static com.is.constant.ParameterKeys.DEVICE_SN;
+import static com.is.constant.ParameterKeys.COMPANY_ID;
+import static com.is.constant.ParameterKeys.PHOTO_PATH;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,6 +41,8 @@ import com.is.util.BusinessHelper;
 import com.is.util.LoginRequired;
 import com.is.util.ResponseFactory;
 
+import net.sf.json.JSONObject;
+
 @Component("adminHandler")
 @Path("admin")
 public class AdminHandle {
@@ -51,7 +56,7 @@ public class AdminHandle {
 	@Path("/AccountAssignment")
 	public Response AccountAssignment(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
-		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		String deviceId=(String) request.getSession().getAttribute(DEVICE_SN);
 		Admin admin=adminService.getAdminByName(requestMap.get(USER_NAME));
 		if(admin!=null){
 			return ResponseFactory.response(Response.Status.OK, ResponseCode.REQUEST_FAIL, "user exist!");
@@ -101,9 +106,8 @@ public class AdminHandle {
 			Admin admin2=employee.getAdmin();
 			admin2.setPassword(null);
 			employee.setAdmin(admin2);
-			request.getSession().setAttribute("companyId", employee.getCompany().getCompanyId());
-			request.getSession().setAttribute("deviceSn", admin.getDeviceId());
-			//System.out.println(request.getSession().getAttribute("deviceSn"));
+			request.getSession().setAttribute(COMPANY_ID, employee.getCompany().getCompanyId());
+			request.getSession().setAttribute(DEVICE_SN, admin.getDeviceId());
 			return ResponseFactory.response(Response.Status.OK, admin.getResponseCode(), employee);
 		}
 		return ResponseFactory.response(Response.Status.OK, admin.getResponseCode(), null);
@@ -145,7 +149,7 @@ public class AdminHandle {
 	@Path("/getUserList")
 	@LoginRequired
 	public Response getUserList(@Context HttpServletRequest request) {
-		int companyId=(int) request.getSession().getAttribute("companyId");
+		int companyId=(int) request.getSession().getAttribute(COMPANY_ID);
 		List<Employee> userlist = adminService.getEmployeeList(companyId);
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, userlist);
 	}
@@ -163,7 +167,7 @@ public class AdminHandle {
 	@LoginRequired
 	public Response deleteUser(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) throws InterruptedException, ExecutionException, TimeoutException {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
-		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		String deviceId=(String) request.getSession().getAttribute(DEVICE_SN);
 		boolean state = adminService.deleteUser(deviceId,requestMap.get(EMPLOYEE_ID));
 		if (state) {
 			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
@@ -177,7 +181,7 @@ public class AdminHandle {
 	@LoginRequired
 	public Response editEmployee(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
-		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		String deviceId=(String) request.getSession().getAttribute(DEVICE_SN);
 		boolean state = adminService.editEmployee(requestMap.get(EMPLOYEE_ID), requestMap.get(NAME),
 				requestMap.get(BIRTH), requestMap.get(CONTACT),  deviceId,
 				requestMap.get("positon"), requestMap.get("jobId"), requestMap.get("address"),
@@ -203,7 +207,7 @@ public class AdminHandle {
 	@Path("/getEmployeeByName")
 	@LoginRequired
 	public Response getEmployeeByName(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
-		int companyId=(int) request.getSession().getAttribute("companyId");
+		int companyId=(int) request.getSession().getAttribute(COMPANY_ID);
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		List<Employee> employees = adminService.getEmployeeByName(requestMap.get(EMPLOYEE_NAME),companyId);
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, employees);
@@ -238,7 +242,7 @@ public class AdminHandle {
 	@Path("/getEmployeeByWhere")
 	public Response getEmployeeByWhere(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
-		int companyId=(int) request.getSession().getAttribute("companyId");
+		int companyId=(int) request.getSession().getAttribute(COMPANY_ID);
 		List<Employee> employees = adminService.getEmployeeByWhere(requestMap.get("word"),
 				requestMap.get("department"),companyId);
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, employees);
@@ -248,7 +252,7 @@ public class AdminHandle {
 	@LoginRequired
 	@Path("/excuteCollection")
 	public Response excuteCollection(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
-		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		String deviceId=(String) request.getSession().getAttribute(DEVICE_SN);
 		boolean state = adminService.excuteCollection(deviceId);
 		if (state) {
 			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
@@ -261,7 +265,7 @@ public class AdminHandle {
 	@LoginRequired
 	@Path("/completeCollection")
 	public Response completeCollection(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) {
-		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		String deviceId=(String) request.getSession().getAttribute(DEVICE_SN);
 		String path = adminService.completeCollection(deviceId);
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, path);
 	}
@@ -271,9 +275,9 @@ public class AdminHandle {
 	@Path("/addEmployee")
 	public Response addEmployeeInfo(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) throws InterruptedException, ExecutionException, TimeoutException  {
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
-		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		String deviceId=(String) request.getSession().getAttribute(DEVICE_SN);
 		String employeeId = adminService.addEmployee(requestMap.get("name"), 
-				requestMap.get("birth"), requestMap.get("contact"),deviceId,   requestMap.get("path"), 
+				requestMap.get("birth"), requestMap.get("contact"),deviceId, requestMap.get("path"), 
 				 requestMap.get("position"), requestMap.get("jobId"),  requestMap.get("address"),  
 				 requestMap.get("email"),  requestMap.get("idCard"),
 				 requestMap.get("workPos"),requestMap.get("departmentId"),
@@ -287,9 +291,42 @@ public class AdminHandle {
 	
 	@POST
 	@LoginRequired
+	@Path("/addTemplate")
+	public Response addTemplate(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams){
+		String deviceId=(String) request.getSession().getAttribute(DEVICE_SN);
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		try {
+			JSONObject jsonObject = adminService.addTemplate(deviceId,requestMap.get(EMPLOYEE_ID),requestMap.get(PHOTO_PATH),requestMap.get("cid"));
+			if(jsonObject!=null){
+				return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, jsonObject);
+			}else{
+				return ResponseFactory.response(Response.Status.OK, ResponseCode.REQUEST_FAIL, null);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.REQUEST_FAIL, null);
+		}
+	}
+	
+	@POST
+	@LoginRequired
+	@Path("/deleteTemplate")
+	public Response deleteTemplate(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams) throws InterruptedException, ExecutionException, TimeoutException{
+		String deviceId=(String) request.getSession().getAttribute(DEVICE_SN);
+		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+		boolean state = adminService.deleteTemplate(deviceId, requestMap.get(EMPLOYEE_ID), requestMap.get(PHOTO_PATH));
+		if(state){
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
+		}else{
+			return ResponseFactory.response(Response.Status.OK, ResponseCode.REQUEST_FAIL, null);
+		}
+	}
+	
+	@POST
+	@LoginRequired
 	@Path("/searchAdmin")
 	public Response searchAdmin(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams)  {
-		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		String deviceId=(String) request.getSession().getAttribute(DEVICE_SN);
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
 		List<Admin> list=adminService.searchAdmin(requestMap.get("name"), requestMap.get("auth"),deviceId);
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, list);
@@ -325,7 +362,7 @@ public class AdminHandle {
 	@LoginRequired
 	@Path("/getAuditPerson")
 	public Response getAuditPerson(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams){
-		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		String deviceId=(String) request.getSession().getAttribute(DEVICE_SN);
 		List<Employee> list=adminService.getAuditPersonList(deviceId);
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, list);
 	}
@@ -334,7 +371,7 @@ public class AdminHandle {
 	@Path("/adminManage")
 	public Response adminManage(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams){
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
-		boolean state=adminService.adminManage(requestMap.get("deviceSn"), requestMap.get("companyId"), requestMap.get("username"),requestMap.get("password"));
+		boolean state=adminService.adminManage(requestMap.get(DEVICE_SN), requestMap.get(COMPANY_ID), requestMap.get("username"),requestMap.get("password"));
 		if (state) {
 			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
 		} else {
@@ -348,7 +385,7 @@ public class AdminHandle {
 	@Path("/getPhotoByTemplate")
 	public Response getPhotoByTemplate(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams){
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
-		List<String> list=adminService.getPhotoByTemplate(requestMap.get("employeeId"));
+		List<String> list=adminService.getPhotoByTemplate(requestMap.get(EMPLOYEE_ID));
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, list);
 	}
 	
@@ -390,29 +427,36 @@ public class AdminHandle {
 				
 	}
 	
-	@POST
-	@Path("/test")
-	public Response test(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams){
-		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
-		String deviceId=requestMap.get("id");
-		String employeeIds=requestMap.get("value");
-		if(employeeIds!=null || !"".equals(employeeIds)){
-			employeeIds=employeeIds.replace("[", "(").replace("]", ")");
-		}
-		List<Employee> list=adminService.getEmployeeByIds(employeeIds,deviceId);
-		for(Employee employee:list){
-			System.out.println(1);
-		}
-		
-		List<String> existEmployee=adminService.getExistEmployee(employeeIds,deviceId);
-		String[] eids=employeeIds.substring(1,employeeIds.length()-1).split(",");
-		for(String eid:eids){
-			if(!existEmployee.contains(eid)){
-				System.out.println(eid);
-			}
-		}
-		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
-	}
+//	@POST
+//	@Path("/test")
+//	public Response test(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams){
+//		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
+//		String deviceId=requestMap.get("id");
+//		String employeeIds=requestMap.get("value");
+//		if(employeeIds!=null || !"".equals(employeeIds)){
+//			employeeIds=employeeIds.replace("[", "(").replace("]", ")");
+//		}
+//		List<Employee> list=adminService.getEmployeeByIds(employeeIds,deviceId);
+//		for(Employee employee:list){
+//			System.out.println(1);
+//		}
+//		
+//		List<String> existEmployee=adminService.getExistEmployee(employeeIds,deviceId);
+//		String[] eids=employeeIds.substring(1,employeeIds.length()-1).split(",");
+//		for(String eid:eids){
+//			if(!existEmployee.contains(eid)){
+//				System.out.println(eid);
+//			}
+//		}
+//		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
+//	}
 	
-	
+//	/** for testing purpose only */
+//	@GET
+//	@Path("/firstTemplate")
+//	public Response firstTemplate(@Context HttpServletRequest request, MultivaluedMap<String, String> formParams){
+//		adminService.addFirstTemplate();
+//		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
+//	}
+
 }

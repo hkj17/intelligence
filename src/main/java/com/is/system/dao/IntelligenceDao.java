@@ -20,6 +20,7 @@ import com.is.model.Employee;
 import com.is.model.EmployeeClock;
 import com.is.model.Message;
 import com.is.model.Notification;
+import com.is.model.Template;
 import com.is.model.VersionUpdate;
 import com.is.model.Visitor;
 import com.is.model.VisitorInfo;
@@ -46,6 +47,8 @@ public interface IntelligenceDao {
 	public Employee getEmployeeByAdmin(String adminId);
 	
 	public Employee getEmployeeById(String id);
+	
+	public Template getTemplateById(String templateId);
 	
 	public CollectionPhoto getCollectionPhotoById(String id);
 	
@@ -128,6 +131,8 @@ public interface IntelligenceDao {
 	public VersionUpdate autoUpdate(String deviceId);
 	
 	public Employee getEmployeeByPhotoPath(String path);
+	
+	public Template getTemplateByPhotoPath(String path);
 
 	public List<Appointment> getAppointmentByVisitor(String visitorId);
 
@@ -153,5 +158,7 @@ public interface IntelligenceDao {
 	public List<EmployeeClock> getClockByEmployeeDataKey(String key,String company_id, String date);
 
 	public HSSFWorkbook export(List<Map<String, String>> list);
+	
+	public List<Template> getTemplatesByEmployeeId(String employeeId);
 	
 }

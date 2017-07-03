@@ -1,10 +1,7 @@
 package com.is.service;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -52,7 +49,7 @@ public class AppointmentService {
 			ServiceDistribution.handleJson106_1(deviceId, employeeId, startTime,endTime, id,visitorInfoId, content);
 			return true;
 		} catch (Exception e) {
-			// TODO: handle exception
+			e.printStackTrace();
 			return false;
 		}
 		
@@ -78,7 +75,7 @@ public class AppointmentService {
 			ServiceDistribution.handleJson106_11(deviceId, appointment.getCreateBy(), startTime,endTime, appid,appointment.getInfo().getId(), content);
 			return true;
 		} catch (Exception e) {
-			// TODO: handle exception
+			e.printStackTrace();
 			return false;
 		}
 		
@@ -103,13 +100,12 @@ public class AppointmentService {
 			
 			return true;
 		} catch (Exception e) {
-			// TODO: handle exception
+			e.printStackTrace();
 			return false;
 		}
 	}
 
 	public List<Appointment> getAppointmentByVisitor(String visitorId) {
-		// TODO Auto-generated method stub
 		return intelligenceDao.getAppointmentByVisitor(visitorId);
 	}
 }

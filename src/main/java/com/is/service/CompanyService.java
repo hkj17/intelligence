@@ -124,8 +124,8 @@ public class CompanyService {
 		try {
 			adminService.deleteUser(device,employeeId);
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return false;
 		}
 		return true;
 	}

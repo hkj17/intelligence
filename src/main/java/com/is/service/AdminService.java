@@ -14,10 +14,12 @@ import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.is.constant.ParameterKeys;
 import com.is.constant.ResponseCode;
 import com.is.map.DeviceService;
 import com.is.map.EmployeeFoldMap;
@@ -29,6 +31,7 @@ import com.is.model.Company;
 import com.is.model.Department;
 import com.is.model.Device;
 import com.is.model.Employee;
+import com.is.model.Template;
 import com.is.model.Visitor;
 import com.is.system.dao.CloudDao;
 import com.is.system.dao.IntelligenceDao;
@@ -42,6 +45,7 @@ import com.is.websocket.SyncFuture;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
+import io.netty.util.internal.StringUtil;
 import net.sf.json.JSONObject;
 import net.sourceforge.pinyin4j.PinyinHelper;
 import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
@@ -50,6 +54,7 @@ import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
 import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombination;
 
 import static com.is.constant.ParameterKeys.EMPLOYEE_FACE;
+import static com.is.constant.ParameterKeys.EMPLOYEE_TEMPLATE;
 
 /**
  * @author lishuhuan
@@ -64,10 +69,8 @@ public class AdminService {
 
 	@Autowired
 	private CloudDao cloudDao;
-
-	public void test2() {
-		System.out.println("123");
-	}
+	
+	private static Logger logger = Logger.getLogger(AdminService.class);
 
 	public boolean AccountAssignment(String adminName, String password, String auth, String employeeId,
 			String deviceId) {
@@ -128,20 +131,26 @@ public class AdminService {
 		String employeeId = CommonUtil.generateRandomUUID();
 		String strangerId = null;
 		if (photo != null) {
+			//TODO: 容错
 			strangerId = photo.substring(photo.lastIndexOf("/") + 1, photo.lastIndexOf("."));
 		}
 
 		SyncFuture<String> future = new SyncFuture<>();
 		ChannelHandlerContext ctx = DeviceService.getSocketMap(deviceId);
 		if (ctx == null) {
+			logger.warn("addEmployee: cannot find channel for device ID "+ deviceId);
 			return null;
 		}
 		FutureMap.addFuture(ctx.channel().id().asLongText() + "103_2", future);
 		
-		List<String> list=intelligenceDao.getDeviceListAll(deviceId);
-		for(String did:list){
-			ServiceDistribution.handleJson103_1(employeeId, strangerId, name, birth, did);
-		}
+		String templateId = CommonUtil.generateRandomUUID();
+//		List<String> list=intelligenceDao.getDeviceListAll(deviceId);
+//		for(String did:list){
+//			ServiceDistribution.handleJson103_1(employeeId, templateId, strangerId, name, birth, did);
+//		}
+		
+		//103-1单发
+		ServiceDistribution.handleJson103_1(employeeId, templateId, strangerId, name, birth, deviceId);
 		String result = future.get(6, TimeUnit.SECONDS);
 		FutureMap.removeFutureMap(ctx.channel().id().asLongText() + "103_2");
 		
@@ -157,6 +166,7 @@ public class AdminService {
 			cloudDao.add(admin);
 
 			Employee employee = new Employee();
+			Template template = new Template();
 			// 鍒ゆ柇鏄惁涓烘眽瀛�
 			Pattern p = Pattern.compile("[\u4e00-\u9fa5]");
 			Matcher m = p.matcher(name);
@@ -180,7 +190,7 @@ public class AdminService {
 			}
 
 			employee.setIdCard(idCard);
-			if (!"".equals(birth) && null != birth) {
+			if (!StringUtil.isNullOrEmpty(birth)) {
 				employee.setBirth(birth);
 			}
 			employee.setTelphone(contact);
@@ -202,15 +212,32 @@ public class AdminService {
 				newpath = newpath + "/" + file.getName();
 				file.renameTo(new File(newpath));
 				employee.setPhotoPath(newpath);
+				template.setPhotoPath(newpath);
 
 				Employee photoem = intelligenceDao.getEmployeeByPhotoPath(newpath);
 				if (photoem != null) {
 					return null;
 				}
 			}
+			
+			String path = EMPLOYEE_TEMPLATE + deviceId + "/" + employeeId;
+			employee.setTemplatePath(path);
 			cloudDao.add(employee);
 
-			if (cid != null && !"".equals(cid)) {
+			template.setTemplateId(templateId);
+			template.setEmployeeId(employeeId);
+			Date javaDate = new Date();
+			Timestamp timestamp = new Timestamp(javaDate.getTime());
+			template.setCreatedAt(timestamp);
+			template.setCreatedBy(System.getProperty("user.name"));
+			template.setTemplatePath(path);
+			cloudDao.add(template);
+			
+			if (!(new File(path).isDirectory())) {
+				new File(path).mkdirs();
+			}
+			
+			if (!StringUtil.isNullOrEmpty(cid)) {
 				CollectionPhoto collectionPhoto = intelligenceDao.getCollectionPhotoById(cid);
 				cloudDao.delete(collectionPhoto);
 			}
@@ -220,11 +247,101 @@ public class AdminService {
 		}
 
 	}
+	
+	public JSONObject addTemplate(String deviceId, String employeeId, String photo, String cid) throws InterruptedException, ExecutionException, TimeoutException{
+		JSONObject jsonObject = new JSONObject();
+		String templateId = CommonUtil.generateRandomUUID();
+		if(StringUtil.isNullOrEmpty(employeeId)){
+			logger.warn("addTemplate: employee ID is null");
+			return null;
+		}
+		
+		String strangerId = null;
+		if (!StringUtil.isNullOrEmpty(photo)) {
+			//TODO: 容错
+			strangerId = photo.substring(photo.lastIndexOf("/") + 1, photo.lastIndexOf("."));
+		}else{
+			logger.warn("addTemplate: photo path is null");
+			return null;
+		}
 
-	@SuppressWarnings("unchecked")
-	public Boolean deleteUser(String deviceId, String id)
+		SyncFuture<String> future = new SyncFuture<>();
+		ChannelHandlerContext ctx = DeviceService.getSocketMap(deviceId);
+		if (ctx == null) {
+			logger.warn("addTemplate: cannot find channel for device ID "+deviceId);
+			return null;
+		}
+		FutureMap.addFuture(ctx.channel().id().asLongText() + "109_2", future);
+//		List<String> list=intelligenceDao.getDeviceListAll(deviceId);
+//		for(String did:list){
+//			ChannelHandlerContext currCtx = DeviceService.getSocketMap(did);
+//			if(currCtx!=null){
+//				ServiceDistribution.handleJson109_1(employeeId, templateId, strangerId, currCtx);
+//			}
+//		}
+		
+		//单发109-1
+		ServiceDistribution.handleJson109_1(employeeId, templateId, strangerId, ctx);
+		String result = future.get(6, TimeUnit.SECONDS);
+		FutureMap.removeFutureMap(ctx.channel().id().asLongText() + "109_2");
+		
+		if(result!=null){
+			Employee employee = intelligenceDao.getEmployeeById(employeeId);
+			Template template = new Template();
+			template.setTemplateId(templateId);
+			template.setEmployeeId(employeeId);
+			if(employee==null){
+				logger.warn("addTemplate: cannot find employee with employee ID " + employeeId);
+				return null;
+			}
+			
+			if (photo != null) {
+				File file = new File(photo);
+
+				String newpath = EMPLOYEE_FACE + deviceId;
+				if (!(new File(newpath).isDirectory())) {
+					new File(newpath).mkdirs();
+				}
+				newpath = newpath + "/" + file.getName();
+				file.renameTo(new File(newpath));
+				template.setPhotoPath(newpath);
+
+				//该照片已经存在
+				Employee photoem = intelligenceDao.getEmployeeByPhotoPath(newpath);
+				if (photoem != null) {
+					logger.warn("addTemplate: employee existed with photo path "+newpath);
+					return null;
+				}
+			}
+			
+			String path = EMPLOYEE_TEMPLATE + deviceId + "/" + employeeId;
+			template.setTemplatePath(path);
+			
+			//未设置模板路径
+			Date javaDate = new Date();
+			Timestamp timestamp = new Timestamp(javaDate.getTime());
+			template.setCreatedAt(timestamp);
+			template.setCreatedBy(System.getProperty("user.name"));
+			cloudDao.add(template);
+			
+			//删除采集模板
+			if (!StringUtil.isNullOrEmpty(cid)) {
+				CollectionPhoto collectionPhoto = intelligenceDao.getCollectionPhotoById(cid);
+				cloudDao.delete(collectionPhoto);
+			}
+			jsonObject.put(ParameterKeys.EMPLOYEE_ID, employeeId);
+			jsonObject.put(ParameterKeys.TEMPLATE_ID, templateId);
+			//TODO: 返回一个JSON对象
+			return jsonObject;
+		}else{
+			logger.warn("addTemplate: no response from future");
+			return null;
+		}
+	}
+
+	public Boolean deleteUser(String deviceId, String employeeId)
 			throws InterruptedException, ExecutionException, TimeoutException {
-		Employee employee = intelligenceDao.getEmployeeById(id);
+		Employee employee = intelligenceDao.getEmployeeById(employeeId);
 		SyncFuture<String> future = new SyncFuture<>();
 		ChannelHandlerContext ctx = DeviceService.getSocketMap(deviceId);
 		if (ctx == null) {
@@ -239,6 +356,26 @@ public class AdminService {
 		String result = future.get(6, TimeUnit.SECONDS);
 		FutureMap.removeFutureMap(ctx.channel().id().asLongText() + "105_2");
 		if (result != null) {
+			//删除模板
+			List<Template> templates = intelligenceDao.getTemplatesByEmployeeId(employeeId);
+			for(Template t : templates){
+				if(t == null){
+					continue;
+				}
+				File photo = new File(t.getPhotoPath());
+				if(photo.exists()){
+					photo.delete();
+				}
+				
+				deleteFolder(t.getTemplatePath(), null);
+				cloudDao.delete(t);
+			}
+			
+			File photo = new File(employee.getPhotoPath());
+			if(photo.exists()){
+				photo.delete();
+			}
+			
 			Admin admin = employee.getAdmin();
 			cloudDao.delete(employee);
 			if (admin != null) {
@@ -249,6 +386,37 @@ public class AdminService {
 			return false;
 		}
 
+	}
+	
+	public boolean deleteTemplate(String deviceId, String employeeId, String photoPath) throws InterruptedException, ExecutionException, TimeoutException {
+		Template template = intelligenceDao.getTemplateByPhotoPath(photoPath);
+		if(template==null){
+			logger.warn("deleteTemplate: cannot find template by photo path "+photoPath);
+			return false;
+		}
+		SyncFuture<String> future = new SyncFuture<>();
+		ChannelHandlerContext ctx = DeviceService.getSocketMap(deviceId);
+		if (ctx == null) {
+			logger.warn("deleteTemplate: cannot find channel for device ID: "+deviceId);
+			return false;
+		}
+		FutureMap.addFuture(ctx.channel().id().asLongText() + "105_4", future);
+		List<String> list=intelligenceDao.getDeviceListAll(deviceId);
+		for(String did : list){
+			ServiceDistribution.handleJson105_3(employeeId, template.getTemplateId(), did);
+		}
+		String result = future.get(6, TimeUnit.SECONDS);
+		FutureMap.removeFutureMap(ctx.channel().id().asLongText() + "105_4");
+		if(result!=null){
+			if(!StringUtil.isNullOrEmpty(template.getTemplatePath())){
+				deleteFolder(template.getTemplatePath(), template.getTemplateId());
+			}
+			cloudDao.delete(template);
+			return true;
+		}else{
+			logger.warn("deleteTemplate: no response from future");
+			return false;
+		}
 	}
 
 	public Boolean editEmployee(String employeeId, String name, String birth, String contact, String deviceId,
@@ -280,11 +448,11 @@ public class AdminService {
 			FutureMap.removeFutureMap(ctx.channel().id().asLongText() + "104_2");
 			if (result != null) {
 				employee.setEmployeeName(name);
-				if (birth != null && !"".equals(birth)) {
+				if (!StringUtil.isNullOrEmpty(birth)) {
 					employee.setBirth(birth);
 				}
 
-				if (adminName != null && !"".equals(adminName)) {
+				if (!StringUtil.isNullOrEmpty(adminName)) {
 					Admin admin = employee.getAdmin();
 					admin.setUsername(adminName);
 					cloudDao.update(admin);
@@ -308,7 +476,7 @@ public class AdminService {
 				return false;
 			}
 		} catch (Exception e) {
-			// TODO: handle exception
+			e.printStackTrace();
 			return false;
 		}
 
@@ -368,13 +536,7 @@ public class AdminService {
 	public List<Employee> getEmployeeByWhere(String word, String department, int companyId) {
 		return intelligenceDao.getEmployeeByWhere(word, department, companyId);
 	}
-
-	public void updateEmployeeTemplatePhoto(String employeeId, String path) {
-		Employee employee = intelligenceDao.getEmployeeById(employeeId);
-		employee.setTemplatePath(path);
-		cloudDao.update(employee);
-	}
-
+	
 	public Boolean excuteCollection(String deviceId) {
 		ChannelHandlerContext ctx = DeviceService.getSocketMap(deviceId);
 		Future<String> sFuture = FutureMap.getFutureMap(ctx.channel().id().asLongText() + "101_2");
@@ -395,10 +557,7 @@ public class AdminService {
 			CheckResponse response = new CheckResponse(deviceId, "102_2", future);
 			response.start();
 		}
-		// String
-		// path="/cloudweb/server/tomcat_intel/webapps/employee_img/1.jpg";
 		String path = PhotoMap.getMap(deviceId);
-		// PhotoMap.removeMap(deviceId);
 		ServiceDistribution.handleJson102_1(deviceId);
 		return path;
 	}
@@ -530,10 +689,10 @@ public class AdminService {
 	public Boolean editAdmin(String id, String name, String password, String auth) {
 		Admin admin = intelligenceDao.getAdminById(id);
 		admin.setUsername(name);
-		if (password != null && !"".equals(password)) {
+		if (!StringUtil.isNullOrEmpty(password)) {
 			admin.setPassword(PasswordUtil.generatePassword(password));
 		}
-		if (auth != null && !"".equals(auth)) {
+		if (!StringUtil.isNullOrEmpty(auth)) {
 			admin.setAuthority(Integer.parseInt(auth));
 		}
 		cloudDao.update(admin);
@@ -542,13 +701,6 @@ public class AdminService {
 
 	public Boolean adminManage(String deviceId, String companyId, String username, String password) {
 		try {
-			/*
-			 * SyncFuture<String> future = AddFuture.setFuture(deviceId,
-			 * "115_2"); CheckResponse response = new CheckResponse(deviceId,
-			 * "115_2", future); response.start(); boolean state =
-			 * ServiceDistribution.handleJson115_1(deviceId, company);
-			 */
-			
 			Admin admin = intelligenceDao.getAdminByName(username);
 			if(admin == null){//当该管理员不存在时添加管理员账号
 				admin = new Admin();
@@ -580,6 +732,7 @@ public class AdminService {
 					Date javaDate = new Date();
 					Timestamp timestamp = new Timestamp(javaDate.getTime());
 					device.setCreatedAt(timestamp);
+					device.setCreatedBy(System.getProperty("user.name"));
 					cloudDao.add(device);
 				}
 				
@@ -597,7 +750,6 @@ public class AdminService {
 				return false;
 			}
 		} catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 			return false;
 		}
@@ -627,9 +779,17 @@ public class AdminService {
 
 	public void updateTemplatePath(String employeeId, String path) {
 		Employee employee = intelligenceDao.getEmployeeById(employeeId);
-		if (employee != null) {
+		if (employee != null && StringUtil.isNullOrEmpty(employee.getTemplatePath())) {
 			employee.setTemplatePath(path);
 			cloudDao.update(employee);
+		}
+	}
+	
+	public void updateTemplatePath2(String templateId, String path){
+		Template template = intelligenceDao.getTemplateById(templateId);
+		if(template != null && StringUtil.isNullOrEmpty(template.getTemplatePath())){
+			template.setTemplatePath(path);
+			cloudDao.update(template);
 		}
 	}
 
@@ -684,25 +844,72 @@ public class AdminService {
 		return state;
 	}
 
-	public void updateEmployeeFoldAndSync(String employeeId) {
+	public void updateEmployeeFoldAndSync(String employeeId, String templateId) {
 		Employee employee=intelligenceDao.getEmployeeById(employeeId);
 		List<String> list=intelligenceDao.getDeviceList(employee.getDeviceId());
 		if(list!=null){
 			for(String deviceId:list){
 				ServiceDistribution.handleJson118_1(deviceId,employee.getEmployeeId(), employee.getEmployeeFold(),employee.getEmployeeName(),
-						employee.getBirth(),employee.getPhotoPath());
+						templateId, employee.getBirth(),employee.getPhotoPath());
 			}
 		}
 	}
 
 	public List<Employee> getEmployeeByIds(String employeeIds, String deviceId) {
-		// TODO Auto-generated method stub
 		return intelligenceDao.getEmployeeByIds(employeeIds,deviceId);
 	}
 
 	public List<String> getExistEmployee(String employeeIds, String deviceId) {
-		// TODO Auto-generated method stub
 		return intelligenceDao.getExistEmployee(employeeIds,deviceId);
 	}
-
+	
+	private static boolean deleteFolder(String folder, String templateId){
+		//TODO: 文件夹必须只有一级目录
+		if(folder==null){
+			logger.warn("template folder is null");
+			return false;
+		}
+		File tempPath = new File(folder);
+		if(tempPath.isDirectory()){
+			File[] files = tempPath.listFiles();
+			boolean ret = true;
+			for(File f : files){
+				if(templateId==null || f.getName().startsWith(templateId))
+					ret = ret && f.delete();
+			}
+			ret = ret && tempPath.delete();
+			return ret;
+		}else{
+			return false;
+		}
+	}
+//	public void addFirstTemplate() {
+//		List<Employee> employeeList = cloudDao.findByHql("from Employee e");
+//		for(Employee e : employeeList){
+//			if(StringUtil.isNullOrEmpty(e.getPhotoPath())){
+//				continue;
+//			}
+//			
+//			String templateId = CommonUtil.generateRandomUUID();
+//			String templatePath = e.getTemplatePath();
+//			Template t = new Template();
+//			t.setTemplateId(templateId);
+//			t.setEmployeeId(e.getEmployeeId());
+//			t.setPhotoPath(e.getPhotoPath());
+//			t.setTemplatePath(templatePath);
+//			
+//			if(!StringUtil.isNullOrEmpty(templatePath)){
+//				File folder = new File(templatePath);
+//				if(folder.isDirectory()){
+//					File[] files=folder.listFiles();
+//					for(File file : files){
+//						file.renameTo(new File(templatePath+File.separator + templateId+"_"+file.getName()));
+//					}
+//				}
+//			}
+//			cloudDao.add(t);
+//		}
+//		
+//	}
+	
 }

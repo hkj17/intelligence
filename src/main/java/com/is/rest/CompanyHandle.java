@@ -10,6 +10,7 @@ import static com.is.constant.ParameterKeys.NAME;
 import static com.is.constant.ParameterKeys.START_TIME;
 import static com.is.constant.ParameterKeys.USER_NAME;
 import static com.is.constant.ParameterKeys.USER_PSW;
+import static com.is.constant.ParameterKeys.DEVICE_SN;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,7 +67,7 @@ public class CompanyHandle {
 	@Path("/editCompany")
 	public Response editCompany(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams) throws InterruptedException, ExecutionException, TimeoutException{
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
-		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		String deviceId=(String) request.getSession().getAttribute(DEVICE_SN);
 		boolean state=companyService.editCompany( requestMap.get(COMPANY_NAME),
 				requestMap.get(ADDRESS),requestMap.get("telphone"),  requestMap.get("morningStartTime"), requestMap.get("morningEndTime"),
 				requestMap.get("nightStartTime"), requestMap.get("nightEndTime"),deviceId);
@@ -82,7 +83,7 @@ public class CompanyHandle {
 	@LoginRequired
 	public Response deleteCompany(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams){
 		Map<String, String> requestMap = BusinessHelper.changeMap(formParams);
-		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		String deviceId=(String) request.getSession().getAttribute(DEVICE_SN);
 		boolean state=companyService.deleteCompany(deviceId,requestMap.get(COMPANY_ID));
 		if(state){
 			return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, null);
@@ -95,7 +96,7 @@ public class CompanyHandle {
 	@Path("/companyInfo")
 	@LoginRequired
 	public Response getCompanyInfo(@Context HttpServletRequest request,MultivaluedMap<String, String> formParams){
-		String deviceId=(String) request.getSession().getAttribute("deviceSn");
+		String deviceId=(String) request.getSession().getAttribute(DEVICE_SN);
 		Company company=companyService.getCompanyInfo(deviceId);
 		return ResponseFactory.response(Response.Status.OK, ResponseCode.SUCCESS, company);
 	}

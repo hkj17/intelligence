@@ -23,6 +23,8 @@ public class Hql {
 	
 	public static final String GET_APPOINT_BY_ID="from Appointment where id=?";
 	
+	public static final String GET_TEMPLATE_BY_ID="from Template t where t.templateId=?";
+	
 	public static final String GET_EMPLOYEE_BY_COMPANY="from Employee e where e.admin.authority=3 and e.company.companyId=?";
 	
 	//public static final String GET_CLOCK_BY_MC="from ClockRecord cr where cr.employee.employeeId=? and cr.startClock like ?%";
@@ -76,5 +78,9 @@ public class Hql {
 	
 	public static final String GET_APPOINTMENT_BY_VISITOR="select a,b.employeeName from Appointment a,Employee b where a.createBy=b.employeeId and a.info.id=?";
 	
-	public static final String GET_EMPLOYEE_BY_PHOTO_PATH="from Employee where photoPath=?";
+	public static final String GET_EMPLOYEE_BY_PHOTO_PATH="from Employee e where e.photoPath=?";
+	
+	public static final String GET_TEMPLATE_BY_PHOTO_PATH="from Template t where t.photoPath=?";
+	
+	public static final String GET_TEMPLATES_BY_EMPLOYEE_ID="from Template t where t.employeeId=?";
 }
