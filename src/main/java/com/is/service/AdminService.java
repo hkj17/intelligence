@@ -323,6 +323,8 @@ public class AdminService {
 			template.setCreatedAt(timestamp);
 			template.setCreatedBy(System.getProperty("user.name"));
 			cloudDao.add(template);
+			updateTemplateVersion(employeeId);
+			
 			
 			//删除采集模板
 			if (!StringUtil.isNullOrEmpty(cid)) {
@@ -357,7 +359,7 @@ public class AdminService {
 		FutureMap.removeFutureMap(ctx.channel().id().asLongText() + "105_2");
 		if (result != null) {
 			//删除模板
-			List<Template> templates = intelligenceDao.getTemplatesByEmployeeId(employeeId);
+			List<Template> templates = intelligenceDao.getTemplateListByEmployeeId(employeeId);
 			for(Template t : templates){
 				if(t == null){
 					continue;
@@ -412,6 +414,7 @@ public class AdminService {
 				deleteFolder(template.getTemplatePath(), template.getTemplateId());
 			}
 			cloudDao.delete(template);
+			updateTemplateVersion(employeeId);
 			return true;
 		}else{
 			logger.warn("deleteTemplate: no response from future");
@@ -469,6 +472,7 @@ public class AdminService {
 				employee.setIdCard(idCard);
 				employee.setSex(Integer.parseInt(sex));
 				employee.setWorkPos(workPos);
+				employee.setEmpVersion(employee.getEmpVersion()+1);
 
 				cloudDao.update(employee);
 				return true;
@@ -777,21 +781,21 @@ public class AdminService {
 		return intelligenceDao.getAuditPersonList(deviceId);
 	}
 
-	public void updateTemplatePath(String employeeId, String path) {
-		Employee employee = intelligenceDao.getEmployeeById(employeeId);
-		if (employee != null && StringUtil.isNullOrEmpty(employee.getTemplatePath())) {
-			employee.setTemplatePath(path);
-			cloudDao.update(employee);
-		}
-	}
-	
-	public void updateTemplatePath2(String templateId, String path){
-		Template template = intelligenceDao.getTemplateById(templateId);
-		if(template != null && StringUtil.isNullOrEmpty(template.getTemplatePath())){
-			template.setTemplatePath(path);
-			cloudDao.update(template);
-		}
-	}
+//	public void updateTemplatePath(String employeeId, String path) {
+//		Employee employee = intelligenceDao.getEmployeeById(employeeId);
+//		if (employee != null && StringUtil.isNullOrEmpty(employee.getTemplatePath())) {
+//			employee.setTemplatePath(path);
+//			cloudDao.update(employee);
+//		}
+//	}
+//	
+//	public void updateTemplatePath2(String templateId, String path){
+//		Template template = intelligenceDao.getTemplateById(templateId);
+//		if(template != null && StringUtil.isNullOrEmpty(template.getTemplatePath())){
+//			template.setTemplatePath(path);
+//			cloudDao.update(template);
+//		}
+//	}
 
 	public List<String> getPhotoByTemplate(String employeeId) {
 		Employee employee = intelligenceDao.getEmployeeById(employeeId);
@@ -855,12 +859,26 @@ public class AdminService {
 		}
 	}
 
-	public List<Employee> getEmployeeByIds(String employeeIds, String deviceId) {
-		return intelligenceDao.getEmployeeByIds(employeeIds,deviceId);
+//	public List<Employee> getEmployeeByIds(String employeeIds, String deviceId) {
+//		return intelligenceDao.getEmployeeByIds(employeeIds,deviceId);
+//	}
+//
+//	public List<String> getExistEmployee(String employeeIds, String deviceId) {
+//		return intelligenceDao.getExistEmployee(employeeIds,deviceId);
+//	}
+	
+	public List<Employee> getEmployeeListByDeviceId(String deviceId){
+		return intelligenceDao.getEmployeeListByDeviceId(deviceId);
 	}
-
-	public List<String> getExistEmployee(String employeeIds, String deviceId) {
-		return intelligenceDao.getExistEmployee(employeeIds,deviceId);
+	
+	public List<Template> getTemplateListByEmployeeId(String employeeId){
+		return intelligenceDao.getTemplateListByEmployeeId(employeeId);
+	}
+	
+	private void updateTemplateVersion(String employeeId){
+		Employee employee = intelligenceDao.getEmployeeById(employeeId);
+		employee.setTempVersion(employee.getTempVersion()+1);
+		cloudDao.update(employee);
 	}
 	
 	private static boolean deleteFolder(String folder, String templateId){

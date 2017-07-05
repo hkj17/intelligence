@@ -142,11 +142,12 @@ public interface IntelligenceDao {
 
 	public List<String> getDeviceListAll(String deviceId);
 
-	public List<Employee> getEmployeeByIds(String employeeIds, String deviceId);
+	//列出该设备所属公司的全部员工
+	public List<Employee> getEmployeeListByDeviceId(String deviceId);
 
 	public List<VisitorInfo> getVisitorByIds(String visitorIds, String deviceId);
 
-	public List<String> getExistEmployee(String employeeIds, String deviceId);
+	//public List<String> getExistEmployee(String employeeIds, String deviceId);
 
 	public List<String> getExistVisitor(String visitorIds, String deviceId);
 
@@ -159,6 +160,6 @@ public interface IntelligenceDao {
 
 	public HSSFWorkbook export(List<Map<String, String>> list);
 	
-	public List<Template> getTemplatesByEmployeeId(String employeeId);
+	public List<Template> getTemplateListByEmployeeId(String employeeId);
 	
 }

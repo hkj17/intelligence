@@ -669,15 +669,22 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 		return companyId;
 	}
 
+//	@Override
+//	public List<Employee> getEmployeeByIds(String employeeIds,String deviceId) {
+//		Query query=null;
+//		if(!StringUtil.isNullOrEmpty(employeeIds)){
+//			query = getSession().createSQLQuery("select a.* from employee a LEFT JOIN device b on b.company_id=a.company_id where b.device_id='"+deviceId+"' and a.employee_id not in "+employeeIds);
+//		}
+//		else{
+//			query = getSession().createSQLQuery("select a.* from employee a LEFT JOIN device b on b.company_id=a.company_id where b.device_id='"+deviceId+"'");
+//		}
+//		List<Employee> list = ((SQLQuery) query).addEntity(Employee.class).list();
+//		return list;
+//	}
+	
 	@Override
-	public List<Employee> getEmployeeByIds(String employeeIds,String deviceId) {
-		Query query=null;
-		if(!StringUtil.isNullOrEmpty(employeeIds)){
-			query = getSession().createSQLQuery("select a.* from employee a LEFT JOIN device b on b.company_id=a.company_id where b.device_id='"+deviceId+"' and a.employee_id not in "+employeeIds);
-		}
-		else{
-			query = getSession().createSQLQuery("select a.* from employee a LEFT JOIN device b on b.company_id=a.company_id where b.device_id='"+deviceId+"'");
-		}
+	public List<Employee> getEmployeeListByDeviceId(String deviceId) {
+		Query query = getSession().createSQLQuery("select e.* from employee e LEFT JOIN device d on d.company_id=e.company_id where d.device_id='"+deviceId+"'");
 		List<Employee> list = ((SQLQuery) query).addEntity(Employee.class).list();
 		return list;
 	}
@@ -695,12 +702,12 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 		return list;
 	}
 
-	@Override
-	public List<String> getExistEmployee(String employeeIds, String deviceId) {
-		Query query = getSession().createSQLQuery("select a.employee_id from employee a LEFT JOIN device b on b.company_id=a.company_id where b.device_id='"+deviceId+"' and a.employee_id in "+employeeIds);
-		List<String> list = query.list();
-		return list;
-	}
+//	@Override
+//	public List<String> getExistEmployee(String employeeIds, String deviceId) {
+//		Query query = getSession().createSQLQuery("select a.employee_id from employee a LEFT JOIN device b on b.company_id=a.company_id where b.device_id='"+deviceId+"' and a.employee_id in "+employeeIds);
+//		List<String> list = query.list();
+//		return list;
+//	}
 
 	@Override
 	public List<String> getExistVisitor(String visitorIds, String deviceId) {
@@ -867,7 +874,7 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 	}
 
 	@Override
-	public List<Template> getTemplatesByEmployeeId(String employeeId) {
+	public List<Template> getTemplateListByEmployeeId(String employeeId) {
 		return cloudDao.findByHql(Hql.GET_TEMPLATES_BY_EMPLOYEE_ID, employeeId);
 	}
 

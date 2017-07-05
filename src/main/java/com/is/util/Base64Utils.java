@@ -11,13 +11,15 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import org.glassfish.jersey.internal.util.Base64;
+
+import io.netty.util.internal.StringUtil;
  
 
 public class Base64Utils {
 	
 	public static String GetImageStr(String path)  
     {//将图片文件转化为字节数组字符串，并对其进行Base64编码处理  
-		if(path!=null && !"".equals(path)){
+		if(!StringUtil.isNullOrEmpty(path)){
 			File file=new File(path);
 			if(file.exists()){
 				InputStream in = null;  
@@ -32,7 +34,8 @@ public class Base64Utils {
 		        }   
 		        catch (IOException e)   
 		        {  
-		            e.printStackTrace();  
+		            e.printStackTrace();
+		            return null;
 		        }  
 		        //对字节数组Base64编码  
 		        BASE64Encoder encoder = new BASE64Encoder();  

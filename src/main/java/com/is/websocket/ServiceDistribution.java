@@ -11,10 +11,13 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
@@ -30,6 +33,7 @@ import com.is.map.PhotoMap;
 import com.is.model.CollectionPhoto;
 import com.is.model.Company;
 import com.is.model.Employee;
+import com.is.model.Template;
 import com.is.model.VisitorInfo;
 import com.is.service.AdminService;
 import com.is.service.ClockService;
@@ -42,6 +46,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.internal.StringUtil;
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import sun.misc.BASE64Decoder;
 
@@ -1076,7 +1081,7 @@ public class ServiceDistribution implements ApplicationContextAware {
 		if (null != channel) {
 			executeWrite(result, channel);
 		}else{
-			logger.warn("118-1无法写入socket");
+			logger.warn("118-1 cannot find socket channel");
 		}
 		
 		
@@ -1113,7 +1118,7 @@ public class ServiceDistribution implements ApplicationContextAware {
 		String employeeId = jsonObject.optString(ParameterKeys.EMPLOYEE_ID);
 		String templateId = jsonObject.optString(ParameterKeys.TEMPLATE_ID);
 		if(StringUtil.isNullOrEmpty(employeeId)||StringUtil.isNullOrEmpty(templateId)){
-			logger.warn("118报文有信息为空");
+			logger.warn("no key employeeId or templateId in 8-2");
 			return;
 		}
 		AdminService adminService = (AdminService) ServiceDistribution.getContext().getBean("adminService");
@@ -1122,59 +1127,170 @@ public class ServiceDistribution implements ApplicationContextAware {
 
 	public static void handleJson12_1(JSONObject jsonObject, ChannelHandlerContext socketChannel) {
 		String deviceId=ChannelNameToDeviceMap.getDeviceMap(socketChannel.channel().id());
-		String employeeIds = jsonObject.getString("employeeIdArray");
-		if(!StringUtil.isNullOrEmpty(employeeIds)){
-			employeeIds=employeeIds.replace("[", "(").replace("]", ")");
-		}
-		AdminService adminService = (AdminService) ServiceDistribution.getContext().getBean("adminService");
-		List<Employee> list=adminService.getEmployeeByIds(employeeIds,deviceId);
-		for(Employee employee:list){
-			send12_2(deviceId, employee.getEmployeeId(), employee.getEmployeeFold(), employee.getEmployeeName(), employee.getBirth(), employee.getPhotoPath());
+		JSONArray jsonArray = jsonObject.optJSONArray("employeeIdArray");
+		if(jsonArray==null){
+			logger.warn("no key \"employeeIdArray\" associated with json array in 12-1");
+			return;
 		}
 		
-		if(!StringUtil.isNullOrEmpty(employeeIds)){
-			List<String> existEmployee=adminService.getExistEmployee(employeeIds,deviceId);
-			String[] eids=employeeIds.substring(1,employeeIds.length()-1).split(",");
-			for(String eid:eids){
-				eid=eid.substring(1,eid.length()-1);
-				if(!existEmployee.contains(eid)){
-					sendDel12_2(deviceId,eid);
-				}
+		//前端发过来的员工数据
+		Set<String> employeeIdSet = new HashSet<String>();
+		Map<String, Employee> employeeMap = new HashMap<String, Employee>();
+		for(int i=0;i<jsonArray.size();i++){
+			JSONObject employeeRecord = jsonArray.getJSONObject(i);
+			String employeeId = employeeRecord.optString(ParameterKeys.EMPLOYEE_ID);
+			if(StringUtil.isNullOrEmpty(employeeId)){
+				continue;
 			}
+			if(employeeIdSet.add(employeeId)){
+				Employee employee = new Employee();
+				employee.setEmployeeId(employeeId);
+				employee.setEmpVersion(employeeRecord.optInt("empVersion"));
+				employee.setTempVersion(employeeRecord.optInt("tempVersion"));
+				employeeMap.put(employeeId, employee);
+			}
+		}
+		
+		//数据库中的员工数据
+		AdminService adminService = (AdminService) ServiceDistribution.getContext().getBean("adminService");
+		List<Employee> employeeList = adminService.getEmployeeListByDeviceId(deviceId);
+		
+		
+		boolean state = true;
+		for(int i=0;i<employeeList.size();i++){
+			Employee employee = employeeList.get(i);
+			if(employee==null){
+				continue;
+			}
+			
+			//机器上存在该条信息
+			if(employeeIdSet.contains(employee.getEmployeeId())){
+				String employeeId = employee.getEmployeeId();
+				Employee empFromDevice = employeeMap.remove(employeeId);
+				if(employee.getEmpVersion()!=empFromDevice.getEmpVersion() && employee.getTempVersion()!=empFromDevice.getTempVersion()){
+					state = send12_2(deviceId, employee,"both");
+				}else if(employee.getEmpVersion()!=empFromDevice.getEmpVersion()){
+					state = send12_2(deviceId, employee,"emp");
+				}else if(employee.getTempVersion()!=empFromDevice.getTempVersion()){
+					state = send12_2(deviceId, employee,"temp");
+				}else{
+					//版本完全相同
+				}
+				employeeIdSet.remove(employeeId);
+			}else{//机器上不存在该条信息
+				state = send12_2(deviceId, employee, "both");
+			}
+			if(!state) 
+				return;
+		}
+		
+		//数据库中已经不存在的员工信息
+		for(String employeeId: employeeIdSet){
+			state = send12_2(deviceId, employeeMap.get(employeeId), "del");
+			if(!state) 
+				return;
+		}
+		
+//		String employeeIds = jsonObject.getString("employeeIdArray");
+//		if(!StringUtil.isNullOrEmpty(employeeIds)){
+//			employeeIds=employeeIds.replace("[", "(").replace("]", ")");
+//		}
+//		AdminService adminService = (AdminService) ServiceDistribution.getContext().getBean("adminService");
+//		List<Employee> list=adminService.getEmployeeByIds(employeeIds,deviceId);
+//		for(Employee employee:list){
+//			sendAdd12_2(deviceId, employee.getEmployeeId(), employee.getEmployeeFold(), employee.getEmployeeName(), employee.getBirth(), employee.getPhotoPath());
+//		}
+//		
+//		if(!StringUtil.isNullOrEmpty(employeeIds)){
+//			List<String> existEmployee=adminService.getExistEmployee(employeeIds,deviceId);
+//			String[] eids=employeeIds.substring(1,employeeIds.length()-1).split(",");
+//			for(String eid:eids){
+//				eid=eid.substring(1,eid.length()-1);
+//				if(!existEmployee.contains(eid)){
+//					sendDel12_2(deviceId,eid);
+//				}
+//			}
+//		}
+	}
+	
+	private static boolean send12_2(String deviceId, Employee employee, String operation){
+		if(employee==null){
+			logger.warn("employee is null in send12_2");
+			return true;
+		}
+		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
+		JSONObject jsonObject=new JSONObject();
+		jsonObject.put(ParameterKeys.TYPE, 12);
+		jsonObject.put(ParameterKeys.CODE, 2);
+		jsonObject.put(ParameterKeys.EMPLOYEE_ID, employee.getEmployeeId());
+		jsonObject.put(ParameterKeys.OPERATION, operation);
+		if(!StringUtil.isNullOrEmpty(employee.getEmployeeFold())){
+			jsonObject.put(ParameterKeys.EMPLOYEE_FOLD, employee.getEmployeeFold());
+		}
+		
+		if("emp".equals(operation) || "both".equals(operation)){
+			jsonObject.put(ParameterKeys.EMPLOYEE_NAME, employee.getEmployeeName());
+			jsonObject.put(ParameterKeys.BIRTH, employee.getBirth());
+			jsonObject.put("empVersion", employee.getEmpVersion());
+			String base64=Base64Utils.GetImageStr(employee.getPhotoPath());
+			jsonObject.put(ParameterKeys.PORTRAIT, base64);
+		}
+		
+		if("temp".equals(operation) || "both".equals(operation)){
+			AdminService adminService = (AdminService) ServiceDistribution.getContext().getBean("adminService");
+			List<Template> templateList = adminService.getTemplateListByEmployeeId(employee.getEmployeeId());
+			JSONArray jsonArray = new JSONArray();
+			for(Template t : templateList){
+				if(t==null){
+					continue;
+				}
+				jsonArray.add(t.getTemplateId());
+			}
+			jsonObject.put("templateIdList", jsonArray);
+			jsonObject.put("tempVersion", employee.getTempVersion());
+		}
+		
+		byte[] result = SocketService.responseByte(jsonObject, "12", "2");
+		if (null != channel) {
+			executeWrite(result, channel);
+			return true;
+		}else{
+			logger.warn("cannot write to socket channel in 12-2");
+			return false;
 		}
 	}
 	
-	public static void sendDel12_2(String deviceId, String employeeId) {
-		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
-		JSONObject jsonObject=new JSONObject();
-		jsonObject.put(ParameterKeys.TYPE, 12);
-		jsonObject.put(ParameterKeys.CODE, 2);
-		jsonObject.put(ParameterKeys.EMPLOYEE_ID, employeeId);
-		jsonObject.put(ParameterKeys.OPERATION, "del");
-		byte[] result = SocketService.responseByte(jsonObject, "12", "2");
-		if (null != channel) {
-			executeWrite(result, channel);
-		}	
-	}
-	
-	public static void send12_2(String deviceId, String employeeId, String employeeFold, String employeeName,
-			String birth, String photoPath) {
-		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
-		String base64=Base64Utils.GetImageStr(photoPath);
-		JSONObject jsonObject=new JSONObject();
-		jsonObject.put(ParameterKeys.TYPE, 12);
-		jsonObject.put(ParameterKeys.CODE, 2);
-		jsonObject.put(ParameterKeys.OPERATION, "add");
-		jsonObject.put(ParameterKeys.EMPLOYEE_ID, employeeId);
-		jsonObject.put(ParameterKeys.EMPLOYEE_FOLD, employeeFold);
-		jsonObject.put(ParameterKeys.EMPLOYEE_NAME, employeeName);
-		jsonObject.put(ParameterKeys.BIRTH, birth);
-		jsonObject.put(ParameterKeys.PORTRAIT, base64);
-		byte[] result = SocketService.responseByte(jsonObject, "12", "2");
-		if (null != channel) {
-			executeWrite(result, channel);
-		}	
-	}
+//	private static void sendDel12_2(String deviceId, String employeeId) {
+//		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
+//		JSONObject jsonObject=new JSONObject();
+//		jsonObject.put(ParameterKeys.TYPE, 12);
+//		jsonObject.put(ParameterKeys.CODE, 2);
+//		jsonObject.put(ParameterKeys.EMPLOYEE_ID, employeeId);
+//		jsonObject.put(ParameterKeys.OPERATION, "del");
+//		byte[] result = SocketService.responseByte(jsonObject, "12", "2");
+//		if (null != channel) {
+//			executeWrite(result, channel);
+//		}	
+//	}
+//	
+//	private static void sendAdd12_2(String deviceId, String employeeId, String employeeFold, String employeeName,
+//			String birth, String photoPath) {
+//		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
+//		String base64=Base64Utils.GetImageStr(photoPath);
+//		JSONObject jsonObject=new JSONObject();
+//		jsonObject.put(ParameterKeys.TYPE, 12);
+//		jsonObject.put(ParameterKeys.CODE, 2);
+//		jsonObject.put(ParameterKeys.OPERATION, "add");
+//		jsonObject.put(ParameterKeys.EMPLOYEE_ID, employeeId);
+//		jsonObject.put(ParameterKeys.EMPLOYEE_FOLD, employeeFold);
+//		jsonObject.put(ParameterKeys.EMPLOYEE_NAME, employeeName);
+//		jsonObject.put(ParameterKeys.BIRTH, birth);
+//		jsonObject.put(ParameterKeys.PORTRAIT, base64);
+//		byte[] result = SocketService.responseByte(jsonObject, "12", "2");
+//		if (null != channel) {
+//			executeWrite(result, channel);
+//		}	
+//	}
 	
 	public static void handleJson12_11(JSONObject jsonObject, ChannelHandlerContext socketChannel) {
 		String deviceId=ChannelNameToDeviceMap.getDeviceMap(socketChannel.channel().id());
@@ -1244,6 +1360,18 @@ public class ServiceDistribution implements ApplicationContextAware {
 			executeWrite(result, channel);
 		}else{
 			logger.warn("105-3无法写入web socket");
+		}
+	}
+	
+	public static void main(String[] args){
+		String jsonString = "{\"type\":12, \"code\":01,\"employeeIdArray\":[{\"employeeId\":\"e12\",\"empVersion\":1,\"tempVersion\":1},{\"employeeId\":\"w15\",\"empVersion\":0,\"tempVersion\":2}]}";
+		JSONArray jarray = JSONObject.fromObject(jsonString).getJSONArray("employeeIdArray");
+		for(int i=0;i<jarray.size();i++){
+			JSONObject jsonObject = jarray.getJSONObject(i);
+			System.out.println(jsonObject.getString("employeeId"));
+			System.out.println(jsonObject.getInt("empVersion"));
+			System.out.println(jsonObject.getInt("tempVersion"));
+			System.out.println();
 		}
 	}
 }

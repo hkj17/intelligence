@@ -162,7 +162,7 @@ public class EmployeeService {
 
 	public List<String> getEmployeePhotoList(String employeeId) {
 		List<String> photoPathList = new ArrayList<String>();
-		List<Template> templates = intelligenceDao.getTemplatesByEmployeeId(employeeId);
+		List<Template> templates = intelligenceDao.getTemplateListByEmployeeId(employeeId);
 		for(Template template: templates){
 			String path = template.getPhotoPath();
 			if(!StringUtil.isNullOrEmpty(path)){
@@ -178,6 +178,7 @@ public class EmployeeService {
 			Employee employee = intelligenceDao.getEmployeeById(employeeId);
 			if(!StringUtil.isNullOrEmpty(photoPath)){
 				employee.setPhotoPath(photoPath);
+				employee.setEmpVersion(employee.getEmpVersion()+1);
 				cloudDao.update(employee);
 				return true;
 			}else{

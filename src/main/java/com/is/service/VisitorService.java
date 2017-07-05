@@ -38,6 +38,7 @@ import com.is.websocket.ServiceDistribution;
 import com.is.websocket.SyncFuture;
 
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.util.internal.StringUtil;
 
 @Transactional
 @Component("visitorService")
@@ -110,7 +111,7 @@ public class VisitorService {
 			info.setEmail(email);
 			info.setCompanyUrl(companyUrl);
 			info.setImportance(Integer.parseInt(importance));
-			if (birth != null && !"".equals(birth)) {
+			if (!StringUtil.isNullOrEmpty(birth)) {
 				info.setBirth(birth);
 			}
 			info.setPhotoPath(path);
@@ -150,7 +151,7 @@ public class VisitorService {
 			info.setEmail(email);
 			info.setCompanyUrl(companyUrl);
 			info.setImportance(Integer.parseInt(importance));
-			if (birth != null && !"".equals(birth)) {
+			if (!StringUtil.isNullOrEmpty(birth)) {
 				info.setBirth(birth);
 			}
 
@@ -167,7 +168,7 @@ public class VisitorService {
 			info.setPhotoPath(newpath);
 			cloudDao.add(info);
 
-			if (cid != null && !"".equals(cid)) {
+			if (!StringUtil.isNullOrEmpty(cid)) {
 				CollectionPhoto photo = intelligenceDao.getCollectionPhotoById(cid);
 				cloudDao.delete(photo);
 			}
@@ -204,7 +205,7 @@ public class VisitorService {
 			visitorInfo.setTelphone(telphone);
 			visitorInfo.setEmail(email);
 			visitorInfo.setImportance(Integer.parseInt(importance));
-			if (birth != null && !"".equals(birth)) {
+			if (!StringUtil.isNullOrEmpty(birth)) {
 				visitorInfo.setBirth(birth);
 			}
 			cloudDao.update(visitorInfo);
@@ -216,9 +217,9 @@ public class VisitorService {
 
 	}
 
-	public List<Visitor> indexVisitor(String depaertmentId, String name, String startTime, String endTime,
+	public List<Visitor> indexVisitor(String departmentId, String name, String startTime, String endTime,
 			String deviceId) {
-		return intelligenceDao.indexVisitor(depaertmentId, name, startTime, endTime, deviceId);
+		return intelligenceDao.indexVisitor(departmentId, name, startTime, endTime, deviceId);
 	}
 
 	public VisitorInfo getVisitorById(String id) {

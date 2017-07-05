@@ -24,7 +24,7 @@ public class Employee implements Serializable {
 	private static final long serialVersionUID = -8452577535288156957L;
 	
 	public Employee() {
-		// TODO Auto-generated constructor stub
+		
 	}
 
 	@Id
@@ -104,6 +104,12 @@ public class Employee implements Serializable {
 	
 	@Column(name = "employee_fold")
 	private String employeeFold;
+	
+	@Column(name = "emp_version")
+	private int empVersion;
+	
+	@Column(name = "temp_version")
+	private int tempVersion;
 	
 	public String getEmployeeFold() {
 		return employeeFold;
@@ -262,6 +268,19 @@ public class Employee implements Serializable {
 		this.content = content;
 	}
 	
+	public int getEmpVersion(){
+		return empVersion;
+	}
 	
+	public void setEmpVersion(int empVersion){
+		this.empVersion = empVersion;
+	}
 
+	public int getTempVersion(){
+		return tempVersion;
+	}
+	
+	public void setTempVersion(int tempVersion){
+		this.tempVersion = tempVersion;
+	}
 }
