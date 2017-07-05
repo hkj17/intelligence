@@ -8,11 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.is.dao.CloudDao;
+import com.is.dao.IntelligenceDao;
 import com.is.model.Appointment;
 import com.is.model.Employee;
 import com.is.model.Notification;
-import com.is.system.dao.CloudDao;
-import com.is.system.dao.IntelligenceDao;
 
 /** 
  * @author lishuhuan 

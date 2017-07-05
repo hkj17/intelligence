@@ -9,7 +9,7 @@ import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import com.is.system.dao.CloudDao;
+import com.is.dao.CloudDao;
 import com.is.util.CommonUtil;
 
 

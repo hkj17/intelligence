@@ -21,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.is.constant.ParameterKeys;
 import com.is.constant.ResponseCode;
+import com.is.dao.CloudDao;
+import com.is.dao.IntelligenceDao;
 import com.is.map.DeviceService;
 import com.is.map.EmployeeFoldMap;
 import com.is.map.FutureMap;
@@ -32,10 +34,6 @@ import com.is.model.Department;
 import com.is.model.Device;
 import com.is.model.Employee;
 import com.is.model.Template;
-import com.is.model.Visitor;
-import com.is.system.dao.CloudDao;
-import com.is.system.dao.IntelligenceDao;
-import com.is.util.Base64Utils;
 import com.is.util.CommonUtil;
 import com.is.util.PasswordUtil;
 import com.is.websocket.AddFuture;
@@ -44,7 +42,6 @@ import com.is.websocket.ServiceDistribution;
 import com.is.websocket.SyncFuture;
 
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelId;
 import io.netty.util.internal.StringUtil;
 import net.sf.json.JSONObject;
 import net.sourceforge.pinyin4j.PinyinHelper;
@@ -144,10 +141,6 @@ public class AdminService {
 		FutureMap.addFuture(ctx.channel().id().asLongText() + "103_2", future);
 		
 		String templateId = CommonUtil.generateRandomUUID();
-//		List<String> list=intelligenceDao.getDeviceListAll(deviceId);
-//		for(String did:list){
-//			ServiceDistribution.handleJson103_1(employeeId, templateId, strangerId, name, birth, did);
-//		}
 		
 		//103-1单发
 		ServiceDistribution.handleJson103_1(employeeId, templateId, strangerId, name, birth, deviceId);
@@ -222,6 +215,8 @@ public class AdminService {
 			
 			String path = EMPLOYEE_TEMPLATE + deviceId + "/" + employeeId;
 			employee.setTemplatePath(path);
+			employee.setEmpVersion(0);
+			employee.setTempVersion(0);
 			cloudDao.add(employee);
 
 			template.setTemplateId(templateId);
@@ -264,7 +259,13 @@ public class AdminService {
 			logger.warn("addTemplate: photo path is null");
 			return null;
 		}
-
+		
+		Employee employee = intelligenceDao.getEmployeeById(employeeId);
+		if(employee==null){
+			logger.warn("addTemplate: cannot find employee with employee ID " + employeeId);
+			return null;
+		}
+		
 		SyncFuture<String> future = new SyncFuture<>();
 		ChannelHandlerContext ctx = DeviceService.getSocketMap(deviceId);
 		if (ctx == null) {
@@ -272,28 +273,16 @@ public class AdminService {
 			return null;
 		}
 		FutureMap.addFuture(ctx.channel().id().asLongText() + "109_2", future);
-//		List<String> list=intelligenceDao.getDeviceListAll(deviceId);
-//		for(String did:list){
-//			ChannelHandlerContext currCtx = DeviceService.getSocketMap(did);
-//			if(currCtx!=null){
-//				ServiceDistribution.handleJson109_1(employeeId, templateId, strangerId, currCtx);
-//			}
-//		}
 		
 		//单发109-1
-		ServiceDistribution.handleJson109_1(employeeId, templateId, strangerId, ctx);
+		ServiceDistribution.handleJson109_1(employeeId, templateId, strangerId, employee.getEmployeeName(), ctx);
 		String result = future.get(6, TimeUnit.SECONDS);
 		FutureMap.removeFutureMap(ctx.channel().id().asLongText() + "109_2");
 		
 		if(result!=null){
-			Employee employee = intelligenceDao.getEmployeeById(employeeId);
 			Template template = new Template();
 			template.setTemplateId(templateId);
 			template.setEmployeeId(employeeId);
-			if(employee==null){
-				logger.warn("addTemplate: cannot find employee with employee ID " + employeeId);
-				return null;
-			}
 			
 			if (photo != null) {
 				File file = new File(photo);
@@ -333,7 +322,6 @@ public class AdminService {
 			}
 			jsonObject.put(ParameterKeys.EMPLOYEE_ID, employeeId);
 			jsonObject.put(ParameterKeys.TEMPLATE_ID, templateId);
-			//TODO: 返回一个JSON对象
 			return jsonObject;
 		}else{
 			logger.warn("addTemplate: no response from future");
@@ -364,9 +352,13 @@ public class AdminService {
 				if(t == null){
 					continue;
 				}
-				File photo = new File(t.getPhotoPath());
-				if(photo.exists()){
-					photo.delete();
+				
+				String templatePhotoPath = t.getPhotoPath();
+				if(!StringUtil.isNullOrEmpty(templatePhotoPath)) {
+				File photo = new File(templatePhotoPath);
+					if(photo.exists()){
+						photo.delete();
+					}
 				}
 				
 				deleteFolder(t.getTemplatePath(), null);
@@ -402,17 +394,28 @@ public class AdminService {
 			logger.warn("deleteTemplate: cannot find channel for device ID: "+deviceId);
 			return false;
 		}
+		
+		Employee employee = intelligenceDao.getEmployeeById(employeeId);
+		
 		FutureMap.addFuture(ctx.channel().id().asLongText() + "105_4", future);
 		List<String> list=intelligenceDao.getDeviceListAll(deviceId);
 		for(String did : list){
-			ServiceDistribution.handleJson105_3(employeeId, template.getTemplateId(), did);
+			ServiceDistribution.handleJson105_3(employeeId, template.getTemplateId(), employee.getEmployeeName(), did);
 		}
 		String result = future.get(6, TimeUnit.SECONDS);
 		FutureMap.removeFutureMap(ctx.channel().id().asLongText() + "105_4");
 		if(result!=null){
-			if(!StringUtil.isNullOrEmpty(template.getTemplatePath())){
-				deleteFolder(template.getTemplatePath(), template.getTemplateId());
+			//删除模板中的头像文件
+			String templatePhotoPath = template.getPhotoPath();
+			if(!StringUtil.isNullOrEmpty(templatePhotoPath) && !templatePhotoPath.equals(employee.getPhotoPath())) {
+				File file = new File(templatePhotoPath);
+				if(file.exists()) {
+					file.delete();
+				}
 			}
+			
+			//删除模板文件夹
+			deleteFolder(template.getTemplatePath(), template.getTemplateId());
 			cloudDao.delete(template);
 			updateTemplateVersion(employeeId);
 			return true;
@@ -501,42 +504,6 @@ public class AdminService {
 		return intelligenceDao.getEmployeeByName(name, companyId);
 	}
 
-	/*
-	 * public Boolean updateEmployee() { List<Employee> list =
-	 * intelligenceDao.getEmployeeList(); for (Employee employee : list) { if
-	 * (employee.getEmployeeId().length() <= 5) { Message message = new
-	 * Message(); message.setEmployeeId(employee.getEmployeeId());
-	 * message.setMessage("璇风瓑寰�"); message.setTime(new Date());
-	 * cloudDao.add(message);
-	 * 
-	 * Message message2 = new Message();
-	 * message2.setEmployeeId(employee.getEmployeeId());
-	 * message2.setMessage("璇风暀瑷�"); message2.setTime(new Date());
-	 * cloudDao.add(message2);
-	 * 
-	 * Message message3 = new Message();
-	 * message3.setEmployeeId(employee.getEmployeeId());
-	 * message3.setMessage("闂ㄥ彛鏈夊揩閫�"); message3.setTime(new Date());
-	 * cloudDao.add(message3);
-	 * 
-	 * Message message4 = new Message();
-	 * message4.setEmployeeId(employee.getEmployeeId());
-	 * message4.setMessage("鎮ㄧ殑澶栧崠鍒颁簡"); message4.setTime(new Date());
-	 * cloudDao.add(message4);
-	 * 
-	 * Message message5 = new Message();
-	 * message5.setEmployeeId(employee.getEmployeeId());
-	 * message5.setMessage("鍙告満姝ｅ湪妤间笅"); message5.setTime(new Date());
-	 * cloudDao.add(message5);
-	 * 
-	 * Message message6 = new Message();
-	 * message6.setEmployeeId(employee.getEmployeeId());
-	 * message6.setMessage("鎮ㄧ殑澶чゼ绯婂暒锛�"); message6.setTime(new Date());
-	 * cloudDao.add(message6); } } return true;
-	 * 
-	 * }
-	 */
-
 	public List<Employee> getEmployeeByWhere(String word, String department, int companyId) {
 		return intelligenceDao.getEmployeeByWhere(word, department, companyId);
 	}
@@ -566,15 +533,6 @@ public class AdminService {
 		return path;
 	}
 
-	/**
-	 * 姹夊瓧杞崲浣嶆眽璇叏鎷硷紝鑻辨枃瀛楃涓嶅彉锛岀壒娈婂瓧绗︿涪澶�
-	 * 鏀寔澶氶煶瀛楋紝鐢熸垚鏂瑰紡濡傦紙閲嶅綋鍙�:zhongdangcen,zhongdangcan,chongdangcen
-	 * ,chongdangshen,zhongdangshen,chongdangcan锛�
-	 * 
-	 * @param chines
-	 *            姹夊瓧
-	 * @return 鎷奸煶
-	 */
 	public static String converterToSpell(String chines) {
 		StringBuffer pinyinName = new StringBuffer();
 		char[] nameChar = chines.toCharArray();
@@ -584,7 +542,6 @@ public class AdminService {
 		for (int i = 0; i < nameChar.length; i++) {
 			if (nameChar[i] > 128) {
 				try {
-					// 鍙栧緱褰撳墠姹夊瓧鐨勬墍鏈夊叏鎷�
 					String[] strs = PinyinHelper.toHanyuPinyinStringArray(nameChar[i], defaultFormat);
 					if (strs != null) {
 						for (int j = 0; j < strs.length; j++) {
@@ -602,31 +559,20 @@ public class AdminService {
 			}
 			pinyinName.append(" ");
 		}
-		// return pinyinName.toString();
 		return parseTheChineseByObject(discountTheChinese(pinyinName.toString()));
 	}
 
-	/**
-	 * 瑙ｆ瀽骞剁粍鍚堟嫾闊筹紝瀵硅薄鍚堝苟鏂规(鎺ㄨ崘浣跨敤)
-	 * 
-	 * @return
-	 */
 	private static String parseTheChineseByObject(List<Map<String, Integer>> list) {
-		Map<String, Integer> first = null; // 鐢ㄤ簬缁熻姣忎竴娆�,闆嗗悎缁勫悎鏁版嵁
-		// 閬嶅巻姣忎竴缁勯泦鍚�
+		Map<String, Integer> first = null;
 		for (int i = 0; i < list.size(); i++) {
-			// 姣忎竴缁勯泦鍚堜笌涓婁竴娆＄粍鍚堢殑Map
 			Map<String, Integer> temp = new Hashtable<String, Integer>();
-			// 绗竴娆″惊鐜紝first涓虹┖
 			if (first != null) {
-				// 鍙栧嚭涓婃缁勫悎涓庢娆￠泦鍚堢殑瀛楃锛屽苟淇濆瓨
 				for (String s : first.keySet()) {
 					for (String s1 : list.get(i).keySet()) {
 						String str = s + s1;
 						temp.put(str, 1);
 					}
 				}
-				// 娓呯悊涓婁竴娆＄粍鍚堟暟鎹�
 				if (temp != null && temp.size() > 0) {
 					first.clear();
 				}
@@ -636,14 +582,12 @@ public class AdminService {
 					temp.put(str, 1);
 				}
 			}
-			// 淇濆瓨缁勫悎鏁版嵁浠ヤ究涓嬫寰幆浣跨敤
 			if (temp != null && temp.size() > 0) {
 				first = temp;
 			}
 		}
 		String returnStr = "";
 		if (first != null) {
-			// 閬嶅巻鍙栧嚭缁勫悎瀛楃涓�
 			for (String str : first.keySet()) {
 				returnStr += (str + ",");
 			}
@@ -654,23 +598,13 @@ public class AdminService {
 		return returnStr;
 	}
 
-	/**
-	 * 鍘婚櫎澶氶煶瀛楅噸澶嶆暟鎹�
-	 * 
-	 * @param theStr
-	 * @return
-	 */
 	private static List<Map<String, Integer>> discountTheChinese(String theStr) {
-		// 鍘婚櫎閲嶅鎷奸煶鍚庣殑鎷奸煶鍒楄〃
 		List<Map<String, Integer>> mapList = new ArrayList<Map<String, Integer>>();
-		// 鐢ㄤ簬澶勭悊姣忎釜瀛楃殑澶氶煶瀛楋紝鍘绘帀閲嶅
 		Map<String, Integer> onlyOne = null;
 		String[] firsts = theStr.split(" ");
-		// 璇诲嚭姣忎釜姹夊瓧鐨勬嫾闊�
 		for (String str : firsts) {
 			onlyOne = new Hashtable<String, Integer>();
 			String[] china = str.split(",");
-			// 澶氶煶瀛楀鐞�
 			for (String s : china) {
 				Integer count = onlyOne.get(s);
 				if (count == null) {
@@ -781,22 +715,6 @@ public class AdminService {
 		return intelligenceDao.getAuditPersonList(deviceId);
 	}
 
-//	public void updateTemplatePath(String employeeId, String path) {
-//		Employee employee = intelligenceDao.getEmployeeById(employeeId);
-//		if (employee != null && StringUtil.isNullOrEmpty(employee.getTemplatePath())) {
-//			employee.setTemplatePath(path);
-//			cloudDao.update(employee);
-//		}
-//	}
-//	
-//	public void updateTemplatePath2(String templateId, String path){
-//		Template template = intelligenceDao.getTemplateById(templateId);
-//		if(template != null && StringUtil.isNullOrEmpty(template.getTemplatePath())){
-//			template.setTemplatePath(path);
-//			cloudDao.update(template);
-//		}
-//	}
-
 	public List<String> getPhotoByTemplate(String employeeId) {
 		Employee employee = intelligenceDao.getEmployeeById(employeeId);
 		String path = null;
@@ -858,14 +776,6 @@ public class AdminService {
 			}
 		}
 	}
-
-//	public List<Employee> getEmployeeByIds(String employeeIds, String deviceId) {
-//		return intelligenceDao.getEmployeeByIds(employeeIds,deviceId);
-//	}
-//
-//	public List<String> getExistEmployee(String employeeIds, String deviceId) {
-//		return intelligenceDao.getExistEmployee(employeeIds,deviceId);
-//	}
 	
 	public List<Employee> getEmployeeListByDeviceId(String deviceId){
 		return intelligenceDao.getEmployeeListByDeviceId(deviceId);
@@ -883,7 +793,7 @@ public class AdminService {
 	
 	private static boolean deleteFolder(String folder, String templateId){
 		//TODO: 文件夹必须只有一级目录
-		if(folder==null){
+		if(StringUtil.isNullOrEmpty(folder)){
 			logger.warn("template folder is null");
 			return false;
 		}

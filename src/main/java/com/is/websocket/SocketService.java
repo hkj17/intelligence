@@ -190,18 +190,16 @@ public class SocketService {
 		}
 		else if (type.equals("103") && code.equals("2")) {
 			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.channel().id().asLongText()+"103_2");
-			 String employeeId=null;
-			 String templateId=null;
-			 String strangerId=null;
 			 if(future!=null){
-				 employeeId=jsonObject.getString(ParameterKeys.EMPLOYEE_ID);
-				 templateId=jsonObject.getString(ParameterKeys.TEMPLATE_ID);
-				 strangerId=jsonObject.getString(ParameterKeys.STRANGER_ID);
-				 String employeeFold = jsonObject.getString(ParameterKeys.EMPLOYEE_FOLD);
+				 String employeeId=jsonObject.optString(ParameterKeys.EMPLOYEE_ID);
+				 String templateId=jsonObject.optString(ParameterKeys.TEMPLATE_ID);
+				 String strangerId=jsonObject.optString(ParameterKeys.STRANGER_ID);
+				 String employeeName=jsonObject.optString(ParameterKeys.EMPLOYEE_NAME);
+				 String employeeFold = jsonObject.optString(ParameterKeys.EMPLOYEE_FOLD);
 				 EmployeeFoldMap.setData(employeeId, employeeFold);	 
 				 future.setResponse("103_2");
+				 ServiceDistribution.handleJson109_1(employeeId, templateId, strangerId, employeeName, socketChannel);
 			 }
-			 ServiceDistribution.handleJson109_1(employeeId, templateId, strangerId, socketChannel);
 		}
 		else if (type.equals("103") && code.equals("12")) {
 			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.channel().id().asLongText()+"103_12");
@@ -333,12 +331,6 @@ public class SocketService {
 				 future.setResponse("113_2");
 			 }
 		}
-		/*else if (type.equals("115") && code.equals("2")) {
-			 SyncFuture<String> future=FutureMap.getFutureMap(socketChannel.channel().id().asLongText()+"115_2");
-			 if(future!=null){
-				 future.setResponse("115_2");
-			 }
-		}*/
 		else {
 			excuteWrite("error type or code!".getBytes(),socketChannel);
 		}
@@ -348,8 +340,6 @@ public class SocketService {
 	public static byte[] responseByte(JSONObject jsonObject,String type,String code){
 		byte[] json = jsonObject.toString().getBytes();
 		int len = json.length;
-		/*byte[] lenb = TransformByte.hexStr2ByteArray(len+34);
-		System.out.println(new String(lenb));*/
 		byte[] xing = "##".getBytes();
 		byte[] result = new byte[36 + len];
 		System.arraycopy(xing, 0, result, 0, 2);

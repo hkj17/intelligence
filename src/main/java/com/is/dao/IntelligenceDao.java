@@ -1,4 +1,4 @@
-package com.is.system.dao;
+package com.is.dao;
 
 import java.util.List;
 import java.util.Map;
@@ -146,8 +146,6 @@ public interface IntelligenceDao {
 	public List<Employee> getEmployeeListByDeviceId(String deviceId);
 
 	public List<VisitorInfo> getVisitorByIds(String visitorIds, String deviceId);
-
-	//public List<String> getExistEmployee(String employeeIds, String deviceId);
 
 	public List<String> getExistVisitor(String visitorIds, String deviceId);
 

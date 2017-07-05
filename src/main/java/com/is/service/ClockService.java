@@ -2,22 +2,20 @@ package com.is.service;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
-import javax.xml.crypto.Data;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.is.dao.CloudDao;
+import com.is.dao.IntelligenceDao;
 import com.is.map.DeviceService;
 import com.is.map.FutureMap;
 import com.is.model.ClockAbnormal;
@@ -26,14 +24,9 @@ import com.is.model.ClockRecordDept;
 import com.is.model.ClockTime;
 import com.is.model.ClockRecord;
 import com.is.model.ClockRecordSelect;
-import com.is.model.Company;
 import com.is.model.Employee;
 import com.is.model.EmployeeClock;
-import com.is.system.dao.CloudDao;
-import com.is.system.dao.IntelligenceDao;
 import com.is.util.CommonUtil;
-import com.is.websocket.AddFuture;
-import com.is.websocket.CheckResponse;
 import com.is.websocket.ServiceDistribution;
 import com.is.websocket.SyncFuture;
 

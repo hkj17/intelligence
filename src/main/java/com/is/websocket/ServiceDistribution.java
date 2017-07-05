@@ -11,7 +11,6 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -619,13 +618,14 @@ public class ServiceDistribution implements ApplicationContextAware {
 		}
 	}
 
-	public static Boolean handleJson109_1(String employeeId, String templateId, String strangerId, ChannelHandlerContext channel) {
+	public static Boolean handleJson109_1(String employeeId, String templateId, String strangerId, String employeeName, ChannelHandlerContext channel) {
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.put(ParameterKeys.TYPE, 109);
 		jsonObject.put(ParameterKeys.CODE, 1);
 		jsonObject.put(ParameterKeys.EMPLOYEE_ID, employeeId);
 		jsonObject.put(ParameterKeys.TEMPLATE_ID, templateId);
 		jsonObject.put(ParameterKeys.STRANGER_ID, strangerId);
+		jsonObject.put(ParameterKeys.EMPLOYEE_NAME, employeeName);
 		logger.info("109-1 code: "+jsonObject);
 		byte[] result = SocketService.responseByte(jsonObject, "109", "1");
 		if (null != channel) {
@@ -986,22 +986,6 @@ public class ServiceDistribution implements ApplicationContextAware {
 		result.put("fileData", data);
 		return result;
 	}
-
-	/*public static String beanToXML(List<Employee> list) {
-		try {
-			JAXBContext context = JAXBContext.newInstance(Employee.class);
-			Marshaller marshaller = context.createMarshaller();
-			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);  
-            marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");  
-            StringWriter writer = new StringWriter();  
-            marshaller.marshal(list, writer);  
-            String result = writer.toString();
-            return result;
-		} catch (JAXBException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}*/
 	
 	public static JSONObject handleJson9_11(JSONObject jsonObject, ChannelHandlerContext socketChannel) {
 		String data=null;
@@ -1016,22 +1000,6 @@ public class ServiceDistribution implements ApplicationContextAware {
 		result.put("fileData", data);
 		return result;
 	}
-	
-	/*public static String visitorBeanToXML(List<VisitorInfo> list) {
-		try {
-			JAXBContext context = JAXBContext.newInstance(VisitorInfo.class);
-			Marshaller marshaller = context.createMarshaller();
-			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);  
-            marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");  
-            StringWriter writer = new StringWriter();  
-            marshaller.marshal(list, writer);  
-            String result = writer.toString();
-            return result;
-		} catch (JAXBException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}*/
 
 	public static JSONObject handleJson10_1(JSONObject jsonObject, ChannelHandlerContext socketChannel) {
 		String fileData = jsonObject.getString("fileData");
@@ -1190,27 +1158,6 @@ public class ServiceDistribution implements ApplicationContextAware {
 			if(!state) 
 				return;
 		}
-		
-//		String employeeIds = jsonObject.getString("employeeIdArray");
-//		if(!StringUtil.isNullOrEmpty(employeeIds)){
-//			employeeIds=employeeIds.replace("[", "(").replace("]", ")");
-//		}
-//		AdminService adminService = (AdminService) ServiceDistribution.getContext().getBean("adminService");
-//		List<Employee> list=adminService.getEmployeeByIds(employeeIds,deviceId);
-//		for(Employee employee:list){
-//			sendAdd12_2(deviceId, employee.getEmployeeId(), employee.getEmployeeFold(), employee.getEmployeeName(), employee.getBirth(), employee.getPhotoPath());
-//		}
-//		
-//		if(!StringUtil.isNullOrEmpty(employeeIds)){
-//			List<String> existEmployee=adminService.getExistEmployee(employeeIds,deviceId);
-//			String[] eids=employeeIds.substring(1,employeeIds.length()-1).split(",");
-//			for(String eid:eids){
-//				eid=eid.substring(1,eid.length()-1);
-//				if(!existEmployee.contains(eid)){
-//					sendDel12_2(deviceId,eid);
-//				}
-//			}
-//		}
 	}
 	
 	private static boolean send12_2(String deviceId, Employee employee, String operation){
@@ -1226,6 +1173,10 @@ public class ServiceDistribution implements ApplicationContextAware {
 		jsonObject.put(ParameterKeys.OPERATION, operation);
 		if(!StringUtil.isNullOrEmpty(employee.getEmployeeFold())){
 			jsonObject.put(ParameterKeys.EMPLOYEE_FOLD, employee.getEmployeeFold());
+		}
+		
+		if(!StringUtil.isNullOrEmpty(employee.getEmployeeName())) {
+			jsonObject.put(ParameterKeys.EMPLOYEE_NAME, employee.getEmployeeName());
 		}
 		
 		if("emp".equals(operation) || "both".equals(operation)){
@@ -1259,38 +1210,6 @@ public class ServiceDistribution implements ApplicationContextAware {
 			return false;
 		}
 	}
-	
-//	private static void sendDel12_2(String deviceId, String employeeId) {
-//		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
-//		JSONObject jsonObject=new JSONObject();
-//		jsonObject.put(ParameterKeys.TYPE, 12);
-//		jsonObject.put(ParameterKeys.CODE, 2);
-//		jsonObject.put(ParameterKeys.EMPLOYEE_ID, employeeId);
-//		jsonObject.put(ParameterKeys.OPERATION, "del");
-//		byte[] result = SocketService.responseByte(jsonObject, "12", "2");
-//		if (null != channel) {
-//			executeWrite(result, channel);
-//		}	
-//	}
-//	
-//	private static void sendAdd12_2(String deviceId, String employeeId, String employeeFold, String employeeName,
-//			String birth, String photoPath) {
-//		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
-//		String base64=Base64Utils.GetImageStr(photoPath);
-//		JSONObject jsonObject=new JSONObject();
-//		jsonObject.put(ParameterKeys.TYPE, 12);
-//		jsonObject.put(ParameterKeys.CODE, 2);
-//		jsonObject.put(ParameterKeys.OPERATION, "add");
-//		jsonObject.put(ParameterKeys.EMPLOYEE_ID, employeeId);
-//		jsonObject.put(ParameterKeys.EMPLOYEE_FOLD, employeeFold);
-//		jsonObject.put(ParameterKeys.EMPLOYEE_NAME, employeeName);
-//		jsonObject.put(ParameterKeys.BIRTH, birth);
-//		jsonObject.put(ParameterKeys.PORTRAIT, base64);
-//		byte[] result = SocketService.responseByte(jsonObject, "12", "2");
-//		if (null != channel) {
-//			executeWrite(result, channel);
-//		}	
-//	}
 	
 	public static void handleJson12_11(JSONObject jsonObject, ChannelHandlerContext socketChannel) {
 		String deviceId=ChannelNameToDeviceMap.getDeviceMap(socketChannel.channel().id());
@@ -1348,13 +1267,14 @@ public class ServiceDistribution implements ApplicationContextAware {
 		}
 	}
 
-	public static void handleJson105_3(String employeeId, String templateId, String deviceId) {
+	public static void handleJson105_3(String employeeId, String templateId, String employeeName, String deviceId) {
 		ChannelHandlerContext channel = DeviceService.getSocketMap(deviceId);
 		JSONObject jsonObject=new JSONObject();
 		jsonObject.put(ParameterKeys.TYPE, 105);
 		jsonObject.put(ParameterKeys.CODE, 3);
 		jsonObject.put(ParameterKeys.EMPLOYEE_ID, employeeId);
 		jsonObject.put(ParameterKeys.TEMPLATE_ID, templateId);
+		jsonObject.put(ParameterKeys.EMPLOYEE_NAME, employeeName);
 		byte[] result = SocketService.responseByte(jsonObject, "105", "3");
 		if (null != channel) {
 			executeWrite(result, channel);
@@ -1363,15 +1283,15 @@ public class ServiceDistribution implements ApplicationContextAware {
 		}
 	}
 	
-	public static void main(String[] args){
-		String jsonString = "{\"type\":12, \"code\":01,\"employeeIdArray\":[{\"employeeId\":\"e12\",\"empVersion\":1,\"tempVersion\":1},{\"employeeId\":\"w15\",\"empVersion\":0,\"tempVersion\":2}]}";
-		JSONArray jarray = JSONObject.fromObject(jsonString).getJSONArray("employeeIdArray");
-		for(int i=0;i<jarray.size();i++){
-			JSONObject jsonObject = jarray.getJSONObject(i);
-			System.out.println(jsonObject.getString("employeeId"));
-			System.out.println(jsonObject.getInt("empVersion"));
-			System.out.println(jsonObject.getInt("tempVersion"));
-			System.out.println();
-		}
-	}
+//	public static void main(String[] args){
+//		String jsonString = "{\"type\":12, \"code\":01,\"employeeIdArray\":[{\"employeeId\":\"e12\",\"empVersion\":1,\"tempVersion\":1},{\"employeeId\":\"w15\",\"empVersion\":0,\"tempVersion\":2}]}";
+//		JSONArray jarray = JSONObject.fromObject(jsonString).getJSONArray("employeeIdArray");
+//		for(int i=0;i<jarray.size();i++){
+//			JSONObject jsonObject = jarray.getJSONObject(i);
+//			System.out.println(jsonObject.getString("employeeId"));
+//			System.out.println(jsonObject.getInt("empVersion"));
+//			System.out.println(jsonObject.getInt("tempVersion"));
+//			System.out.println();
+//		}
+//	}
 }

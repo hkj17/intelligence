@@ -22,6 +22,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.is.constant.Hql;
+import com.is.dao.CloudDao;
+import com.is.dao.IntelligenceDao;
 import com.is.model.Admin;
 import com.is.model.Appointment;
 import com.is.model.ClockAbnormal;
@@ -42,8 +44,6 @@ import com.is.model.Template;
 import com.is.model.VersionUpdate;
 import com.is.model.Visitor;
 import com.is.model.VisitorInfo;
-import com.is.system.dao.CloudDao;
-import com.is.system.dao.IntelligenceDao;
 import com.is.util.Page;
 
 import io.netty.util.internal.StringUtil;
@@ -668,19 +668,6 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 		String companyId = query.uniqueResult().toString();
 		return companyId;
 	}
-
-//	@Override
-//	public List<Employee> getEmployeeByIds(String employeeIds,String deviceId) {
-//		Query query=null;
-//		if(!StringUtil.isNullOrEmpty(employeeIds)){
-//			query = getSession().createSQLQuery("select a.* from employee a LEFT JOIN device b on b.company_id=a.company_id where b.device_id='"+deviceId+"' and a.employee_id not in "+employeeIds);
-//		}
-//		else{
-//			query = getSession().createSQLQuery("select a.* from employee a LEFT JOIN device b on b.company_id=a.company_id where b.device_id='"+deviceId+"'");
-//		}
-//		List<Employee> list = ((SQLQuery) query).addEntity(Employee.class).list();
-//		return list;
-//	}
 	
 	@Override
 	public List<Employee> getEmployeeListByDeviceId(String deviceId) {
@@ -701,13 +688,6 @@ public class IntelligenceDaoImpl implements IntelligenceDao {
 		List<VisitorInfo> list = ((SQLQuery) query).addEntity(VisitorInfo.class).list();
 		return list;
 	}
-
-//	@Override
-//	public List<String> getExistEmployee(String employeeIds, String deviceId) {
-//		Query query = getSession().createSQLQuery("select a.employee_id from employee a LEFT JOIN device b on b.company_id=a.company_id where b.device_id='"+deviceId+"' and a.employee_id in "+employeeIds);
-//		List<String> list = query.list();
-//		return list;
-//	}
 
 	@Override
 	public List<String> getExistVisitor(String visitorIds, String deviceId) {
