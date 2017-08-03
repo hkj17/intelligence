@@ -14,6 +14,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
+import io.netty.handler.timeout.ReadTimeoutHandler;
 @Component
 public class SocketHandle implements ApplicationListener<ContextRefreshedEvent>{
 	private static final int PORT = 8087;
@@ -41,6 +42,7 @@ public class SocketHandle implements ApplicationListener<ContextRefreshedEvent>{
 			public void initChannel(Channel ch) throws Exception {
 				ChannelPipeline pipeline = ch.pipeline();
 				pipeline.addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4));
+				pipeline.addLast(new ReadTimeoutHandler(60));
 				pipeline.addLast(new LengthFieldPrepender(4, true));
 				pipeline.addLast(new HttpServerInboundHandler());
 			}
